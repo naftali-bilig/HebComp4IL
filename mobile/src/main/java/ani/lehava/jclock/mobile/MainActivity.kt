@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
 
     private fun birthUrl(): String {
         val now = ZonedDateTime.now()
-        return Uri.parse("https://jclock.net/BirthCalculator/public/he/index.html").buildUpon()
+        return Uri.parse("https://jclock.net/apps/birth-calculator/he/").buildUpon()
             .appendQueryParameter("date", now.format(DateTimeFormatter.ISO_LOCAL_DATE))
             .appendQueryParameter("time", now.format(DateTimeFormatter.ofPattern("HH:mm")))
             .appendQueryParameter("timeZone", now.zone.id)
@@ -325,7 +325,7 @@ class MainActivity : ComponentActivity() {
                 startActivity(
                     JClockWebActivity.intent(
                         this@MainActivity,
-                        "https://jclock.net/BirthCalculator/public/he/index.html",
+                        "https://jclock.net/apps/birth-calculator/he/",
                     ),
                 )
             }

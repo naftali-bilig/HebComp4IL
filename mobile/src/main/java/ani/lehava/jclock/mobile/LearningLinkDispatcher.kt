@@ -6,7 +6,7 @@ import android.net.Uri
 import org.json.JSONObject
 
 object LearningLinkDispatcher {
-    private const val BIRTH_CALCULATOR = "https://jclock.net/BirthCalculator/public/he/index.html"
+    private const val BIRTH_CALCULATOR = "https://jclock.net/apps/birth-calculator/he/"
 
     const val SUN_TITLE = "שעון חמה:\nמה צריך להיות באמת יעד המשימה?"
     const val MOON_TITLE = "שעון הלבנה:\nמה גרם לנו לעצור את השעון?"

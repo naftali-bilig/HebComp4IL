@@ -343,37 +343,27 @@
 	
 	function openSpecialHebrewGiving()
 	{
-        //return;
-        var userLang = navigator.language || navigator.userLanguage; 
-        if (userLang = "he") 
-            window.location.href = "../mahasrot/he/index.html";
-        else
-            window.location.href = "../mahasrot/en/index.html";		
+		var userLang = navigator.language || navigator.userLanguage;
+		window.location.href = userLang.includes("he") ? "/apps/mahasrot/he/" : "/apps/mahasrot/en/";
 	}
 	
     function openSpecialHebrewClock()
     {
 		var url = new URL(document.location.href);
         var queryString = getClockQueryString(url);
-		
-        var userLang = navigator.language || navigator.userLanguage; 
-		if (userLang.includes("he"))
-		{
-			window.location.href = "../me/he/kabala/index.html" + queryString;
-		}
-		else
-		{
-			window.location.href = "../me/en/kabala/index.html" + queryString;
-		}
+		var userLang = navigator.language || navigator.userLanguage;
+		var learningGender = url.searchParams.get("gender") === "woman" ? "woman" : "man";
+		var language = userLang.includes("he") ? "he" : "en";
+		window.location.href = "/learning/" + learningGender + "/me/" + language + "/kabala/index.html" + queryString;
     }
     
     function openSpecialMuslimClock()
     {
-        var userLang = navigator.language || navigator.userLanguage; 
-        if (userLang = "he") 
-            window.location.href = "../is/he/kabala/index.html";
-        else
-            window.location.href = "../is/en/kabala/index.html";
+		var url = new URL(document.location.href);
+		var queryString = getClockQueryString(url);
+		var userLang = navigator.language || navigator.userLanguage;
+		var language = userLang.includes("he") ? "he" : "en";
+		window.location.href = "/learning/man/me/" + language + "/index.html" + queryString + "&religion=islam";
     }
 
     function openSpecialChristianClock()
@@ -384,11 +374,11 @@
         var userLang = navigator.language || navigator.userLanguage; 
 		if (userLang.includes("he"))
 		{
-			window.location.href = "../it/he/kabala/index.html" + queryString;
+			window.location.href = "/learning/man/me/he/index.html" + queryString + "&religion=christian";
 		}
 		else
 		{
-			window.location.href = "../it/en/kabala/index.html" + queryString;
+			window.location.href = "/learning/man/me/en/index.html" + queryString + "&religion=christian";
 		}	
     }
 
@@ -432,10 +422,10 @@
 	function yovelMazalCalculator()
 	{
         var userLang = navigator.language || navigator.userLanguage; 
-        if (userLang = "he") 
-            window.location.href = "../yovelMazalCalculator/he/index.html";
+		if (userLang.includes("he"))
+			window.location.href = "/learning/man/me/he/yovel/index.html";
         else
-            window.location.href = "../yovelMazalCalculator/en/index.html";
+			window.location.href = "/learning/man/me/en/yovel/index.html";
 	
 	}
 
@@ -449,10 +439,10 @@
 		{
 			var userLang = navigator.language || navigator.userLanguage; 
 			var mazalHebrewDay = getMazalHebrewDay();
-			if (userLang = "he") 
-				window.location.href = "../me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1);
+			if (userLang.includes("he"))
+				window.location.href = "/learning/man/me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1);
 			else
-				window.location.href = "../me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1);		
+				window.location.href = "/learning/man/me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1);		
 		}
 	}
 	
@@ -460,6 +450,7 @@
 	{
 		let isPersonalMazal = "&period=personal";
 		var url = new URL(document.location.href);
+		var learningGender = url.searchParams.get("gender") === "woman" ? "woman" : "man";
 		if(url.searchParams.get("hour") == null)
 			isPersonalMazal = "";
 
@@ -469,9 +460,9 @@
 		var mazalHebrewDay = getMazalHebrewDay();
         var userLang = navigator.language || navigator.userLanguage; 
         if (userLang.includes("he")) 
-            window.location.href = "/learning/man/me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;
+            window.location.href = "/learning/" + learningGender + "/me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;
         else
-            window.location.href = "/learning/man/me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;	
+            window.location.href = "/learning/" + learningGender + "/me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;	
 	}
     </script>
 
