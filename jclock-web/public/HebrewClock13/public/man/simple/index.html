@@ -1,0 +1,1018 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>שעון עברי</title>  
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<link rel="stylesheet" type="text/css" href="css/stylesheet.css" id="thecss">   
+    <link rel="stylesheet" type="text/css" href="css/progressBar.css" id="thecss">   
+	<link rel="shortcut icon" type="image/x-icon" href="../hebrewclock.png" />
+	<style>
+
+	@media (max-width: 768px) {
+		body {
+			font-size: 14px;
+			background-color: lightgreen;
+		}
+
+		.container {
+			padding: 10px;
+		}
+	}
+
+	</style>
+</head>
+
+<body id="hebrewClock">
+	<!-- The core Firebase JS SDK is always required and must be listed first--> 
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+		 https://firebase.google.com/docs/web/setup#available-libraries --> 
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-analytics.js"></script>	
+	
+	<script>
+		// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+		const firebaseConfig = {
+		  apiKey: "AIzaSyC_o6BkcBq_KHMuNWJU0try__AUjw9IHfk",
+		  authDomain: "hebrewclock13.firebaseapp.com",
+		  projectId: "hebrewclock13",
+		  storageBucket: "hebrewclock13.appspot.com",
+		  messagingSenderId: "284970515106",
+		  appId: "1:284970515106:web:15952320f357f3582575fb",
+		  measurementId: "G-GRQJVJC2E0"
+		};
+		// Initialize Firebase.
+		firebase.initializeApp(firebaseConfig);
+
+		// Initialize Firebase Analytics.
+		firebase.analytics().logEvent('שעון עברי');
+	</script>
+		
+    <div id="container" ondblclick="pause()">
+		<div style = "text-align:center; margin-bottom:10px; ">
+            <table style="width:850px;">
+                <input class ="ChirstianClock" id="ChirstianHour" type="text" value="11" /> <!--onclick="House4You()";/>-->
+                <input class ="ChirstianClock" id="Text2" type="text" value=":" /> <!--onclick="yovelMazalCalculator();"-->
+                <input class ="ChirstianClock" id="ChirstianMinute" type="text" value="59" /><!--onclick="Tefila();"/>-->
+                <input class ="ChirstianClock" id="Text4" type="text" value=":" /> <!--onclick="yovelMazalCalculator();"-->
+                <input class ="ChirstianClock" id="ChirstianSecond" type="text"  value="59" /><!--onclick="yovelMazalCalculator();"//>-->
+            </table>
+            <table style="width:850px;">
+                    <input class ="clock" id="Hour" type="text" value = "11" onclick="openSpecialHebrewClock();"/><!--onclick="openSpecialHebrewClock();"/>-->
+                    <input class ="clock" id="HebrewText2" type="text" value = ":" onclick="openSpecialHebrewGiving();"/> <!--onclick="openSpecialHebrewGiving();"-->
+                    <input class ="clock" id="Minute" type="text" value = "1079" onclick="openSpecialChristianClock();"/><!--onclick="openSpecialChristianClock();"/>-->
+                    <input class ="clock" id="HebrewText4" type="text" value = ":" onclick="openSpecialHebrewGiving();"/> <!--onclick="openSpecialHebrewGiving();"-->
+                    <input class ="clock" id="Second" type="text" value = "75" onclick="openSpecialMuslimClock();"/><!--onclick="openSpecialMuslimClock();"/>-->
+            </table>
+            <div>
+			<div>
+				<center>
+				<div> 
+					<a id="Mazal" style="cursor:pointer;" onclick="openSederLimud();" style="text-decoration: unset;"></a>
+				</div>
+				<button id="LocationModeButton" class="location-button" type="button" onclick="advanceLocationMode();" title="&#1502;&#1497;&#1511;&#1493;&#1501; &#1504;&#1493;&#1499;&#1495;&#1497;">&#1502;&#1497;&#1511;&#1493;&#1501; &#1504;&#1493;&#1499;&#1495;&#1497;</button>
+				<div class="circular" style="display:none";>
+					<div class="inner"></div>
+					<div class="number">ברכות השחר</div>
+					<div class="circle">
+						<div class="bar left">
+							<div class="progress"></div>
+						</div>
+						<div class="bar right">
+							<div class="progress"></div>
+						</div>
+					</div>
+				</div>
+				</center>
+			</div>
+			</div>
+			<br>			
+        </div>		
+    </div>
+
+	
+	<script type="text/javascript" src="../../../../BirthCalculator/public/shared/tz-lookup.js"></script>
+	<script type="text/javascript" src="../../../../BirthCalculator/public/shared/timezone-converter.js"></script>
+	<script type="text/javascript" src="js/adhan.js"></script>
+    <script type="text/javascript" src="../shared/he/js/Commercial.js"></script>
+	<script type="text/javascript" src="js/Geolocation.js"></script>
+    <script type="text/javascript" src="js/SunAlert.js"></script>
+    <script type="text/javascript" src="js/HebrewClock.js"></script>
+	<script type="text/javascript" src="js/Times.js"></script>
+    <script type="text/javascript" src="js/SunTime.js"></script>
+    <script type="text/javascript" src="js/TimeAdj.js"></script>
+    <script type="text/javascript" src="js/Dst.js"></script>
+    <script type="text/javascript" src="js/Dates.js"></script>
+    <script type="text/javascript" src="js/Location.js"></script>
+    <script type="text/javascript" src="js/Mazal.js?v=20260707-final-hebrew-day"></script>
+	<script type="text/javascript" src="js/Tefila.js"></script>
+
+    
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+	var birthYear,birthMonth,birthDay,birthGMT,birthHour,birthMin,birthSec,birthMs; //get birth time
+	
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var DEFAULT_TIME_ZONE = "Asia/Jerusalem";
+    var JERUSALEM_LATITUDE = 31.7768514;
+    var JERUSALEM_LONGITUDE = 35.2331664;
+    var clockTimeZone = DEFAULT_TIME_ZONE;
+    var clockGmt = 2;
+    var displayLatitude = JERUSALEM_LATITUDE;
+    var displayLongitude = JERUSALEM_LONGITUDE;
+    var displayTimeZone = DEFAULT_TIME_ZONE;
+    var displayGmt = 2;
+    var useProvidedLocationAsClock = false;
+    var locationMode = "jerusalem";
+    var CURRENT_LOCATION_STORAGE_KEY = "JClock.Simple.CurrentLocation";
+    var JERUSALEM_TIME_API_URL = "https://timeapi.io/api/TimeZone/zone?timeZone=Asia/Jerusalem";
+    var JERUSALEM_TIME_REFRESH_MS = 5 * 60 * 1000;
+    var JERUSALEM_TIME_TIMEOUT_MS = 4000;
+    var JERUSALEM_TIME_MAX_DRIFT_MS = 15 * 1000;
+    var jerusalemNetworkTime = null;
+    var jerusalemNetworkRefreshTimer = null;
+    var pendingClockStartToken = 0;
+    var tz = clockGmt; // set from the clock location before calculations
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+	
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+
+	//pray variables
+	var fajar;
+	var dawn;  			// 1.2 zmanit hour before sunrise 	 --  זמן קריאת שמע של שחרית 	
+	var sunrise;
+	var misheyakir;
+	var asr;
+	var sunset;
+	var tzeit;
+	var shaa;
+	
+/*1*/ var tzitzit =14;			// 55 zmanit  minutes before sunrise -- ציצית
+/*2*/ var birkutHashahar; // 42 regular minutes before sunrise -- ברכות השחר  
+/*3*/ var patachEliyaou;  // 38 regular minutes before sunrise -- פתח אליהו
+/*4*/ var korbanot;		// 35 regular minutes before sunrise -- קורבנות
+/*5*/ var psokeiDzimra;	// 22 regular minutes before sunrise -- פסוקי דזמרה
+/*6*/ var YozerOr;		// 08 regular minutes before sunrise -- יוצר אור
+/*7*/ var kriyahtShema;	// 04 regular minutes before sunrise -- קריאת שמע
+
+    getLocation();  //activate the clock
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+		var url = new URL(document.location.href);
+		var lon = url.searchParams.get("longitude");
+		var lat = url.searchParams.get("latitude");
+		readClockParams(url);
+		useProvidedLocationAsClock = shouldUseProvidedLocationAsClock(url);
+		setLocationModeFromUrl(url);
+
+		if(isCurrentLocationRequested(url))
+		{
+			requestCurrentLocation(false, useProvidedLocationAsClock, false);
+			return;
+		}
+
+		if(lon && lat)
+		{
+			startClockWithDisplayLocation(lat, lon, "manual location");
+			return;
+		}
+
+        startClockWithDisplayLocation(JERUSALEM_LATITUDE, JERUSALEM_LONGITUDE, "jerusalem default");
+    }
+
+	function readClockParams(url)
+	{
+		birthYear = url.searchParams.get("year");
+		birthMonth = url.searchParams.get("month");
+		birthDay = url.searchParams.get("day");
+		birthHour = url.searchParams.get("hour");
+		birthMin = url.searchParams.get("min");
+		birthSec = url.searchParams.get("sec");
+		birthMs = url.searchParams.get("ms");
+		birthGMT = url.searchParams.get("gmt");
+	}
+
+	function isCurrentLocationRequested(url)
+	{
+		var value = url.searchParams.get("CurrentLocation");
+		return isTruthyParam(value);
+	}
+
+	function shouldUseProvidedLocationAsClock(url)
+	{
+		var clockLocation = (url.searchParams.get("ClockLocation") || "").toLowerCase();
+		if(clockLocation == "local" || clockLocation == "location" || clockLocation == "current" || clockLocation == "currentlocation" || clockLocation == "user")
+			return true;
+
+		return isTruthyParam(url.searchParams.get("UseLocationAsClock")) ||
+			isTruthyParam(url.searchParams.get("LocalClock")) ||
+			isTruthyParam(url.searchParams.get("LocationClock"));
+	}
+
+	function setLocationModeFromUrl(url)
+	{
+		if(isCurrentLocationRequested(url))
+			locationMode = shouldUseProvidedLocationAsClock(url) ? "local" : "current";
+		else if(url.searchParams.get("latitude") && url.searchParams.get("longitude"))
+			locationMode = shouldUseProvidedLocationAsClock(url) ? "local" : "current";
+		else
+			locationMode = "jerusalem";
+
+		updateLocationModeButton();
+	}
+
+	function isTruthyParam(value)
+	{
+		if(value == null)
+			return false;
+		value = value.toLowerCase();
+		return value != "0" && value != "false" && value != "no";
+	}
+
+	function requestCurrentLocation(rememberInUrl, forceLocalClock, askForStoredLocation)
+	{
+		var storedLocation = askForStoredLocation ? getStoredCurrentLocation() : null;
+		if(storedLocation && shouldUseStoredCurrentLocation(storedLocation))
+		{
+			applyCurrentCoordinates(storedLocation.latitude, storedLocation.longitude, rememberInUrl, forceLocalClock, "stored current location");
+			return;
+		}
+
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(function(position) {
+				applyCurrentPosition(position, rememberInUrl, forceLocalClock);
+			},showError);
+			return;
+        }
+
+		if(storedLocation)
+		{
+			applyCurrentCoordinates(storedLocation.latitude, storedLocation.longitude, rememberInUrl, forceLocalClock, "stored current location fallback");
+			return;
+		}
+
+		locationMode = "jerusalem";
+		startClockWithDisplayLocation(JERUSALEM_LATITUDE, JERUSALEM_LONGITUDE, "jerusalem fallback");
+    }
+  
+    function showPosition(position)
+    {
+        applyCurrentPosition(position, false, false);
+    }
+
+	function applyCurrentPosition(position, rememberInUrl, forceLocalClock)
+	{
+		saveCurrentPosition(position);
+		applyCurrentCoordinates(position.coords.latitude, position.coords.longitude, rememberInUrl, forceLocalClock, "current location");
+	}
+
+	function applyCurrentCoordinates(currentLatitude, currentLongitude, rememberInUrl, forceLocalClock, source)
+	{
+        var url = new URL(document.location.href);
+		readClockParams(url);
+		useProvidedLocationAsClock = forceLocalClock || shouldUseProvidedLocationAsClock(url);
+		locationMode = useProvidedLocationAsClock ? "local" : "current";
+
+		if(rememberInUrl)
+			rememberCurrentLocationInUrl(url, forceLocalClock);
+
+        startClockWithDisplayLocation(currentLatitude, currentLongitude, source);
+	}
+
+	function useCurrentLocation()
+	{
+		requestCurrentLocation(true, false, true);
+	}
+
+	function useCurrentLocationAsLocalClock()
+	{
+		requestCurrentLocation(true, true, true);
+	}
+
+	function saveCurrentPosition(position)
+	{
+		if(!position || !position.coords)
+			return;
+
+		var currentLatitude = Number(position.coords.latitude);
+		var currentLongitude = Number(position.coords.longitude);
+		if(!Number.isFinite(currentLatitude) || !Number.isFinite(currentLongitude))
+			return;
+
+		var storedLocation = {
+			latitude: currentLatitude,
+			longitude: currentLongitude,
+			accuracy: Number(position.coords.accuracy) || null,
+			savedAt: Date.now()
+		};
+
+		try
+		{
+			if(window.localStorage)
+				window.localStorage.setItem(CURRENT_LOCATION_STORAGE_KEY, JSON.stringify(storedLocation));
+		}
+		catch(error)
+		{
+			console.warn("Could not save current location", error);
+		}
+	}
+
+	function getStoredCurrentLocation()
+	{
+		try
+		{
+			if(!window.localStorage)
+				return null;
+
+			var storedValue = window.localStorage.getItem(CURRENT_LOCATION_STORAGE_KEY);
+			if(!storedValue)
+				return null;
+
+			var storedLocation = JSON.parse(storedValue);
+			var currentLatitude = Number(storedLocation.latitude);
+			var currentLongitude = Number(storedLocation.longitude);
+			if(!Number.isFinite(currentLatitude) || !Number.isFinite(currentLongitude))
+				return null;
+
+			return {
+				latitude: currentLatitude,
+				longitude: currentLongitude,
+				accuracy: Number(storedLocation.accuracy) || null,
+				savedAt: Number(storedLocation.savedAt) || null
+			};
+		}
+		catch(error)
+		{
+			console.warn("Could not read saved current location", error);
+			return null;
+		}
+	}
+
+	function shouldUseStoredCurrentLocation(storedLocation)
+	{
+		if(!storedLocation || typeof window.confirm != "function")
+			return false;
+
+		return window.confirm("נמצא מיקום נוכחי שמור. לטעון מהזיכרון?\nאישור = לטעון מהזיכרון\nביטול = לבקש מחדש משירותי המיקום");
+	}
+
+	function useJerusalemLocation()
+	{
+        var url = new URL(document.location.href);
+		useProvidedLocationAsClock = false;
+		locationMode = "jerusalem";
+		rememberJerusalemInUrl(url);
+		readClockParams(url);
+		startClockWithDisplayLocation(JERUSALEM_LATITUDE, JERUSALEM_LONGITUDE, "jerusalem");
+	}
+
+	function advanceLocationMode()
+	{
+		if(locationMode == "jerusalem")
+			useCurrentLocation();
+		else if(locationMode == "current")
+			useCurrentLocationAsLocalClock();
+		else
+			useJerusalemLocation();
+	}
+
+	function updateLocationModeButton()
+	{
+		var button = document.getElementById("LocationModeButton");
+		if(!button)
+			return;
+
+		if(locationMode == "jerusalem")
+		{
+			button.innerText = "מיקום נוכחי";
+			button.title = "מיקום נוכחי";
+		}
+		else if(locationMode == "current")
+		{
+			button.innerText = "מיקום ושעה מקומית";
+			button.title = "מיקום ושעה מקומית";
+		}
+		else
+		{
+			button.innerText = "ירושלים";
+			button.title = "ירושלים";
+		}
+	}
+
+	function rememberCurrentLocationInUrl(url, forceLocalClock)
+	{
+		url.searchParams.set("CurrentLocation", "1");
+		if(forceLocalClock)
+			url.searchParams.set("ClockLocation", "Local");
+		else
+		{
+			url.searchParams.delete("ClockLocation");
+			url.searchParams.delete("UseLocationAsClock");
+			url.searchParams.delete("LocalClock");
+			url.searchParams.delete("LocationClock");
+		}
+		url.searchParams.delete("latitude");
+		url.searchParams.delete("longitude");
+		url.searchParams.delete("displayLatitude");
+		url.searchParams.delete("displayLongitude");
+		url.searchParams.delete("displayTimeZone");
+		url.searchParams.delete("gmt");
+		url.searchParams.delete("timeZone");
+		if(window.history && typeof window.history.replaceState == "function")
+			window.history.replaceState(null, "", url.toString());
+	}
+
+	function rememberJerusalemInUrl(url)
+	{
+		url.searchParams.delete("CurrentLocation");
+		url.searchParams.delete("ClockLocation");
+		url.searchParams.delete("UseLocationAsClock");
+		url.searchParams.delete("LocalClock");
+		url.searchParams.delete("LocationClock");
+		url.searchParams.delete("latitude");
+		url.searchParams.delete("longitude");
+		url.searchParams.delete("displayLatitude");
+		url.searchParams.delete("displayLongitude");
+		url.searchParams.delete("displayTimeZone");
+		url.searchParams.delete("gmt");
+		url.searchParams.delete("timeZone");
+		if(window.history && typeof window.history.replaceState == "function")
+			window.history.replaceState(null, "", url.toString());
+	}
+
+	function startClockWithDisplayLocation(latValue, lonValue, source, skipNetworkSync, startToken)
+	{
+		if(!startToken)
+			startToken = ++pendingClockStartToken;
+
+		var parsedLatitude = Number(latValue);
+		var parsedLongitude = Number(lonValue);
+
+		if(!Number.isFinite(parsedLatitude) || !Number.isFinite(parsedLongitude))
+		{
+			parsedLatitude = JERUSALEM_LATITUDE;
+			parsedLongitude = JERUSALEM_LONGITUDE;
+			source = "jerusalem fallback";
+		}
+
+        displayLatitude = parsedLatitude;
+        displayLongitude = parsedLongitude;
+
+		latitude = JERUSALEM_LATITUDE;
+		longitude = JERUSALEM_LONGITUDE;
+
+		setDisplayTimeZone();
+		setClockTimeZone();
+
+		if(!skipNetworkSync && shouldSyncJerusalemNetworkTime())
+		{
+			syncJerusalemNetworkTime(function() {
+				if(startToken == pendingClockStartToken)
+					startClockWithDisplayLocation(parsedLatitude, parsedLongitude, source, true, startToken);
+			});
+			return;
+		}
+
+		console.log(source + ": clock " + clockTimeZone + " GMT" + clockGmt + ", display " + displayTimeZone + " GMT" + displayGmt);
+
+		set_dst();
+		set_default_date();
+		list_pos();
+		hebrewclock();
+		if(oTimer)
+			clearInterval(oTimer);
+		oTimerclock();
+		setmazal();
+		updateLocationModeButton();
+		scheduleJerusalemNetworkRefresh();
+	}
+
+	function shouldSyncJerusalemNetworkTime()
+	{
+		return clockTimeZone == DEFAULT_TIME_ZONE && !hasExplicitClockDateTime();
+	}
+
+	function hasExplicitClockDateTime()
+	{
+		return birthYear != null || birthMonth != null || birthDay != null || birthHour != null;
+	}
+
+	function syncJerusalemNetworkTime(callback)
+	{
+		if(!shouldSyncJerusalemNetworkTime() || typeof window.fetch != "function")
+		{
+			callback(false);
+			return;
+		}
+
+		if(jerusalemNetworkTime && getNetworkElapsedMilliseconds() < JERUSALEM_TIME_REFRESH_MS)
+		{
+			callback(true);
+			return;
+		}
+
+		var timeoutId = null;
+		var fetchOptions = { cache: "no-store" };
+		if(typeof window.AbortController == "function")
+		{
+			var controller = new AbortController();
+			fetchOptions.signal = controller.signal;
+			timeoutId = setTimeout(function() {
+				controller.abort();
+			}, JERUSALEM_TIME_TIMEOUT_MS);
+		}
+
+		window.fetch(JERUSALEM_TIME_API_URL, fetchOptions)
+			.then(function(response) {
+				if(!response.ok)
+					throw new Error("Jerusalem time request failed: " + response.status);
+				return response.json();
+			})
+			.then(function(data) {
+				if(timeoutId)
+					clearTimeout(timeoutId);
+				callback(applyJerusalemNetworkTime(data));
+			})
+			.catch(function(error) {
+				if(timeoutId)
+					clearTimeout(timeoutId);
+				console.warn("Could not sync Jerusalem time from the network", error);
+				callback(false);
+			});
+	}
+
+	function applyJerusalemNetworkTime(data)
+	{
+		var offsetSeconds = Number(data && data.currentUtcOffset && data.currentUtcOffset.seconds);
+		var localMilliseconds = parseLocalDateTimeAsUtcMilliseconds(data && data.currentLocalTime);
+		if(!Number.isFinite(offsetSeconds) || !Number.isFinite(localMilliseconds))
+			throw new Error("Invalid Jerusalem time response.");
+
+		var utcMilliseconds = localMilliseconds - (offsetSeconds * 1000);
+		var localClockDriftMilliseconds = utcMilliseconds - Date.now();
+
+		clockGmt = offsetSeconds / 3600;
+		if(clockTimeZone == DEFAULT_TIME_ZONE)
+			tz = clockGmt;
+
+		if(Math.abs(localClockDriftMilliseconds) > JERUSALEM_TIME_MAX_DRIFT_MS)
+		{
+			jerusalemNetworkTime = null;
+			console.warn("Ignoring stale Jerusalem network time; drift is " + localClockDriftMilliseconds + "ms");
+			return false;
+		}
+
+		jerusalemNetworkTime = {
+			utcMilliseconds: utcMilliseconds,
+			offsetSeconds: offsetSeconds,
+			receivedAtMilliseconds: getSteadyNowMilliseconds()
+		};
+		return true;
+	}
+
+	function parseLocalDateTimeAsUtcMilliseconds(value)
+	{
+		if(!value)
+			return NaN;
+
+		var match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?/.exec(value);
+		if(!match)
+			return NaN;
+
+		var milliseconds = 0;
+		if(match[7])
+			milliseconds = Number((match[7] + "000").slice(0, 3));
+
+		return Date.UTC(
+			Number(match[1]),
+			Number(match[2]) - 1,
+			Number(match[3]),
+			Number(match[4]),
+			Number(match[5]),
+			Number(match[6]),
+			milliseconds
+		);
+	}
+
+	function getSteadyNowMilliseconds()
+	{
+		if(window.performance && typeof window.performance.now == "function")
+			return window.performance.now();
+
+		return Date.now();
+	}
+
+	function getNetworkElapsedMilliseconds()
+	{
+		if(!jerusalemNetworkTime)
+			return Infinity;
+
+		return getSteadyNowMilliseconds() - jerusalemNetworkTime.receivedAtMilliseconds;
+	}
+
+	function getJerusalemNetworkDate()
+	{
+		if(!jerusalemNetworkTime)
+			return null;
+
+		return new Date(jerusalemNetworkTime.utcMilliseconds + getNetworkElapsedMilliseconds());
+	}
+
+	function getCurrentReferenceDate()
+	{
+		return getJerusalemNetworkDate() || new Date();
+	}
+
+	function scheduleJerusalemNetworkRefresh()
+	{
+		if(jerusalemNetworkRefreshTimer)
+			clearTimeout(jerusalemNetworkRefreshTimer);
+
+		if(!shouldSyncJerusalemNetworkTime())
+			return;
+
+		jerusalemNetworkRefreshTimer = setTimeout(function() {
+			syncJerusalemNetworkTime(function(synced) {
+				if(synced)
+				{
+					setClockTimeZone();
+					setDisplayTimeZone();
+					set_default_date();
+					list_pos();
+					hebrewclock();
+					setmazal();
+				}
+				scheduleJerusalemNetworkRefresh();
+			});
+		}, JERUSALEM_TIME_REFRESH_MS);
+	}
+
+	function setClockTimeZone()
+	{
+		clockTimeZone = DEFAULT_TIME_ZONE;
+		clockGmt = getTimeZoneOffset(clockTimeZone);
+		tz = clockGmt;
+	}
+
+	function setDisplayTimeZone()
+	{
+		displayTimeZone = getTimeZoneForLocation(displayLatitude, displayLongitude);
+		displayGmt = getTimeZoneOffset(displayTimeZone);
+	}
+
+	function getTimeZoneForLocation(latValue, lonValue)
+	{
+		if(typeof tzlookup == "function")
+		{
+			try
+			{
+				return tzlookup(Number(latValue), Number(lonValue));
+			}
+			catch(error)
+			{
+				console.warn("Time zone lookup failed", error);
+			}
+		}
+
+		return DEFAULT_TIME_ZONE;
+	}
+
+	function getTimeZoneOffset(timeZone)
+	{
+		if(timeZone == DEFAULT_TIME_ZONE && jerusalemNetworkTime && !hasExplicitClockDateTime())
+			return jerusalemNetworkTime.offsetSeconds / 3600;
+
+		if(window.BirthCalculatorTime && typeof BirthCalculatorTime.getTimeZoneOffsetHours == "function")
+			return BirthCalculatorTime.getTimeZoneOffsetHours(getClockReferenceDateForOffset(timeZone), timeZone);
+
+		if(birthGMT != null && birthGMT !== "")
+		{
+			var explicitGmt = Number(birthGMT);
+			if(Number.isFinite(explicitGmt))
+				return explicitGmt;
+		}
+
+		return timeZone == DEFAULT_TIME_ZONE ? 2 : new Date().getTimezoneOffset() / -60;
+	}
+
+	function getClockReferenceDateForOffset(timeZone)
+	{
+		timeZone = timeZone || clockTimeZone;
+		if(birthYear != null && birthMonth != null && birthDay != null &&
+			window.BirthCalculatorTime && typeof BirthCalculatorTime.zonedLocalTimeToUtc == "function")
+		{
+			return BirthCalculatorTime.zonedLocalTimeToUtc(
+				Number(birthYear),
+				Number(birthMonth),
+				Number(birthDay),
+				Number(birthHour == null ? 12 : birthHour),
+				Number(birthMin == null ? 0 : birthMin),
+				timeZone
+			);
+		}
+
+		return getCurrentReferenceDate();
+	}
+
+	function getClockNowParts()
+	{
+		return getNowPartsForTimeZone(clockTimeZone);
+	}
+
+	function getDisplayNowParts()
+	{
+		return getNowPartsForTimeZone(displayTimeZone);
+	}
+
+	function getNowPartsForTimeZone(timeZone)
+	{
+		var date = getCurrentReferenceDate();
+		var parts;
+		if(window.BirthCalculatorTime && typeof BirthCalculatorTime.getZonedParts == "function")
+		{
+			parts = BirthCalculatorTime.getZonedParts(date, timeZone);
+			parts.millisecond = date.getMilliseconds();
+			return parts;
+		}
+
+		return {
+			year: date.getFullYear(),
+			month: date.getMonth() + 1,
+			day: date.getDate(),
+			hour: date.getHours(),
+			minute: date.getMinutes(),
+			second: date.getSeconds(),
+			millisecond: date.getMilliseconds()
+		};
+	}
+
+	function getClockDateParts()
+	{
+		if(birthYear != null && birthMonth != null && birthDay != null)
+		{
+			return {
+				year: Number(birthYear),
+				month: Number(birthMonth),
+				day: Number(birthDay)
+			};
+		}
+
+		return getClockNowParts();
+	}
+
+	function getDisplayTimeParts()
+	{
+		if(birthHour != null)
+		{
+			return {
+				hour: Number(birthHour),
+				minute: Number(birthMin == null ? 0 : birthMin),
+				second: Number(birthSec == null ? 0 : birthSec),
+				millisecond: Number(birthMs == null ? 0 : birthMs)
+			};
+		}
+
+		return getDisplayNowParts();
+	}
+
+	function getClockTimeParts()
+	{
+		if(birthHour != null)
+		{
+			return {
+				hour: Number(birthHour),
+				minute: Number(birthMin == null ? 0 : birthMin),
+				second: Number(birthSec == null ? 0 : birthSec),
+				millisecond: Number(birthMs == null ? 0 : birthMs)
+			};
+		}
+
+		return getClockNowParts();
+	}
+
+	function getClockDate()
+	{
+		var parts = getClockDateParts();
+		return new Date(parts.year, parts.month - 1, parts.day);
+	}
+
+	function getClockDayOfWeek()
+	{
+		var parts = getClockDateParts();
+		return new Date(Date.UTC(parts.year, parts.month - 1, parts.day)).getUTCDay();
+	}
+
+	function getClockTimeAsHours()
+	{
+		var parts = getClockTimeParts();
+		var milliseconds = parts.millisecond + (parts.second * 1000) + (parts.minute * 60 * 1000) + (parts.hour * 60 * 60 * 1000);
+		return milliseconds / (1000 * 3600);
+	}
+
+	function getZonedPartsForClock(date)
+	{
+		if(window.BirthCalculatorTime && typeof BirthCalculatorTime.getZonedParts == "function")
+			return BirthCalculatorTime.getZonedParts(date, clockTimeZone);
+
+		return {
+			hour: date.getHours(),
+			minute: date.getMinutes(),
+			second: date.getSeconds()
+		};
+	}
+	
+	function openSpecialHebrewGiving()
+	{
+        //return;
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang.includes("he")) 
+            window.location.href = "../mahasrot/he/index.html";
+        else
+            window.location.href = "../mahasrot/en/index.html";		
+	}
+	
+    function openSpecialHebrewClock()
+    {
+        var url = new URL(document.location.href);
+        var queryString = getClockQueryString(url);
+		
+        var userLang = navigator.language || navigator.userLanguage; 
+		if (userLang.includes("he"))
+		{
+			window.location.href = "../me/he/kabala/index.html" + queryString;
+		}
+		else
+		{
+			window.location.href = "../me/en/kabala/index.html" + queryString;
+		}
+    }
+    
+    function openSpecialMuslimClock()
+    {
+        var url = new URL(document.location.href);
+        var queryString = getClockQueryString(url);
+		
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang.includes("he")) 
+		{
+			window.location.href = "../is/he/kabala/index.html" + queryString;
+        }
+		else
+		{
+			window.location.href = "../is/en/kabala/index.html" + queryString;
+		}
+    }
+
+    function openSpecialChristianClock()
+    {
+        var url = new URL(document.location.href);
+        var queryString = getClockQueryString(url);
+     
+		var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang.includes("he"))
+		{
+			window.location.href = "../it/he/kabala/index.html" + queryString;
+		}
+		else
+		{
+			window.location.href = "../it/en/kabala/index.html" + queryString;
+		}
+	}
+
+	function getClockQueryString(url)
+	{
+		var dateParts = getClockDateParts();
+		var timeParts = getClockTimeParts();
+		var hour = birthHour == null ? timeParts.hour : birthHour;
+		var min = birthMin == null ? timeParts.minute : birthMin;
+		var sec = birthSec == null ? timeParts.second : birthSec;
+		var ms = birthMs == null ? timeParts.millisecond : birthMs;
+		var year = birthYear == null ? dateParts.year : birthYear;
+		var month = birthMonth == null ? dateParts.month : birthMonth;
+		var day = birthDay == null ? dateParts.day : birthDay;
+		var gmt = clockGmt;
+		var params = new URLSearchParams(url.search);
+		params.set("latitude", latitude);
+		params.set("longitude", longitude);
+		params.set("displayLatitude", displayLatitude);
+		params.set("displayLongitude", displayLongitude);
+		if(!params.get("hour"))
+			params.set("hour", hour);
+		if(!params.get("min"))
+			params.set("min", min);
+		if(!params.get("sec"))
+			params.set("sec", sec);
+		if(!params.get("ms"))
+			params.set("ms", ms);
+		if(!params.get("year"))
+			params.set("year", year);
+		if(!params.get("month"))
+			params.set("month", month);
+		if(!params.get("day"))
+			params.set("day", day);
+		params.set("gmt", gmt);
+		params.set("timeZone", clockTimeZone);
+		params.set("displayTimeZone", displayTimeZone);
+		if(useProvidedLocationAsClock)
+			params.set("ClockLocation", "Local");
+		else
+			params.delete("ClockLocation");
+		params.set("live", "1");
+		params.set("liveStart", Date.now());
+		return "?" + params.toString();
+	}
+	
+	function yovelMazalCalculator()
+	{
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../yovelMazalCalculator/he/index.html";
+        else
+            window.location.href = "../yovelMazalCalculator/en/index.html";
+	
+	}
+
+	function House4You()
+	{
+		//var url = new URL(document.location.href);
+		//var selfShevet = url.searchParams.get("selfShevet");        
+		//window.location.href = "../house4You/index.html?selfShevet=" + selfShevet;
+			
+		if(birthHour)
+		{
+			var userLang = navigator.language || navigator.userLanguage; 
+			if (userLang = "he") 
+				window.location.href = "../me/he/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1);
+			else
+				window.location.href = "../me/en/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1);		
+		}
+	}
+	
+	function openSederLimud()
+	{
+		let isPersonalMazal = "&period=personal";
+		var url = new URL(document.location.href);
+		if(url.searchParams.get("hour") == null)
+			isPersonalMazal = "";
+
+        var url = new URL(document.location.href);
+        var lon = longitude;
+        var lat = latitude;
+	
+        var userLang = navigator.language || navigator.userLanguage; 
+		var hasLocation = lat != null && lon != null && lat !== "" && lon !== "";
+
+        if (userLang = "he") 
+		{
+			if(hasLocation)
+				window.location.href = "../me/he/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + "&latitude=" + lat + "&longitude="+ lon;
+			else
+				window.location.href = "../me/he/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal;
+
+        }
+		else
+		{
+			if(hasLocation)
+				window.location.href = "../me/en/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + "&latitude=" + lat + "&longitude=" + lon;
+			else
+				window.location.href = "../me/en/index.html?hebrewDay="+ hebrewday +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal;
+            	
+		}
+	}
+    </script>
+
+</body>
+</html>

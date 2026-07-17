@@ -1,0 +1,670 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>JClock Schedule</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --panel: #fff8e8;
+      --text: #2f210d;
+      --muted: #765225;
+      --border: #f1b44f;
+      --accent: #c44c00;
+      --accent-strong: #953500;
+      --danger: #9f2f2f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      min-height: 100vh;
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(circle at 50% 0%, rgba(255, 238, 128, 0.92), transparent 34%),
+        linear-gradient(145deg, #ffe27a 0%, #ffb23f 42%, #e96b14 76%, #aa3300 100%);
+      color: var(--text);
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    main {
+      width: min(100%, 420px);
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      padding: 24px;
+      box-shadow: 0 16px 42px rgba(111, 46, 0, 0.24);
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: 28px;
+      line-height: 1.2;
+    }
+
+    p {
+      margin: 0 0 22px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    form {
+      display: grid;
+      gap: 16px;
+    }
+
+    label {
+      display: grid;
+      gap: 7px;
+      font-weight: 700;
+    }
+
+    input,
+    button {
+      width: 100%;
+      min-height: 44px;
+      border-radius: 6px;
+      font: inherit;
+    }
+
+    input {
+      border: 1px solid var(--border);
+      padding: 9px 11px;
+      color: var(--text);
+      background: #fffaf0;
+    }
+
+    input:focus {
+      outline: 2px solid rgba(196, 76, 0, 0.24);
+      border-color: var(--accent);
+    }
+
+    .location-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .button-row {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr;
+    }
+
+    .gender-panel {
+      display: grid;
+      gap: 7px;
+      font-weight: 700;
+    }
+
+    .gender-toggle {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: 1fr 1fr;
+    }
+
+    .gender-option {
+      border: 0;
+      color: #fff;
+      cursor: pointer;
+      font-weight: 700;
+      padding: 9px 11px;
+    }
+
+    .gender-option.male {
+      background: #5dbcd2;
+    }
+
+    .gender-option.female {
+      background: #CA2C92;
+    }
+
+    .gender-option.selected {
+      outline: 2px dashed #000;
+      outline-offset: -5px;
+    }
+
+    .map-panel {
+      display: grid;
+      gap: 10px;
+    }
+
+    #map {
+      width: 100%;
+      height: 320px;
+      border: 1px solid var(--border);
+      border-radius: 6px;
+      background: #fff0c7;
+    }
+
+    .secondary {
+      border: 1px solid var(--accent);
+      background: #fff0c7;
+      color: var(--accent-strong);
+      cursor: pointer;
+      padding: 9px 11px;
+    }
+
+    .secondary:hover {
+      background: #ffe19a;
+    }
+
+    .timezone-preview {
+      display: grid;
+      gap: 8px;
+    }
+
+    .timezone-hint {
+      min-height: 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .timezone-hint.error {
+      color: var(--danger);
+    }
+
+    .primary {
+      border: 0;
+      background: var(--accent);
+      color: #fff;
+      font-weight: 700;
+      cursor: pointer;
+      margin-top: 4px;
+    }
+
+    .primary:hover {
+      background: var(--accent-strong);
+    }
+
+    #status {
+      min-height: 20px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    #status.error {
+      color: var(--danger);
+    }
+
+    @media (max-width: 460px) {
+      body {
+        padding: 12px;
+      }
+
+      main {
+        padding: 20px;
+      }
+
+      .location-row {
+        grid-template-columns: 1fr;
+      }
+
+      .button-row {
+        grid-template-columns: 1fr;
+      }
+
+      .gender-toggle {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <h1 id="title">פתיחת יומן</h1>
+    <p id="description">בחר תאריך, שעה ומיקום לפתיחת יומן JClock.</p>
+
+    <form id="schedule-form">
+      <button class="secondary" id="language-toggle" type="button">English</button>
+
+      <div class="gender-panel">
+        <span id="gender-label">בן / בת</span>
+        <div class="gender-toggle" role="group" aria-labelledby="gender-label">
+          <button type="button" class="gender-option male selected" data-gender="man" aria-pressed="true" id="boy-button">בן</button>
+          <button type="button" class="gender-option female" data-gender="woman" aria-pressed="false" id="girl-button">בת</button>
+        </div>
+      </div>
+
+      <label>
+        <span id="date-label">תאריך</span>
+        <input id="date" type="date" required>
+      </label>
+
+      <label>
+        <span id="time-label">שעה</span>
+        <input id="time" type="time" required>
+      </label>
+
+      <div class="location-row">
+        <label>
+          <span id="latitude-label">קו רוחב</span>
+          <input id="latitude" type="number" step="any" required>
+        </label>
+
+        <label>
+          <span id="longitude-label">קו אורך</span>
+          <input id="longitude" type="number" step="any" required>
+        </label>
+      </div>
+
+      <div class="map-panel">
+        <label>
+          <span id="place-label">חיפוש מקום</span>
+          <input id="place-search" type="text">
+        </label>
+        <button class="secondary" id="place-search-button" type="button">חפש במפה</button>
+        <div id="map"></div>
+      </div>
+
+      <div class="timezone-preview">
+        <label>
+          <span id="jerusalem-time-label">תאריך ושעה בירושלים</span>
+          <input id="jerusalem-time" type="text" readonly>
+        </label>
+        <p id="timezone-preview" class="timezone-hint" aria-live="polite"></p>
+      </div>
+
+      <div class="button-row">
+        <button class="secondary" id="jerusalem-location" type="button">השתמש במיקום ירושלים</button>
+      </div>
+      <p id="status" aria-live="polite"></p>
+      <button class="primary" id="open-button" type="submit">פתח יומן</button>
+    </form>
+  </main>
+
+  <script src="../../BirthCalculator/public/shared/tz-lookup.js"></script>
+  <script src="../../BirthCalculator/public/shared/timezone-converter.js"></script>
+  <script>
+    const JERUSALEM = {
+      latitude: "31.7768514",
+      longitude: "35.2331664"
+    };
+
+    const translations = {
+      he: {
+        lang: "he",
+        dir: "rtl",
+        title: "פתיחת יומן",
+        description: "בחר תאריך, שעה ומיקום לצורך תרגום לשעון ירושלים. היומן ייפתח תמיד במיקום ירושלים.",
+        date: "תאריך",
+        time: "שעה",
+        latitude: "קו רוחב לקביעת אזור זמן",
+        longitude: "קו אורך לקביעת אזור זמן",
+        gender: "בן / בת",
+        boy: "בן",
+        girl: "בת",
+        place: "מיקום השעה המבוקשת",
+        placePlaceholder: "לדוגמה: ניו-יורק",
+        searchPlace: "חפש במפה",
+        placeNotFound: "לא נמצא מקום מתאים.",
+        jerusalemLocation: "השתמש במיקום ירושלים",
+        languageToggle: "English",
+        open: "פתח יומן",
+        locationReady: "המיקום נבחר לצורך תרגום לשעון ירושלים.",
+        jerusalemReady: "ירושלים נבחרה לצורך תרגום לשעון ירושלים.",
+        jerusalemTime: "תאריך ושעה שיישלחו בירושלים",
+        timezonePreviewEmpty: "אחרי בחירת תאריך, שעה ומיקום יוצג הזמן שיישלח ליומן.",
+        timezoneUnavailable: "מפת אזורי הזמן לא נטענה. נא לרענן את הדף.",
+        conversionError: "לא ניתן לתרגם את הזמן לשעון ירושלים.",
+        target: "../../HebrewClock13/public/{gender}/it/he/kabala/index.html"
+      },
+      en: {
+        lang: "en",
+        dir: "ltr",
+        title: "Open Schedule",
+        description: "Choose a date, time, and source location for Jerusalem-time conversion. The schedule always opens at the Jerusalem location.",
+        date: "Date",
+        time: "Time",
+        latitude: "Source latitude",
+        longitude: "Source longitude",
+        gender: "Boy / Girl",
+        boy: "Boy",
+        girl: "Girl",
+        place: "Requested time location",
+        placePlaceholder: "For example: New York",
+        searchPlace: "Search map",
+        placeNotFound: "No matching place was found.",
+        jerusalemLocation: "Use Jerusalem location",
+        languageToggle: "עברית",
+        open: "Open Schedule",
+        locationReady: "Location selected for Jerusalem-time conversion.",
+        jerusalemReady: "Jerusalem selected for Jerusalem-time conversion.",
+        jerusalemTime: "Date and time sent in Jerusalem",
+        timezonePreviewEmpty: "After choosing a date, time, and location, the time sent to the schedule will appear here.",
+        timezoneUnavailable: "The time zone map did not load. Please refresh the page.",
+        conversionError: "Unable to convert the time to Jerusalem time.",
+        target: "../../HebrewClock13/public/{gender}/it/en/kabala/index.html"
+      }
+    };
+
+    const requestedLanguage = new URLSearchParams(window.location.search).get("lang");
+    const language = requestedLanguage === "he" || requestedLanguage === "en"
+      ? requestedLanguage
+      : navigator.language && navigator.language.toLowerCase().startsWith("he") ? "he" : "en";
+    const text = translations[language];
+
+    document.documentElement.lang = text.lang;
+    document.documentElement.dir = text.dir;
+    document.getElementById("title").textContent = text.title;
+    document.getElementById("description").textContent = text.description;
+    document.getElementById("date-label").textContent = text.date;
+    document.getElementById("time-label").textContent = text.time;
+    document.getElementById("latitude-label").textContent = text.latitude;
+    document.getElementById("longitude-label").textContent = text.longitude;
+    document.getElementById("gender-label").textContent = text.gender;
+    document.getElementById("boy-button").textContent = text.boy;
+    document.getElementById("girl-button").textContent = text.girl;
+    document.getElementById("place-label").textContent = text.place;
+    document.getElementById("place-search").placeholder = text.placePlaceholder;
+    document.getElementById("place-search-button").textContent = text.searchPlace;
+    document.getElementById("language-toggle").textContent = text.languageToggle;
+    document.getElementById("jerusalem-location").textContent = text.jerusalemLocation;
+    document.getElementById("jerusalem-time-label").textContent = text.jerusalemTime;
+    document.getElementById("timezone-preview").textContent = text.timezonePreviewEmpty;
+    document.getElementById("open-button").textContent = text.open;
+
+    const dateInput = document.getElementById("date");
+    const timeInput = document.getElementById("time");
+    const latitudeInput = document.getElementById("latitude");
+    const longitudeInput = document.getElementById("longitude");
+    const placeSearchInput = document.getElementById("place-search");
+    const jerusalemTimeInput = document.getElementById("jerusalem-time");
+    const timezonePreview = document.getElementById("timezone-preview");
+    const status = document.getElementById("status");
+    let map;
+    let marker;
+    let geocoder;
+    let placesService;
+    let placeAutocomplete;
+    let selectedGender = "man";
+
+    const now = new Date();
+    dateInput.value = formatDate(now);
+    timeInput.value = formatTime(now);
+    latitudeInput.value = JERUSALEM.latitude;
+    longitudeInput.value = JERUSALEM.longitude;
+
+    window.initMap = function() {
+      const initialLocation = getSelectedLocation();
+      geocoder = new google.maps.Geocoder();
+      map = new google.maps.Map(document.getElementById("map"), {
+        center: initialLocation,
+        zoom: 13
+      });
+      placesService = new google.maps.places.PlacesService(map);
+      marker = new google.maps.Marker({
+        draggable: true,
+        map,
+        position: initialLocation
+      });
+
+      marker.addListener("dragend", () => {
+        setSelectedLocation(marker.getPosition());
+      });
+
+      placeAutocomplete = new google.maps.places.Autocomplete(placeSearchInput, {
+        fields: ["formatted_address", "geometry", "name"]
+      });
+      placeAutocomplete.bindTo("bounds", map);
+      placeAutocomplete.addListener("place_changed", () => {
+        const place = placeAutocomplete.getPlace();
+        if (!place.geometry || !place.geometry.location) {
+          searchPlace();
+          return;
+        }
+
+        applyGoogleLocation(place.geometry.location, place.formatted_address || place.name);
+      });
+    };
+
+    document.getElementById("language-toggle").addEventListener("click", () => {
+      const nextLanguage = language === "he" ? "en" : "he";
+      const params = new URLSearchParams(window.location.search);
+      params.set("lang", nextLanguage);
+      window.location.href = `${window.location.pathname}?${params.toString()}`;
+    });
+
+    document.getElementById("jerusalem-location").addEventListener("click", () => {
+      updateLocation(JERUSALEM.latitude, JERUSALEM.longitude);
+      status.className = "";
+      status.textContent = text.jerusalemReady;
+    });
+
+    document.querySelectorAll(".gender-option").forEach(button => {
+      button.addEventListener("click", () => {
+        selectGender(button.getAttribute("data-gender"));
+      });
+    });
+
+    document.getElementById("place-search-button").addEventListener("click", searchPlace);
+    placeSearchInput.addEventListener("keydown", event => {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        searchPlace();
+      }
+    });
+
+    [dateInput, timeInput, latitudeInput, longitudeInput].forEach(input => {
+      input.addEventListener("change", updateTimezonePreview);
+      input.addEventListener("input", updateTimezonePreview);
+    });
+
+    [latitudeInput, longitudeInput].forEach(input => {
+      input.addEventListener("change", syncMapToInputs);
+    });
+
+    document.getElementById("schedule-form").addEventListener("submit", event => {
+      event.preventDefault();
+
+      let timeInfo;
+      try {
+        timeInfo = getScheduleTimeInfo();
+      } catch (error) {
+        status.className = "error";
+        status.textContent = error.message || text.conversionError;
+        updateTimezonePreview();
+        return;
+      }
+
+      const jerusalemTime = timeInfo.jerusalem;
+      const params = new URLSearchParams({
+        year: String(jerusalemTime.year),
+        month: String(jerusalemTime.month),
+        day: String(jerusalemTime.day),
+        longitude: JERUSALEM.longitude,
+        latitude: JERUSALEM.latitude,
+        hour: String(jerusalemTime.hour),
+        minute: String(jerusalemTime.minute),
+        gmt: String(timeInfo.jerusalemGmt),
+        isSchedule: "true"
+      });
+
+      const target = text.target.replace("{gender}", selectedGender);
+      window.location.href = `${target}?${params.toString()}`;
+    });
+
+    function selectGender(gender) {
+      selectedGender = gender;
+      document.querySelectorAll(".gender-option").forEach(button => {
+        const isSelected = button.getAttribute("data-gender") === gender;
+        button.classList.toggle("selected", isSelected);
+        button.setAttribute("aria-pressed", String(isSelected));
+      });
+    }
+
+    function formatDate(date) {
+      const year = date.getFullYear();
+      const month = String(date.getMonth() + 1).padStart(2, "0");
+      const day = String(date.getDate()).padStart(2, "0");
+      return `${year}-${month}-${day}`;
+    }
+
+    function formatTime(date) {
+      const hour = String(date.getHours()).padStart(2, "0");
+      const minute = String(date.getMinutes()).padStart(2, "0");
+      return `${hour}:${minute}`;
+    }
+
+    function parseSelectedDateTime() {
+      if (!dateInput.value || !timeInput.value) {
+        return null;
+      }
+
+      const [year, month, day] = dateInput.value.split("-").map(Number);
+      const [hour, minute] = timeInput.value.split(":").map(Number);
+      if (![year, month, day, hour, minute].every(Number.isFinite)) {
+        return null;
+      }
+
+      return { year, month, day, hour, minute };
+    }
+
+    function getScheduleTimeInfo() {
+      if (typeof BirthCalculatorTime === "undefined" || typeof tzlookup !== "function") {
+        throw new Error(text.timezoneUnavailable);
+      }
+
+      const dateTime = parseSelectedDateTime();
+      const sourceLocation = getSelectedLocation();
+      if (!dateTime || ![sourceLocation.lat, sourceLocation.lng].every(Number.isFinite)) {
+        throw new Error(text.conversionError);
+      }
+
+      return BirthCalculatorTime.convertLocalTimeToJerusalem({
+        latitude: sourceLocation.lat,
+        longitude: sourceLocation.lng,
+        year: dateTime.year,
+        month: dateTime.month,
+        day: dateTime.day,
+        hour: dateTime.hour,
+        minute: dateTime.minute,
+        lookupTimeZone: tzlookup
+      });
+    }
+
+    function updateTimezonePreview() {
+      if (!dateInput.value || !timeInput.value) {
+        jerusalemTimeInput.value = "";
+        timezonePreview.className = "timezone-hint";
+        timezonePreview.textContent = text.timezonePreviewEmpty;
+        return;
+      }
+
+      try {
+        const timeInfo = getScheduleTimeInfo();
+        const targetTimeZone = BirthCalculatorTime.JERUSALEM_TIME_ZONE || "Asia/Jerusalem";
+        jerusalemTimeInput.value = BirthCalculatorTime.formatJerusalemDateTime(timeInfo.jerusalem);
+        timezonePreview.className = "timezone-hint";
+        timezonePreview.textContent = `${timeInfo.timeZone} -> ${targetTimeZone} - ${BirthCalculatorTime.formatGmtOffset(timeInfo.jerusalemGmt)}`;
+      } catch (error) {
+        jerusalemTimeInput.value = "";
+        timezonePreview.className = "timezone-hint error";
+        timezonePreview.textContent = error.message || text.conversionError;
+      }
+    }
+
+    function searchPlace() {
+      const address = placeSearchInput.value.trim();
+      if (!address) {
+        return;
+      }
+
+      if (placesService) {
+        placesService.findPlaceFromQuery(
+          {
+            query: address,
+            fields: ["formatted_address", "geometry", "name"]
+          },
+          (results, placesStatus) => {
+            if (placesStatus === google.maps.places.PlacesServiceStatus.OK && results[0] && results[0].geometry) {
+              applyGoogleLocation(results[0].geometry.location, results[0].formatted_address || results[0].name);
+              return;
+            }
+
+            geocodeAddress(address);
+          }
+        );
+        return;
+      }
+
+      geocodeAddress(address);
+    }
+
+    function geocodeAddress(address) {
+      if (!geocoder) {
+        return;
+      }
+
+      geocoder.geocode({ address }, (results, geocodeStatus) => {
+        if (geocodeStatus !== "OK" || !results[0]) {
+          status.className = "error";
+          status.textContent = text.placeNotFound;
+          return;
+        }
+
+        const location = results[0].geometry.location;
+        applyGoogleLocation(location, results[0].formatted_address);
+      });
+    }
+
+    function applyGoogleLocation(location, label) {
+      updateLocation(location.lat(), location.lng());
+      status.className = "";
+      status.textContent = label || text.locationReady;
+    }
+
+    function getSelectedLocation() {
+      return {
+        lat: Number(latitudeInput.value),
+        lng: Number(longitudeInput.value)
+      };
+    }
+
+    function setSelectedLocation(location) {
+      updateLocation(location.lat(), location.lng());
+    }
+
+    function syncMapToInputs() {
+      const location = getSelectedLocation();
+      if (![location.lat, location.lng].every(Number.isFinite)) {
+        updateTimezonePreview();
+        return;
+      }
+
+      if (map && marker) {
+        marker.setPosition(location);
+        map.setCenter(location);
+        map.setZoom(15);
+      }
+
+      updateTimezonePreview();
+    }
+
+    function updateLocation(latitude, longitude) {
+      latitudeInput.value = latitude;
+      longitudeInput.value = longitude;
+
+      if (map && marker) {
+        const location = getSelectedLocation();
+        marker.setPosition(location);
+        map.setCenter(location);
+        map.setZoom(15);
+      }
+
+      updateTimezonePreview();
+    }
+
+    updateTimezonePreview();
+  </script>
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDcXPNQH8H9c_xeTxH9yT1OKPoM5e_YU4I&libraries=places&callback=initMap"></script>
+</body>
+</html>

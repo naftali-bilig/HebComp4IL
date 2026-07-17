@@ -1,0 +1,34 @@
+.modal-content
+{
+}
+
+.modal-body
+{
+	font-weight: bold;
+    font-size: 15px;
+    color: #f58888;
+}
+.whatsapp-icon {
+  width: 20px;
+  height: 20px;
+  max-width: 20px;
+  max-height: 20px;
+  flex: 0 0 20px;
+  margin-inline-end: 0.35em;
+  object-fit: contain;
+}
+
+#whatsapp-db-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 44px;
+  min-height: 44px;
+  overflow: hidden;
+}
+
+.calculation-actions {
+  width: 100%;
+  margin-bottom: 0;
+}

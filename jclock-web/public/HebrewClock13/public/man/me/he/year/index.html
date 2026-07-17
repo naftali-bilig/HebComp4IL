@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+
+    <title>לימוד שנתי</title>
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" id="thecss">
+    <link rel="stylesheet" type="text/css" href="../../../shared/css/stylesheet.css" id="commercial_css">
+    <meta charset="UTF-8">
+    <meta name="description" content="hebrew clock that showing the sun clock in order to Sanctify the month">
+    <meta name="keywords" content="HebrewClock,kidush levana,moon,sunclock, hebrew time,
+Sanctification of the Month,kidush hachodesh, pray,pray time,sun time,god,god time,god pray,jesus, jesus time, church, church time, church pray,psalms,priest,corrs,music,kabala,jewish ">
+    <meta name="author" content="Naftali Bilig">
+</head>
+
+<body>
+
+    <div id="container" ondblclick="pause()">
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <!--<button class="gender male disable"></button>-->
+            <button onclick="englishFunction()" class="hebrew_btn"></button>
+            <button onclick="pause()" class="refresh_btn refresh_btn_crisitan"></button>
+            <div id="myDropdown" class="dropdown-content">
+ <!--               <a href="../index.html" id="hourly__learning">לימוד עצמי</a>
+                <a href="../islam/index.html" id="monthly__learning">לימוד עם מוסלמי/ה</a>
+                <a href="./index.html" id="yearly__learning">לימוד עם נוצרי/ה</a>
+				<a href="../jewish/index.html" id="Jubilee__learning">לימוד עם יהודי/ה</a>-->
+<!--                <a href="../guide.html">מדריך למשתמש</a>
+                <a href="./chosen_story.html">סיפור החורף</a>  -->
+				<a href="../kabala/index.html">לו"ז תפילה</a>
+            </div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <!--<button id="stop" onclick="stop()" />עצור-->
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input style="font-weight: bold;" class="year" id="Mazal_year" type="text" value="נפתלי שבבנימין"/>
+            <input style="font-weight: bold;" class="year" id="Mazal_year" type="text" value="חסד שביסוד" onclick="openMidaInNewTab(1);" ondblclick="openMidaInNewTab(0);"/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="year" id="Masechet_year" type="text" value="עוקצים" onclick="openMasechetInNewTab();" ondblclick="openMasechetInSefariaInNewTab();"/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="year" id="Sefer_year" type="text" value="יחזקאל" onclick="openSeferInNewTab();" ondblclick="openSeferInSefariaInNewTab();"/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="year" id="Parasha" type="text" value="ויחי" onclick="openParashaInNewTab();" ondblclick="openParashaInSefariaInNewTab();" />
+        </div>
+        <div id="commercial" style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<img class="day" />
+        </div>
+<!--		<div style="text-align:center; margin-bottom:10px;" onclick="openSoteriaInNewTab();">
+			<input class="year" id="Parasha" type="text" value="מחלה" onclick="openHealthInNewTab();" />
+        </div>-->
+<!--
+		<div style="text-align:center; margin-bottom:10px;" onclick="openSoteriaInNewTab();">
+			<input class="year" id="Parasha" type="text" value="מחלת רוע" onclick="openHealthInNewTab();" />
+        </div>
+		<div style="text-align:center; margin-bottom:10px;" onclick="openSoteriaInNewTab();">
+			<input class="year" id="Parasha" type="text" value="מחלת צונאמי" onclick="openHealthInNewTab();" />
+        </div>
+		<div style="text-align:center; margin-bottom:10px;" onclick="openSoteriaInNewTab();">
+			<input class="year" id="Parasha" type="text" value="מחלת בולימיה" onclick="openHealthInNewTab();" />
+        </div>
+		<div style="text-align:center; margin-bottom:10px;" onclick="openSoteriaInNewTab();">
+			<input class="year" id="Parasha" type="text" value="מחלת בגידה" onclick="openHealthInNewTab();" />
+        </div>-->
+        <br />
+        <br />
+<!--        <div style="text-align:center;">
+            <input id="Text8" class="zmanim_text" type="text" value="Matins" />
+            <input id="Matins" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="Text15" class="zmanim_text" type="text" value="Lauds" />
+            <input id="Lauds" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="Text7" class="zmanim_text" type="text" value="Prime" />
+            <input id="Prime" class="zmanim_hour" type="text" />
+        </div>
+        <div style = "text-align:center;">
+            <input id="Text6" class="zmanim_text" type="text" value="Terce" />
+            <input id="Terce" class="zmanim_hour" type="text" />
+        </div>
+        <div style = "text-align:center;">
+            <input id="Text10" class="zmanim_text" type="text" value="Sext" />
+            <input id="Sext" class="zmanim_hour" type="text"  />
+        </div>
+        <div style="text-align:center;">
+            <input id="Text5" class="zmanim_text" type="text" value="None" />
+            <input id="None" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="Text12" class="zmanim_text" type="text" value="Vespers" />
+            <input id="Vespers" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="Text13" class="zmanim_text" type="text" value="Compline" />
+            <input id="Compline" class="zmanim_hour" type="text" />
+        </div> -->
+    </div>
+
+	<script type="text/javascript" src="../js/HebrewDate.js"></script>
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="../js/LongPressDoubleClick.js"></script>
+    <script type="text/javascript" src="../js/HebrewClock.js"></script>
+    <script type="text/javascript" src="../js/Parasha.js"></script>
+    <script type="text/javascript" src="../js/SederLimud.js"></script>
+    <script type="text/javascript" src="../../../shared/he/js/Commercial.js"></script>
+    <script type="text/javascript" src="./js/Sefer.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+	<script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="../js/Times.js"></script>
+    <script type="text/javascript" src="../js/SunTime.js"></script>
+    <script type="text/javascript" src="../js/TimeAdj.js"></script>
+    <script type="text/javascript" src="../js/Dst.js"></script>
+    <script type="text/javascript" src="../js/Dates.js"></script>
+    <script type="text/javascript" src="../js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+    var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+	var sunrise;
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer=45;
+    var mazal_url;
+    var mida_url
+    var x;
+
+    getLocation();  //activate the clock
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+
+        var defaultLongitude = "35.2331664";
+        var defaultLatitude = "31.7768514";
+        var defaultUrl = new URL(document.location.href);
+        if (defaultUrl.searchParams.get("longitude") !== defaultLongitude || defaultUrl.searchParams.get("latitude") !== defaultLatitude)
+        {
+            defaultUrl.searchParams.set("longitude", defaultLongitude);
+            defaultUrl.searchParams.set("latitude", defaultLatitude);
+            window.location.replace(defaultUrl.href);
+            return;
+        }
+        showPosition({ coords: { longitude: defaultLongitude, latitude: defaultLatitude } });
+    }
+
+    function showPosition(position)
+    {
+
+        var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");
+        var lat = url.searchParams.get("latitude");
+        if(lat)
+        {
+            //tz = https://maps.googleapis.com/maps/api/timezone/outputFormat?parameters
+        }
+
+        longitude = lon ? lon : position.coords.longitude;
+        latitude = lat ? lat : position.coords.latitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        setmazal();
+        //sederLimud();
+        //setSefer();
+
+        //נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openMidaInNewTab(x) {
+        var win;
+        if (x == 1)
+            win = window.open(mazal_url, '_blank');
+        else if(x == 0)
+            win = window.open("https://www.youtube.com/watch?v=pBjTYt-M8zk&list=PLFtAIQdzOs6SLU01c1II5RZpBFUv76WSk&index=16", '_blank');
+        win.focus();
+    }
+
+    var masechetClickTimer;
+    function openMasechetInNewTab()
+    {
+        clearTimeout(masechetClickTimer);
+        masechetClickTimer = setTimeout(openKehatiAppInNewTab, 250);
+    }
+
+    function openMasechetInSefariaInNewTab()
+    {
+        clearTimeout(masechetClickTimer);
+        var win = window.open('https://www.sefaria.org/Mishnah_Oktzin.1?lang=he', '_blank');
+        win.focus();
+    }
+
+    function openKehatiAppInNewTab()
+    {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
+        var isAndroid = /android/i.test(userAgent);
+        var isIOS = /iPad|iPhone|iPod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var url = 'https://play.google.com/store/apps/details?id=com.nocker.kehati&hl=iw&gl=IL';
+
+        if (isAndroid) {
+            url = 'https://play.google.com/store/apps/details?id=com.nocker.kehati&hl=iw&gl=IL';
+        } else if (isIOS) {
+            url = 'https://apps.apple.com/il/app/kehati/id1059791961';
+        }
+
+        var win = window.open(url, '_blank');
+        win.focus();
+    }
+
+    var seferClickTimer;
+    function openSeferInNewTab()
+    {
+        clearTimeout(seferClickTimer);
+        seferClickTimer = setTimeout(function() {
+            var win = window.open('https://www.929.org.il/page/453', '_blank');
+            win.focus();
+        }, 250);
+    }
+    function openSeferInSefariaInNewTab() {
+        clearTimeout(seferClickTimer);
+        var win = window.open('https://www.sefaria.org/Yalkut_Shimoni_on_Nach.336.1-384.2?lang=he', '_blank');
+        win.focus();
+    }
+
+    var parashaClickTimer;
+    function openParashaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        parashaClickTimer = setTimeout(function() {
+            var elonUrl = (typeof parasha_elon_url !== 'undefined' && parasha_elon_url) ?
+                parasha_elon_url :
+                'https://haravelon.co.il/tag/%D7%95%D7%99%D7%97%D7%99/';
+            var win = window.open(elonUrl, '_blank');
+            win.focus();
+        }, 250);
+    }
+
+    function openParashaInSefariaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        var parashaName = document.getElementById("Parasha").value;
+        var zoharUrl = (typeof getSefariaZoharParashaUrl === "function") ?
+            getSefariaZoharParashaUrl(parashaName) :
+            'https://www.sefaria.org/Zohar,_Vayechi?vhe=Hebrew_Translation&lang=he';
+        var win = window.open(zoharUrl, '_blank');
+        win.focus();
+    }
+
+	function openHealthInNewTab()
+    {
+        var win = window.open("./Health/index.html", '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+        sederLimud();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        localStorage.setItem("mida", document.getElementById("Mazal").value);
+
+        var win = window.open("../moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>

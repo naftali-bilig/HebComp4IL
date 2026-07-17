@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title> לו''ז תפילה</title>  
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" id="thecss">
+    <link rel="stylesheet" type="text/css" href="../../../shared/css/stylesheet.css" id="commercial_css">    
+    <meta charset="UTF-8">
+    <meta name="description" content="שעון עברי המציג את זמן השמש בשביל לקדש את הלבנה">
+    <meta name="keywords" content="HebrewClock,kidush levana,moon,sunclock, hebrew time,
+Sanctification of the Month,kidush hachodesh, שעון עברי, שעות זמניות, קידוש החודש, שעה זמנית,קידוש הלבנה, ראש חודש ">
+    <meta name="author" content="Naftali Bilig">
+</head>
+
+<body>
+	<!-- The core Firebase JS SDK is always required and must be listed first--> 
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+		 https://firebase.google.com/docs/web/setup#available-libraries --> 
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-analytics.js"></script>	
+	
+	<script>
+		// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+		const firebaseConfig = {
+		  apiKey: "AIzaSyC_o6BkcBq_KHMuNWJU0try__AUjw9IHfk",
+		  authDomain: "hebrewclock13.firebaseapp.com",
+		  projectId: "hebrewclock13",
+		  storageBucket: "hebrewclock13.appspot.com",
+		  messagingSenderId: "284970515106",
+		  appId: "1:284970515106:web:15952320f357f3582575fb",
+		  measurementId: "G-GRQJVJC2E0"
+		};
+		// Initialize Firebase.
+		firebase.initializeApp(firebaseConfig);
+
+		// Initialize Firebase Analytics.
+		firebase.analytics().logEvent('זמני תפילה למוסלמים');
+	</script>
+
+    <div id="container" onclick="pause()">
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <!-- <button onclick="genderFunction()" class="gender married"></button> -->
+            <button onclick="englishFunction()" class="hebrew_btn"></button>
+            <button onclick = "religionFunction()" class="religion muslim"></button>
+            <div id="myDropdown" class="dropdown-content">  
+                <a href="../../../me/he/index.html?religion=muslim&period=Month&latitude=31.7768514&longitude=35.2331664" id="hourly__learning">לימוד עצמי</a>
+				
+<!--                <a href="../../../me/he/islam/index.html" id="monthly__learning">לימוד עם מוסלמי/ה</a>
+                <a href="../../../me/he/cristian/index.html" id="yearly__learning">לימוד עם נוצרי/ה</a>
+                <a href="../../../me/he/jewish/index.html" id="Jubilee__learning">לימוד עם יהודי/ה</a>
+                <a href="./index.html">לו''ז תפילה</a>
+				<a href="../../../me/he/guide.html">מדריך למשתמש</a>-->
+            </div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style = "text-align:center;">
+            <button id="stop" onclick="stop()" />עצור  
+        </div>
+        <br />
+        <br />
+
+        <div style="text-align:center;">
+            <input id="average" class="zmanim_hour" type="text" value="רגילה"/>
+            <input id="Text15" class="zmanim_text" type="text" value="שעה" />
+			<input id="daily" class="zmanit_hour" type="text" value="זמנית"/>
+		</div>
+        <div style="text-align:center;">
+            <input id="dawn" class="zmanim_hour" type="text" />
+            <input id="Text15" class="zmanim_text" type="text" value="פג'ר" />
+			<input class="zmanit_hour" type="text" value="ירקרק"/>
+        </div>
+        <!-- <div style="text-align:center;">
+            <input id="misheyakir" class="zmanim_hour" type="text" />
+            <input id="Text15" class="zmanim_text" type="text" value="משיכיר" />
+        </div> -->
+        <div style="text-align:center;">
+            <input id="sunrise" class="zmanim_hour" type="text" />
+            <input id="Text15" class="zmanim_text" type="text" value="אישראק" />
+			<input class="zmanit_hour" type="text" value="00:0000"/>
+        </div>
+        <!-- <div style = "text-align:center;">
+            <input id="shema" class="zmanim_hour" type="text" />
+            <input id="Text6" class="zmanim_text" type="text" value = "סוף זמן ק''ש"  />
+        </div> -->
+        <!-- <div style = "text-align:center;">
+            <input id="tefila" class="zmanim_hour" type="text"  />
+            <input id="Text10" class="zmanim_text" type="text" value = "סוף זמן תפילה"  />
+        </div> -->
+        <div style="text-align:center;">
+            <input id="chatzot_yom" class="zmanim_hour" type="text" />
+            <input id="Text5" class="zmanim_text" type="text" value= "ט'הר" />
+			<input class="zmanit_hour" type="text" value="06:0000"/>
+        </div>
+        <!-- <div style="text-align:center;">
+            <input id="mincha_gedola" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="מנחה גדולה" />
+        </div>		 -->
+		<div style="text-align:center;">
+            <input id="mincha_ketana" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="עצר" />
+			<input class="zmanit_hour" type="text" value="צהבהב"/>
+        </div>
+		<!-- <div style="text-align:center;">
+            <input id="plag_mincha" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="פלג המנחה" />
+        </div> -->
+		<div style="text-align:center;">
+            <input id="sunset" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="מע'רב" />
+			<input class="zmanit_hour" type="text" value="00:0000"/>
+        </div>
+		<!-- <div style="text-align:center;">
+            <input id="tziet" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="צאת הכוכבים" />
+        </div> -->
+		<div style="text-align:center;">
+            <input id="tziet_tam" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="'עשאא" />
+			<input class="zmanit_hour" type="text" value="אפור"/>
+        </div>
+		<!-- <div style="text-align:center;">
+            <input id="chatzot_layla" class="zmanim_hour" type="text" />
+            <input id="Text12" class="zmanim_text" type="text" value="חצות הלילה" />
+        </div> -->
+<!-- 
+		<div id="commercial" style="text-align:center; margin-bottom:10px; margin-top:10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<img class="day" />
+        </div> 
+		-->
+    </div>
+
+    <script type="text/javascript" src="../../../simple/js/Geolocation.js"></script>
+	<script type="text/javascript" src="../../../../../../BirthCalculator/public/shared/timezone-converter.js"></script>
+    <script type="text/javascript" src="./js/adhan.js"></script>
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="../js/HebrewClock.js"></script>
+    <script type="text/javascript" src="../js/Gender.js"></script>
+    <script type="text/javascript" src="../js/Religion.js"></script>
+    <script type="text/javascript" src="../../../shared/he/js/Commercial.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+    <script type="text/javascript" src="./js/Times.js?v=2"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="../js/SunTime.js"></script>
+    <script type="text/javascript" src="../js/TimeAdj.js"></script>
+    <script type="text/javascript" src="../js/Dst.js"></script>
+    <script type="text/javascript" src="../js/Dates.js"></script>
+    <script type="text/javascript" src="../js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  // Jerusalem calculation location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+    var clockTimeZone = "Asia/Jerusalem";
+    var displayTimeZone = "Asia/Jerusalem";
+    var JERUSALEM_LATITUDE = 31.7768514;
+    var JERUSALEM_LONGITUDE = 35.2331664;
+    var JERUSALEM_TIME_ZONE = "Asia/Jerusalem";
+    var JERUSALEM_TIME_API_URL = "https://timeapi.io/api/TimeZone/zone?timeZone=Asia/Jerusalem";
+    var JERUSALEM_TIME_TIMEOUT_MS = 4000;
+    var LOCAL_CLOCK_DRIFT_WARNING_MS = 60 * 1000;
+    var verifiedJerusalemTime = null;
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+	
+    var oTimer;                 //event for the running clock
+   // var cTimer;                 //event for running commercials
+
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+	var birthYear,birthMonth,birthDay,birthGMT,birthHour,birthMin,birthSec,birthMs,clockLive,clockLiveStart; //get birth time
+    var audio;
+    var omer;
+    var mazal_url;
+
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'        
+    }
+    
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+
+    getLocation();  //activate the clock
+
+
+
+    function getLocation()
+    {
+		var url = new URL(document.location.href);
+		readDisplayTimeParams(url);
+		birthYear = url.searchParams.get("year");
+		birthMonth = url.searchParams.get("month");
+		birthDay = url.searchParams.get("day");
+		birthHour = url.searchParams.get("hour");
+		birthMin = url.searchParams.get("min") || url.searchParams.get("minute");
+		birthSec = url.searchParams.get("sec");
+		birthMs = url.searchParams.get("ms");
+		clockLive = url.searchParams.get("live");
+		clockLiveStart = url.searchParams.get("liveStart");
+		birthGMT = url.searchParams.get("gmt");
+
+		longitude = JERUSALEM_LONGITUDE;
+		latitude = JERUSALEM_LATITUDE;
+		console.log("jerusalem location");
+		verifyJerusalemTimeSafely(startKabalaClock);
+    }
+
+	function startKabalaClock()
+	{
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        setmazal();
+        setShevet();
+        commercialFunction();
+	}
+
+	function readDisplayTimeParams(url)
+	{
+		clockTimeZone = JERUSALEM_TIME_ZONE;
+		displayTimeZone = getLocalDisplayTimeZone() || url.searchParams.get("displayTimeZone") || clockTimeZone;
+		if(window.BirthCalculatorTime && typeof BirthCalculatorTime.getTimeZoneOffsetHours == "function")
+			tz = BirthCalculatorTime.getTimeZoneOffsetHours(new Date(), clockTimeZone);
+		else
+			tz = 2;
+
+	}
+
+	function getLocalDisplayTimeZone()
+	{
+		try
+		{
+			if(window.Intl && typeof Intl.DateTimeFormat == "function")
+			{
+				var options = Intl.DateTimeFormat().resolvedOptions();
+				if(options && options.timeZone)
+					return options.timeZone;
+			}
+		}
+		catch(error)
+		{
+			console.warn("Could not read browser display time zone", error);
+		}
+
+		return "";
+	}
+
+	function verifyJerusalemTimeSafely(callback)
+	{
+		if(clockTimeZone != JERUSALEM_TIME_ZONE || typeof window.fetch != "function")
+		{
+			callback();
+			return;
+		}
+
+		var timeoutId = null;
+		var requestStartedAt = getSteadyNowMilliseconds();
+		var fetchOptions = { cache: "no-store" };
+		if(typeof window.AbortController == "function")
+		{
+			var controller = new AbortController();
+			fetchOptions.signal = controller.signal;
+			timeoutId = setTimeout(function() {
+				controller.abort();
+			}, JERUSALEM_TIME_TIMEOUT_MS);
+		}
+
+		window.fetch(JERUSALEM_TIME_API_URL, fetchOptions)
+			.then(function(response) {
+				if(!response.ok)
+					throw new Error("Jerusalem time request failed: " + response.status);
+				return response.json();
+			})
+			.then(function(data) {
+				if(timeoutId)
+					clearTimeout(timeoutId);
+				applyVerifiedJerusalemTime(data, requestStartedAt);
+				callback();
+			})
+			.catch(function(error) {
+				if(timeoutId)
+					clearTimeout(timeoutId);
+				console.warn("Could not verify Jerusalem time from the network", error);
+				callback();
+			});
+	}
+
+	function applyVerifiedJerusalemTime(data, requestStartedAt)
+	{
+		var offsetSeconds = Number(data && data.currentUtcOffset && data.currentUtcOffset.seconds);
+		var localMilliseconds = parseLocalDateTimeAsUtcMilliseconds(data && data.currentLocalTime);
+		if(!Number.isFinite(offsetSeconds) || !Number.isFinite(localMilliseconds))
+			throw new Error("Invalid Jerusalem time response.");
+
+		var receivedAt = getSteadyNowMilliseconds();
+		var serviceUtcMilliseconds = localMilliseconds - (offsetSeconds * 1000);
+		var roundTripMilliseconds = Math.max(0, receivedAt - requestStartedAt);
+		var adjustedServiceUtcMilliseconds = serviceUtcMilliseconds + Math.round(roundTripMilliseconds / 2);
+
+		verifiedJerusalemTime = {
+			utcMilliseconds: adjustedServiceUtcMilliseconds,
+			offsetSeconds: offsetSeconds,
+			receivedAtMilliseconds: receivedAt,
+			localClockDriftMilliseconds: adjustedServiceUtcMilliseconds - Date.now()
+		};
+
+		tz = offsetSeconds / 3600;
+		if(Math.abs(verifiedJerusalemTime.localClockDriftMilliseconds) > LOCAL_CLOCK_DRIFT_WARNING_MS)
+			console.warn("Local clock differs from verified Jerusalem time by " + verifiedJerusalemTime.localClockDriftMilliseconds + "ms");
+	}
+
+	function parseLocalDateTimeAsUtcMilliseconds(value)
+	{
+		if(!value)
+			return NaN;
+
+		var match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2})(?:\.(\d+))?/.exec(value);
+		if(!match)
+			return NaN;
+
+		var milliseconds = 0;
+		if(match[7])
+			milliseconds = Number((match[7] + "000").slice(0, 3));
+
+		return Date.UTC(
+			Number(match[1]),
+			Number(match[2]) - 1,
+			Number(match[3]),
+			Number(match[4]),
+			Number(match[5]),
+			Number(match[6]),
+			milliseconds
+		);
+	}
+
+	function getSteadyNowMilliseconds()
+	{
+		if(window.performance && typeof window.performance.now == "function")
+			return window.performance.now();
+
+		return Date.now();
+	}
+
+	function getVerifiedUtcNow()
+	{
+		if(!verifiedJerusalemTime)
+			return new Date();
+
+		return new Date(verifiedJerusalemTime.utcMilliseconds + (getSteadyNowMilliseconds() - verifiedJerusalemTime.receivedAtMilliseconds));
+	}
+
+	function getCurrentClockDate()
+	{
+		if(isLiveClock() && hasExplicitClockDateTime())
+			return getLiveClockDate();
+
+		if(hasExplicitClockDateTime())
+			return getExplicitClockDate();
+
+		return getClockWallDate(getVerifiedUtcNow(), clockTimeZone);
+	}
+
+	function isLiveClock()
+	{
+		return clockLive != null && clockLive != "0" && clockLive != "false";
+	}
+
+	function hasExplicitClockDateTime()
+	{
+		return birthYear != null && birthMonth != null && birthDay != null && birthHour != null;
+	}
+
+	function getExplicitClockDate()
+	{
+		return new Date(
+			Number(birthYear),
+			Number(birthMonth) - 1,
+			Number(birthDay),
+			Number(birthHour),
+			Number(birthMin || 0),
+			Number(birthSec || 0),
+			Number(birthMs || 0)
+		);
+	}
+
+	function getLiveClockDate()
+	{
+		var liveStartMilliseconds = Number(clockLiveStart);
+		var currentMilliseconds = getVerifiedUtcNow().getTime();
+		var elapsedMilliseconds = Number.isFinite(liveStartMilliseconds) ? currentMilliseconds - liveStartMilliseconds : 0;
+		return new Date(getExplicitClockDate().getTime() + elapsedMilliseconds);
+	}
+
+	function getClockWallDate(utcDate, timeZone)
+	{
+		if(window.BirthCalculatorTime && typeof BirthCalculatorTime.getZonedParts == "function")
+		{
+			var parts = BirthCalculatorTime.getZonedParts(utcDate, timeZone);
+			return new Date(parts.year, parts.month - 1, parts.day, parts.hour, parts.minute, parts.second || 0, utcDate.getMilliseconds());
+		}
+
+		return utcDate;
+	}
+
+	function formatScheduleTimeForDisplay(clockHour, baseDate, useAmPm)
+	{
+		if(!displayTimeZone || !clockTimeZone || displayTimeZone == clockTimeZone ||
+			!window.BirthCalculatorTime ||
+			typeof BirthCalculatorTime.zonedLocalTimeToUtc != "function" ||
+			typeof BirthCalculatorTime.getZonedParts != "function")
+		{
+			return timeadj(clockHour, useAmPm);
+		}
+
+		var sourceParts = getScheduleWallParts(clockHour, baseDate);
+		var utcDate = BirthCalculatorTime.zonedLocalTimeToUtc(
+			sourceParts.year,
+			sourceParts.month,
+			sourceParts.day,
+			sourceParts.hour,
+			sourceParts.minute,
+			clockTimeZone
+		);
+		var displayParts = BirthCalculatorTime.getZonedParts(utcDate, displayTimeZone);
+
+		return formatRegularTime(displayParts.hour, displayParts.minute, useAmPm);
+	}
+
+	function getScheduleWallParts(clockHour, baseDate)
+	{
+		var totalMinutes = Math.round(clockHour * 60);
+		var wallDate = new Date(Date.UTC(baseDate.getFullYear(), baseDate.getMonth(), baseDate.getDate()));
+		wallDate = new Date(wallDate.getTime() + (totalMinutes * 60 * 1000));
+
+		return {
+			year: wallDate.getUTCFullYear(),
+			month: wallDate.getUTCMonth() + 1,
+			day: wallDate.getUTCDate(),
+			hour: wallDate.getUTCHours(),
+			minute: wallDate.getUTCMinutes()
+		};
+	}
+
+	function formatRegularTime(hour, minute, useAmPm)
+	{
+		var ampmString = "";
+		if(useAmPm)
+		{
+			ampmString = hour > 11 ? " PM" : " AM";
+			hour %= 12;
+			hour = hour < 1 ? 12 : hour;
+		}
+
+		return hour + ":" + (minute < 10 ? "0" : "") + minute + ampmString;
+	}
+
+    //link to mazal information
+    function openInNewTab() {
+        var win = window.open(mazal_url, '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        //localStorage.setItem("omer", omer);
+        //localStorage.setItem("mida", document.getElementById("Mazal").value);
+
+        var win = window.open("../moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>

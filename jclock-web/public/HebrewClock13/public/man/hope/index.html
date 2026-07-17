@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>בית המקדש השלישי</title>
+    <meta name="description" content="חשמל זה גם אש לפי ההלכה היהודית">
+    <meta property="og:title" content="בית המקדש השלישי">
+    <meta property="og:description" content="חשמל זה גם אש לפי ההלכה היהודית">
+    <meta property="og:type" content="website">
+</head>
+<body>
+
+    <center>
+    <canvas id="myCanvas" width="800" height="650" style="border:1px solid #d3d3d3;">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+    </center>
+    <!-- <iframe style="width: 550px;height: 360px; border:none;" src="../simple/index.html"></iframe> -->
+
+    <script type="text/javascript" src="./js/circle.js"></script>
+    <script>
+        drawCircle();
+        var mouseX=0, mouseY=0;
+        var canvas = document.getElementById("myCanvas");
+        canvas.addEventListener( "mousemove", function ( e )
+        {
+            var scrollX = ( window.scrollX !== null && typeof window.scrollX !== 'undefined') ? window.scrollX : window.pageXOffset;
+            var scrollY = ( window.scrollY !== null && typeof window.scrollY !== 'undefined') ? window.scrollY : window.pageYOffset;
+            mouseX = e.clientX - canvas.offsetLeft + scrollX;
+            mouseY = e.clientY - canvas.offsetTop + scrollY;
+            //console.log("mouseX: " + mouseX + "  mouseY: " + mouseY)
+
+        }, false );
+        canvas.addEventListener( "click", function ( e )
+        {
+            var mouseRadius = Math.sqrt(Math.pow((mouseX - 400), 2) + Math.pow((mouseY - 320), 2));
+
+            if( mouseRadius <= 30){
+                window.location = "https://ceves.net/";
+                return;
+            }
+
+            if( mouseRadius < 300){
+                window.location = "/HebrewGiving";
+            }
+
+}, false );
+    </script> 
+</body>
+</html>

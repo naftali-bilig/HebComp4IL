@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>E-zone</title>  
+</head>
+<body>
+
+    <center>
+    <canvas id="myCanvas" width="800" height="650" style="border:1px solid #d3d3d3;">
+        Your browser does not support the HTML5 canvas tag.</canvas>
+    </center>
+    <!-- <iframe style="width: 550px;height: 360px; border:none;" src="../simple/index.html"></iframe> -->
+
+    <script type="text/javascript" src="./js/circle.js"></script>
+    <script>
+        drawCircle();
+        var mouseX=0, mouseY=0;
+        var canvas = document.getElementById("myCanvas");
+        canvas.addEventListener( "mousemove", function ( e )
+        {
+            var scrollX = ( window.scrollX !== null && typeof window.scrollX !== 'undefined') ? window.scrollX : window.pageXOffset;
+            var scrollY = ( window.scrollY !== null && typeof window.scrollY !== 'undefined') ? window.scrollY : window.pageYOffset;
+            mouseX = e.clientX - canvas.offsetLeft + scrollX;
+            mouseY = e.clientY - canvas.offsetTop + scrollY;
+            //console.log("mouseX: " + mouseX + "  mouseY: " + mouseY)
+
+        }, false );
+        canvas.addEventListener( "click", function ( e )
+        {
+            var mouseRadius = Math.sqrt(Math.pow((mouseX - 400), 2) + Math.pow((mouseY - 320), 2));
+
+            if( mouseRadius <= 30){
+                window.location = "https://youtu.be/O6gM51TxJws";
+                return;
+            }
+
+            if( mouseRadius >= 300)
+                return;
+
+
+                
+            //quarter 1
+
+            if( mouseY > 20 && mouseY < 320 && mouseX > 400 && mouseX < 700 ){
+                window.location = "https://shellygilad.wixsite.com/e-zone/1";  
+            }
+
+            //quarter 2
+            if( mouseY > 320 && mouseY < 620 && mouseX > 400 && mouseX < 700 ){
+                window.location = "https://www.israeli-hope.gov.il/";
+            }
+
+            //quarter 3
+            if( mouseY > 320 && mouseY < 620 && mouseX < 400 && mouseX > 100 ){
+                window.location = "../index.html";
+
+            }
+
+            //quarter 4
+            if( mouseY > 20 && mouseY < 320 && mouseX < 400 && mouseX > 100 ){
+                window.location = "http://shellygilad.wix.com/e-zone";
+            }
+
+
+
+}, false );
+    </script> 
+</body>
+</html>

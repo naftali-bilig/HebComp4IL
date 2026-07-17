@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>יצירת קונפיגורציה לפרסומות</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="../shared/bootstrap.min.css">
+  <link rel="stylesheet" href="../shared/style.css">
+  <!-- Load Font Awesome Icon Library -->
+  <link rel="stylesheet" href="../shared/font-awesome.min.css">
+  <script src="../shared/jquery.min.js"></script>
+  <script src="../shared/popper.min.js"></script>
+  <script src="../shared/bootstrap.min.js"></script>
+  <script src="../shared/script.js"></script>
+  <style>
+  /* Set the size of the div element that contains the map */
+  #map {
+	height: 400px;  /* The height is 400 pixels */
+	width: 100%;  /* The width is the width of the web page */
+   }
+  </style>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+   		צור הגדרות לפרסומות
+  	</button>
+</center>
+ 
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          	<button type="button" class="close" data-dismiss="modal">×</button>
+            <h4 class="modal-title">צור הגדרות לפרסומות</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body" style="direction:rtl;!important;">
+
+			<!-- Buttons to choose list or grid view -->
+
+			<div class="row gridHeader">
+			  <div class="column">
+				<h6>שם</h6>
+			  </div>
+			  <div class="column" >
+				<h6>כמות השקעה</h6>
+			  </div>
+			</div>
+			<div class="commercial row">
+			  <div class="column">
+				<input class="commercialName" value="סוטריה"/>
+			  </div>
+			  <div class="column" >
+				<input type="number" class="commercialProbability" value="36" />
+			  </div>
+			  <div class="column narrow" >
+				<div onclick="addCommercial(this)" class="btn btn-primary btnAddCommercial">הוסף</div>
+				<div onclick="removeCommercial(this)" class="btn btn-danger btnRemoveCommercial">הסר</div>
+				<div onclick="expandCommercial(this)" class="btn btn-success btnExpandCommercial">הרחב</div>
+			  </div>
+			  <div class="row gridHeader" style="display:none;">
+				<div class="column">
+						<h6>מיקום</h6>
+					</div>
+					<div class="column" >
+						<h6>יום</h6>
+					</div>
+					<div class="column" >
+						<h6>שעה</h6>
+					</div>
+					<div class="row">
+						<div class="column">
+							<input type="text" class="commercialRegion" value="12" />
+						</div>
+						<div class="column" >
+							<input type="text" class="commercialDay" value="xx" />
+						</div>
+						<div class="column" >
+							<input type="text" class="commercialHour" value="xx" />
+						</div>
+					</div>
+				</div>
+			  </div>
+
+		<!--
+			<p style="display:none;" href="#" data-toggle="tooltip" title="בחירת המיקום"  style="display: inline-block; width: 248px;">בחירת המיקום</p>
+			<div style="display:none;" id="map"></div>
+		-->
+			<!-- <iframe style="width:100%; height:450px;" src="./location.html"></iframe>-->
+			<!--
+			<p href="#" data-toggle="tooltip" title="קו רוחב"  style="display: inline-block; width: 248px;">קו רוחב</p><input id="latitude" value="30"/>		  
+			</br>
+			<p href="#" data-toggle="tooltip" title="קו אורך" style="display: inline-block; width: 248px;">קו אורך</p><input id="longitude"  value="32"/>
+			-->
+<!--		<hr style="display:none;"/>
+
+			<p href="#" data-toggle="tooltip" title="תאריך חילוני"  style="display: inline-block; width: 248px;">תאריך לידה</p><input type="date" id="dateOfBirth" class="form-control" data-toggle="datepicker"> 
+			<p href="#" data-toggle="tooltip" title="שעה חילונית"  style="display: inline-block; width: 248px;">שעת לידה</p><input type="time" id="hourOfBirth" class="form-control" data-toggle="timepicker"> 
+			<br>
+			<p href="#" data-toggle="tooltip" title="ישראל בחורף +3 ובקיץ +2" style="display: inline-block; width: 248px;">GMT</p><input type="number" id="GMT"  value="3"/>
+-->
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+		  <div id="loadCommercialData" type="button" class="btn btn-danger" onclick="loadJsonFile();">טען הגדרות</div>
+		  <input id="fileInput" type="file" style="display:none"></input>
+		  <div id="downloadCommercialData" type="button" class="btn btn-success" onclick="downloadCommercialData();">צור הגדרות</div>
+		  <a id="downloadAnchorElem" style="display:none"></a>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	let commercials = {
+		Soteria: [
+		{region: '12',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0001'},
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0001'}
+		],
+		Breslev: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0001'}
+		],
+		Drink_01: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0720'}
+		],
+		Drink_03: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0720'}
+		],
+		Drink_04: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0720'}
+		],
+		Drink_05: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0720'}
+		],
+		Drink_06: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0720'}
+		],
+		Drink_07: [
+		{region: 'xx',
+		 day: 'xx',
+		 hour:  'xx',
+		 probability: '0360'}
+		]
+	};
+	
+	let commercialsData = {};
+	
+	//console.log(commercials);
+	//Soteria: 's_xx#d_xx__h_xx__p_0001+',
+    
+    function onChange(event) {
+        let reader = new FileReader();
+        reader.onload = onReaderLoad;
+        reader.readAsText(event.target.files[0]);
+    }
+    function onReaderLoad(event){
+        console.log(event.target.result);
+        let commercialsObj = JSON.parse(event.target.result);
+        //console.log(commercials);
+		LoadCommercialData(commercialsObj)
+    }   
+    document.getElementById('fileInput').addEventListener('change', onChange);
+	
+	function loadJsonFile()
+	{
+		let fileInput = document.querySelector("#fileInput");
+		fileInput.click();
+	}
+	
+	
+	function LoadCommercialData(commercialsObj)
+	{
+		//build 
+		commercials = {};
+		for (let commercial in commercialsObj) 
+		{
+			//commercial <= name of the commercial in const object.
+			//cSlots <= array of all commercial schedule time inside specific region.
+
+//			console.log(commercial + " " + String(commercialsObj[commercial]));
+			let commercial_request = String(commercialsObj[commercial]);
+			let cSlots = commercial_request.split("+");
+			//console.log(cSlots)
+			
+			for(let cSlot of cSlots)
+			{
+				if(cSlot.length == 0)
+					continue;
+					
+				let regionValue = cSlot.slice(2,4);
+				let dayValue = cSlot.slice(7,9);
+				let timeValue = cSlot.slice(13,15);
+				let priority = cSlot.slice(19,23);   
+										
+				let commercialName = String(commercial);
+				let commercialProbability = priority;
+			
+				if(commercials[commercialName] == null)
+					commercials[commercialName] = [];
+
+				commercials[commercialName].push({"region":regionValue,
+												  "day" : dayValue, 
+												  "hour" : timeValue,
+												  "probability" : commercialProbability});
+				console.log(commercialName);
+			}
+	
+
+		}
+	
+		//console.log("source - regionValue: " + regionValue)
+		//console.log("source - dayValue: " + regionValue)
+		//console.log("source - timeValue: " + regionValue)
+				
+		//first check that the file is valid then erase the current data
+	
+		//save one commercial node for template
+		let tempCommercialNode = document.querySelector(".commercial");
+		let tempNewCommercial = tempCommercialNode.cloneNode(true);
+
+		//erase current commercial nodes
+		let commercialNodes = document.querySelectorAll(".commercial");
+		for(let i=0; i< commercialNodes.length; i++)
+		{
+			let commercialNode = commercialNodes[i];
+			commercialNode.parentElement.removeChild(commercialNode);
+			console.log(commercialNode);
+		}
+		
+		
+		
+		//build HTML elements from the file
+		for (let commercial in commercials) 
+		{
+				let commercialNodesContainer = document.querySelector(".modal-body");
+				//console.log(commercial);
+				commercialsData[commercial]='';
+				for(let i=0; i< commercials[commercial].length; i++)
+				{
+					let newCommercial = tempNewCommercial.cloneNode(true);
+					commercialNodesContainer.appendChild(newCommercial);
+
+					let commercialData = commercials[commercial][i];
+
+					let commercialName = newCommercial.querySelector(".commercialName");
+					let commercialProbability = newCommercial.querySelector(".commercialProbability");
+					let commercialRegion = newCommercial.querySelector(".commercialRegion");
+					let commercialDay = newCommercial.querySelector(".commercialDay");
+					let commercialHour = newCommercial.querySelector(".commercialHour");
+
+					commercialName.value = commercial;
+					commercialProbability.value = commercialData.probability;
+					commercialRegion.value = commercialData.region;
+					commercialDay.value = commercialData.day;
+					commercialHour.value = commercialData.hour;
+										
+					//commercialsData[commercial] += "s_" + commercialData.region + "#d_" + commercialData.day + "__h_" + commercialData.hour + "__p_" + commercialData.probability + "+";
+					//console.log(commercialData);
+				}
+			}				
+	}
+
+	function downloadCommercialData()
+	{	
+		commercials = {};
+		var commercialsDiv = document.querySelectorAll(".commercial");
+		for(var i = 0; i< commercialsDiv.length; i++)
+		{
+			let commercialName = commercialsDiv[i].querySelector(".commercialName").value;
+			let commercialProbability = commercialsDiv[i].querySelector(".commercialProbability").value;
+			let commercialRegion = commercialsDiv[i].querySelector(".commercialRegion").value;
+			let commercialDay = commercialsDiv[i].querySelector(".commercialDay").value;
+			let commercialHour = commercialsDiv[i].querySelector(".commercialHour").value;
+
+			
+			if(commercials[commercialName] == null)
+				commercials[commercialName] = [];
+
+			commercials[commercialName].push({"region": commercialRegion,
+			                                  "day" : commercialDay, 
+											  "hour" : commercialHour,
+											  "probability" : commercialProbability});
+		}
+	
+		//commercialsData = {};
+		for (let commercial in commercials) 
+		{
+			//console.log(commercial);
+			commercialsData[commercial]='';
+			for(let i=0; i< commercials[commercial].length; i++)
+			{
+				let commercialData = commercials[commercial][i];
+				commercialsData[commercial] += "s_" + commercialData.region + "#d_" + commercialData.day + "__h_" + commercialData.hour + "__p_" + commercialData.probability + "+";
+				console.log(commercialData);
+			}			
+		}
+	
+		var dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(commercialsData));
+		var dlAnchorElem = document.getElementById('downloadAnchorElem');
+		dlAnchorElem.setAttribute("href",     dataStr     );
+		dlAnchorElem.setAttribute("download", "./commercialsData.json");
+		dlAnchorElem.click();
+	
+	
+	/*
+		var latitude = marker.position.lat();
+		var longitude = marker.position.lng();
+		var hourStr = document.getElementById('hourOfBirth').value;
+		var hour = Number(hourStr.split(':')[0]);
+		var min = Number(hourStr.split(':')[1]);
+		var dateStr = document.getElementById('dateOfBirth').value;
+		var year = Number(dateStr.split('-')[0]);
+		var month = Number(dateStr.split('-')[1]);
+		var day = Number(dateStr.split('-')[2]);
+		var gmt = document.getElementById('GMT').value;
+		
+		//document.location.href = "https://hebrewclock13.web.app/man/simple/index.html?latitude=30&longitude=32&hour=20&min=43&year=1987&month=3&day=4&gmt=3";
+		document.location.href = "https://hebrewclock13.web.app/man/simple/index.html?latitude=" + latitude + 
+																					"&longitude=" + longitude +
+																					"&hour=" + hour + 
+																					"&min=" + min + 
+																					"&year=" + year + 
+																					"&month=" + month + 
+																					"&day=" + day + 
+																					"&gmt=" + gmt;
+*/
+	}
+
+	$(document).ready(function()
+	{
+		LoadCommercialData(commercials);
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+
+	var marker;
+	var latitude,longitude;
+
+    //var longitude;
+    //var latitude;
+
+    // Initialize and add the map
+    //getLocation();  //activate the clock
+
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+    }
+
+    function showPosition(position)
+    {   
+        longitude = position.coords.longitude;
+        latitude = position.coords.latitude;
+        initMap();
+    }
+
+//var marker;
+function initMap() {
+  // The location of Uluru
+  var uluru = {lat: latitude, lng: longitude};
+  // The map, centered at Uluru
+  var map = new google.maps.Map(
+      document.getElementById('map'), {zoom: 18, center: uluru});
+      
+  // The marker, positioned at Uluru
+  marker = new google.maps.Marker({draggable: true, position: uluru, map: map});
+
+//   google.maps.event.addListener(marker, 'dragend', function(evt){
+//     console.log('<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3));
+// });
+
+
+}
+    </script>
+<!--    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDuCtGQgL9XzjoxMPog_YewcPqKlEmPXy4&callback=initMap">
+    
+    </script>
+-->
+</body>
+</html>

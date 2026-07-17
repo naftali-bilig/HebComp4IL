@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>מחשבון למזל שנת היובל</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <link rel="stylesheet" href="../shared/style.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+   		מחשבון לשנת היובל
+  	</button>
+</center>
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          	<button type="button" class="close" data-dismiss="modal">×</button>
+            <h4 class="modal-title">מחשבון לשנת היובל</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body" style="direction:rtl;!important;">
+			<p href="#" data-toggle="tooltip" title="שנה עברית" style="display: inline-block; width: 248px;">שנה עברית במספרים</p><input id="hebrewYear"  value="5782"/>
+          <hr/>
+			<p href="#" data-toggle="tooltip" title="מספר השנה בשמיטה הנוכחית" style="display: inline-block; width: 248px;" >מספר השנה בשמיטה</p><input onclick="calculateMazal()" readonly id="mazalDay"/>          
+			<p href="#" data-toggle="tooltip" title="מספר השמיטה ביובל הנוכחי" style="display: inline-block; width: 248px;" >מספר השמיטה ביובל</p><input onclick="calculateMazal()" readonly id="mazalWeek"/>          
+
+		</div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer" style="display:block">
+		  <button type="button" class="btn btn-success" style="display:block; float:left;"; onclick="calculateMazal()";>חשב</button>
+          <button type="button" class="btn btn-danger" style="display:block; float:right;"; data-dismiss="modal">סגור</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	document.getElementById('btn').click();
+	function calculateMazal()
+	{
+		var hebrewYear = (parseInt(document.getElementById("hebrewYear").value)); 
+		
+		yovelYear = hebrewYear%49;
+		if(yovelYear == 0)
+			yovelYear = 49;
+		
+		if(yovelYear%7 == 0)
+			yovelWeek = yovelYear/7;
+		else	
+			yovelWeek =  Math.floor(yovelYear/7) + 1;
+		
+		document.getElementById("mazalWeek").value = yovelWeek;
+		
+		yovelDay = yovelYear%7;
+		if(yovelDay == 0)
+			yovelDay=7;
+		
+		document.getElementById("mazalDay").value = yovelDay;
+	}
+
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+
+</script>
+
+</body>
+</html>

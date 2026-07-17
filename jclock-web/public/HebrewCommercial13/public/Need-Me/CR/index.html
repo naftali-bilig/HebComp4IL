@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Need-Me iframe demo</title>
+  <style>
+    :root {
+      color-scheme: light;
+      --bg: #f4f7f8;
+      --panel: #ffffff;
+      --ink: #172026;
+      --muted: #63717a;
+      --line: #d7dee2;
+      --primary: #0d6b5f;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      background: var(--bg);
+      color: var(--ink);
+      font-family: Arial, "Noto Sans Hebrew", sans-serif;
+      line-height: 1.5;
+    }
+
+    main {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 24px;
+    }
+
+    header {
+      display: grid;
+      gap: 8px;
+      margin-bottom: 18px;
+    }
+
+    h1,
+    p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 30px;
+      letter-spacing: 0;
+    }
+
+    p {
+      color: var(--muted);
+      font-size: 16px;
+    }
+
+    .demo-controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 14px;
+    }
+
+    button {
+      min-height: 40px;
+      border: 1px solid var(--primary);
+      border-radius: 6px;
+      padding: 8px 12px;
+      background: #fff;
+      color: var(--primary);
+      cursor: pointer;
+      font: inherit;
+      font-weight: 700;
+    }
+
+    button.is-active {
+      background: var(--primary);
+      color: #fff;
+    }
+
+    .frame-wrap {
+      overflow: hidden;
+      min-height: 720px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    iframe {
+      display: block;
+      width: 100%;
+      height: 720px;
+      border: 0;
+      background: #fff;
+    }
+
+    code {
+      display: block;
+      direction: ltr;
+      unicode-bidi: embed;
+      margin-top: 14px;
+      padding: 12px;
+      overflow-x: auto;
+      border: 1px solid var(--line);
+      border-radius: 6px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 13px;
+    }
+
+    @media (max-width: 700px) {
+      main {
+        padding: 14px;
+      }
+
+      h1 {
+        font-size: 24px;
+      }
+
+      .frame-wrap {
+        min-height: 760px;
+      }
+
+      iframe {
+        height: 760px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>דוגמת הטמעה של Need-Me</h1>
+      <p>זה דף HTML מקומי לדוגמה שמטמיע את הכלי דרך iframe ומעביר אליו מוצר כפרמטר.</p>
+    </header>
+
+    <div class="demo-controls" aria-label="בחירת מוצר לדוגמה">
+      <button class="is-active" type="button" data-product="תרופה לסרטן">תרופה לסרטן</button>
+      <button type="button" data-product="תחיית המתים">תחיית המתים</button>
+      <button type="button" data-product="תרופה לשיגעון">תרופה לשיגעון</button>
+      <button type="button" data-product="מוצר חדש לבדיקה">מוצר לא קיים</button>
+    </div>
+
+    <section class="frame-wrap" aria-label="Need-Me iframe">
+      <iframe id="needMeFrame" title="Need-Me"></iframe>
+    </section>
+
+    <code id="embedCode"></code>
+  </main>
+
+  <script>
+    (function () {
+      "use strict";
+
+      var frame = document.getElementById("needMeFrame");
+      var embedCode = document.getElementById("embedCode");
+      var buttons = Array.prototype.slice.call(document.querySelectorAll("[data-product]"));
+      var baseUrl = "https://Need-Me.net/iframe.html";
+
+      function setProduct(product) {
+        var src = baseUrl + "?product=" + encodeURIComponent(product);
+        frame.src = src;
+        embedCode.textContent = "<iframe src=\"" + src + "\" width=\"100%\" height=\"720\" style=\"border:0;\" title=\"Need-Me\"></iframe>";
+
+        buttons.forEach(function (button) {
+          button.classList.toggle("is-active", button.getAttribute("data-product") === product);
+        });
+      }
+
+      buttons.forEach(function (button) {
+        button.addEventListener("click", function () {
+          setProduct(button.getAttribute("data-product"));
+        });
+      });
+
+      setProduct("תרופה לסרטן");
+    }());
+  </script>
+</body>
+</html>

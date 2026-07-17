@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Children essennce</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Children essennce
+  </button>
+</center>
+
+
+    <!-- Change date Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">×</button>
+              <h4 class="modal-title">Children essennce</h4>
+          </div>
+          
+          <!-- Modal body -->
+          <div class="modal-body">
+               <p style="display: inline-block; width: 248px;">Enter full name in hebrew:</p><input type="text" value="נהוראי ביליג" id="ID" />          
+          </div>
+          
+          <!-- Modal footer -->
+          <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="get_marrige_essential();">Ok</button>
+          </div>
+            
+        </div>
+        </div>
+    </div>
+  
+</div>
+
+<script type="text/javascript" src="../../shared/multiLanguage/js/ChildrenDB.js"></script>
+<script>
+	function get_marrige_essential()
+	{
+    var childrenTime = childrenDB.find(childrenTime=>childrenTime.ID == document.getElementById("ID").value);
+    if(childrenTime != null)
+      document.location.href = "../../me/en/index.html?hebrewDay=" + childrenTime.hebrewDay + "&hebrewHour=" + childrenTime.hebrewHour;  
+    else
+    {  
+      alert("The ID doesn't exist in the database");
+      document.location.href = "../../me/en/index.html";  
+    }
+  }
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});</script>
+
+</body>
+</html>

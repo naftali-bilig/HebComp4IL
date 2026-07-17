@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>משמעות הילדים</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+        משמעות הילדים
+  	</button>
+</center>
+
+
+    <!-- Change date Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">משמעות הילדים</h4>
+            </div>
+            
+            <!-- Modal body -->
+            <div class="modal-body" style="direction:rtl;!important;">
+                 <p style="display: inline-block; width: 248px;">הכנס שם מלא:</p><input type="text" value="נהוראי ביליג" id="ID" />          
+            </div>
+            
+            <!-- Modal footer -->
+            <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="get_marrige_essential();">אישור</button>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+  
+</div>
+
+<script type="text/javascript" src="../../shared/multiLanguage/js/ChildrenDB.js"></script>
+<script>
+	function get_marrige_essential()
+	{
+        var childrenTime = childrenDB.find(childrenTime=>childrenTime.ID == document.getElementById("ID").value);
+        if(childrenTime != null)
+            document.location.href = "../../me/he/index.html?hebrewDay=" + childrenTime.hebrewDay + "&hebrewHour=" + childrenTime.hebrewHour; 
+        else
+        {
+            alert("תעודת הזהות לא קיימת במערכת");
+            document.location.href = "../../me/he/index.html"; 
+        } 
+    }
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});</script>
+
+</body>
+</html>

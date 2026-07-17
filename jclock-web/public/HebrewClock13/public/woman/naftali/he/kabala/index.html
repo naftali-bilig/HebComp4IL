@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+    <title>דרך עץ החיים</title>  
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" id="thecss">   
+    <link rel="stylesheet" type="text/css" href="../../../shared/css/stylesheet.css" id="commercial_css">    
+    <meta charset="UTF-8">
+    <meta name="description" content="שעון עברי המציג את זמן השמש בשביל לקדש את הלבנה">
+    <meta name="keywords" content="HebrewClock,kidush levana,moon,sunclock, hebrew time,
+Sanctification of the Month,kidush hachodesh, שעון עברי, שעות זמניות, קידוש החודש, שעה זמנית,קידוש הלבנה, ראש חודש ">
+    <meta name="author" content="Naftali Bilig">
+</head>
+
+<body class="kabala-page">
+		<!-- The core Firebase JS SDK is always required and must be listed first--> 
+		<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+
+		<!-- TODO: Add SDKs for Firebase products that you want to use
+			 https://firebase.google.com/docs/web/setup#available-libraries --> 
+		<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-analytics.js"></script>	
+		
+		<script>
+			// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+			const firebaseConfig = {
+				apiKey: "AIzaSyC_o6BkcBq_KHMuNWJU0try__AUjw9IHfk",
+				authDomain: "hebrewclock13.firebaseapp.com",
+				projectId: "hebrewclock13",
+				storageBucket: "hebrewclock13.appspot.com",
+				messagingSenderId: "284970515106",
+				appId: "1:284970515106:web:15952320f357f3582575fb",
+				measurementId: "G-GRQJVJC2E0"
+			};
+			// Initialize Firebase.
+			firebase.initializeApp(firebaseConfig);
+
+			// Initialize Firebase Analytics.
+			firebase.analytics().logEvent('דרך עץ החיים');
+		</script>
+		
+    <div id="container">
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <button onclick="genderFunction()" class="gender married"></button>
+            <button onclick="englishFunction()" class="hebrew_btn"></button>
+            <button onclick = "religionFunction()" class="religion eternity"></button>
+            <div id="myDropdown" class="dropdown-content">  
+				<a href="https://book-of-numbers.web.app/">משחק</a>
+				<!--<a href="../../../me/he/diate.html">מה לאכול</a>-->
+				<!--<a style="display:none;" href="../../../me/he/jewish/index.html" id="Jubilee__learning">לימוד עצמי</a>-->
+				<a href="../../../me/he/kabala/index.html">לו''ז תפילה</a>
+                <!--<a style="display:none;" href="../../../me/he/islam/index.html" id="monthly__learning">לימוד עם מוסלמי/ה</a>-->
+                <!--<a style="display:none;" href="../../../me/he/cristian/index.html" id="yearly__learning">לימוד עם נוצרי/ה</a>-->
+<!--                <a href="../../../me/he/kabala/index.html">לו''ז תפילה</a>
+				<a href="../../../me/he/guide.html">מדריך למשתמש</a>-->
+            </div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style = "text-align:center;">
+            <!--<button id="stop" onclick="stop()" />עצור-->  
+        </div>
+        <br />
+        <br />
+
+       <div style="text-align:center;">
+            <input id="header_boker" class="zmanim_hour" type="text" value="שעה רגילה" style="font:bold;"/>
+            <input id="boker__label" class="zmanim_text" type="text" value="פעולה"  onclick="pauseMusic()"/>
+			<input id="hour_0_idx" class="zmanim_index" type="text" value="שעה זמנית" style="font:bold;"> 
+		</div>
+		<hr>
+        <div style="text-align:center;">
+            <input id="hour_10_idx" class="zmanim_hour" type="text"/>
+            <input id="sunrise__label" class="zmanim_text" type="text" value="צום/משקה => הכנה לתפילה" />
+			<input class="zmanim_index" type="text" value="10:0000:00">
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_11_idx" class="zmanim_hour" type="text" />
+            <input id="sunrise__label" class="zmanim_text" type="text" value="צום/משקה => הכנה לתפילה" />
+			<input class="zmanim_index" type="text" value="11:0000:00">
+        </div>
+		<hr>
+        <div style="text-align:center;">
+			<input id="hour_12_idx" class="zmanim_hour" type="text"/>
+			<input id="sunrise__label" class="zmanim_text" type="text" value="שחרית => לימוד ומשקה" />
+			<input class="zmanim_index" type="text" value="00:0000:00">
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_13_idx" class="zmanim_hour" type="text"/>
+            <input id="sunrise__label" class="zmanim_text" type="text" value="שחרית => לימוד ומשקה" />
+			<input class="zmanim_index" type="text" value="01:0000:00">
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_14_idx" class="zmanim_hour" type="text" />
+            <input id="sunrise__label" class="zmanim_text" type="text" value="שחרית => לימוד ומשקה" />
+			<input class="zmanim_index" type="text" value="02:0000:00">
+        </div>
+		<hr>
+		<div style="text-align:center;">
+            <input id="hour_15_idx" class="zmanim_hour" type="text" />
+            <input id="sunrise__label" class="zmanim_text" type="text" value="שחרית => לימוד ומשקה" />
+			<input class="zmanim_index" type="text" value="03:0000:00">
+        </div>
+		<div style="text-align:center;">
+            <input id="hour_16_idx" class="zmanim_hour" type="text" />
+            <input id="sunrise__label" class="zmanim_text" type="text" value="שחרית => לימוד ומשקה" />
+			<input class="zmanim_index" type="text" value="04:0000:00">
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_17_idx" class="zmanim_hour" type="text" />
+            <input id="hour_6__label" class="zmanim_text" type="text" value="פת שחרית => הכנה לעבודה" />
+			<input class="zmanim_index" type="text" value="05:0000:00">
+        </div>
+		<hr>
+        <div style="text-align:center;">
+            <input id="hour_18_idx" class="zmanim_hour" type="text" />
+            <input id="chatzot_yom__label" class="zmanim_text" type="text" value= "צום/שתייה" />
+			<input class="zmanim_index" type="text" value="06:0000:00">
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_18-30_idx" class="zmanim_hour" type="text" />
+            <input id="chatzot_yom__label" class="zmanim_text" type="text" value= "אוכל ועבודה" />
+			<input class="zmanim_index" type="text" value="06:0540:00">
+        </div>
+		<div style="text-align:center;">
+            <input id="hour_19_idx" class="zmanim_hour" type="text" />
+            <input id="mincha_ketana__label" class="zmanim_text" type="text" value="אוכל ועבודה" />
+			<input class="zmanim_index" type="text" value="07:0000:00">
+        </div>
+		<div style="text-align:center;">
+            <input id="hour_20_idx" class="zmanim_hour" type="text" />
+            <input id="mincha_ketana__label" class="zmanim_text" type="text" value="אוכל ועבודה" />
+			<input class="zmanim_index" type="text" value="08:0000:00">
+        </div>
+		<hr>
+		<div style="text-align:center;">
+            <input id="hour_21_idx" class="zmanim_hour" type="text" />
+            <input id="mincha_ketana__label" class="zmanim_text" type="text" value="אוכל ועבודה" />
+			<input class="zmanim_index" type="text" value="09:0000:00">
+        </div>
+		<div style="text-align:center;">
+            <input id="hour_22_idx" class="zmanim_hour" type="text" />
+            <input id="plag_mincha__label" class="zmanim_text" type="text" value="אוכל ועבודה"/>
+			<input class="zmanim_index" type="text" value="10:0000:00">
+        </div>
+		<div style="text-align:center;">
+            <input id="hour_23_idx" class="zmanim_hour" type="text" />
+            <input id="sunset__label" class="zmanim_text" type="text" value="מנחה => בית/משפחה" />
+			<input class="zmanim_index" type="text" value="11:0000:00">
+        </div>
+		<hr>
+        <div style="text-align:center;">
+			<input id="hour_00_idx" class="zmanim_hour" type="text"/>
+			<input id="sunrise__label" class="zmanim_text" type="text" value="צום" />
+			<input class="zmanim_index" type="text" value="00:0000:00">
+        </div>
+        <div style="text-align:center;">
+			<input id="tziet" class="zmanim_hour" type="text"/>
+			<input id="sunrise__label" class="zmanim_text" type="text" value="קריאת שמע" />
+			<input class="zmanim_index" type="text" value="צאת הכוכבים">
+        </div>
+        <div style="text-align:center;">
+			<input id="hour_together" class="zmanim_hour" type="text" value="יחד"/>
+			<input id="sunrise__label" class="zmanim_text" type="text" value="סעודת לילה" />
+			<input class="zmanim_index" type="text" value="יחד">
+        </div>
+		<!-- <div style="text-align:center;">
+            <input id="tziet_tam" class="zmanim_hour" type="text" />
+			<input id="Text12" class="zmanim_text" type="text" value="ארוחת ערב" />
+        </div> -->
+		
+        <div style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<iframe title="פרסומת" src="../../../../../../HebrewCommercial13/public/woman/index.html?latitude=31.7768514&longitude=35.2331664&embedded=1" style="width:100%; max-width:900px; height:430px; border:0; overflow:hidden; background:transparent;" allowtransparency="true"></iframe>
+        </div>
+    </div>
+
+    
+    <script type="text/javascript" src="../../../../../../BirthCalculator/public/shared/timezone-converter.js"></script>
+    <script type="text/javascript" src="../../../../shared/js/jerusalem-woman-kabala-time.js?v=4"></script>
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="../js/HebrewClock.js"></script>
+    <script type="text/javascript" src="../js/Gender.js"></script>
+	<script type="text/javascript" src="../js/Religion.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+    <script type="text/javascript" src="./js/SunCalc.js?v=2"></script>
+    <script type="text/javascript" src="./js/Times.js?v=4"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="../../../shared/he/js/Commercial.js"></script>
+    <script type="text/javascript" src="../js/SunTime.js"></script>
+    <script type="text/javascript" src="../js/TimeAdj.js"></script>
+    <script type="text/javascript" src="../js/Dst.js"></script>
+    <script type="text/javascript" src="../js/Dates.js"></script>
+    <script type="text/javascript" src="../js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var TEMPLE_MOUNT_LONGITUDE = 35.2331664;
+    var TEMPLE_MOUNT_LATITUDE = 31.7768514;
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+	
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'        
+    }
+    
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+
+    getLocation();  //activate the clock
+
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+        startVerifiedJerusalemWomanKabalaClock();
+        return;
+
+        longitude = TEMPLE_MOUNT_LONGITUDE;
+        latitude = TEMPLE_MOUNT_LATITUDE;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        
+        genderInitFunction();
+        setmazal();
+		
+        //נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    function showPosition(position)
+    {
+        startVerifiedJerusalemWomanKabalaClock();
+        return;
+
+        longitude = TEMPLE_MOUNT_LONGITUDE;
+        latitude = TEMPLE_MOUNT_LATITUDE;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        
+        genderInitFunction();
+        setmazal();
+		
+        //נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openInNewTab() {
+        var win = window.open(mazal_url, '_blank');
+        win.focus();
+    }
+	
+	function openSoteriaInNewTab() {
+        var win = window.open("http://soteria.org.il/", '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pauseMusic() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        localStorage.setItem("mida", document.getElementById("Mazal").value);
+
+        var win = window.open("../moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>

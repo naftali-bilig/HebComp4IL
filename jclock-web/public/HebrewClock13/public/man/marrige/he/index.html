@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>משמעות הנישואים</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+  <meta http-equiv="Pragma" content="no-cache">
+  <meta http-equiv="Expires" content="0">
+  <script>
+    (function hardRefreshOnReload() {
+      var navigationEntry = performance.getEntriesByType && performance.getEntriesByType("navigation")[0];
+      var isReload = (navigationEntry && navigationEntry.type == "reload") ||
+        (performance.navigation && performance.navigation.type === performance.navigation.TYPE_RELOAD);
+      if(isReload)
+      {
+        var url = new URL(window.location.href);
+        url.searchParams.set("hardRefresh", Date.now().toString());
+        window.location.replace(url.toString());
+      }
+    })();
+  </script>
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <script>
+    document.write('<script src="https://bind-me.net/MarrigeDB.js?v=' + Date.now() + '"><\/script>');
+  </script>
+  <style>
+    .name-autocomplete {
+        display: inline-block;
+        position: relative;
+    }
+
+    .name-autocomplete input {
+        width: 188px;
+    }
+
+    .name-suggestions {
+        background: #fff;
+        border: 1px solid #d7d7d7;
+        border-radius: 4px;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.18);
+        display: none;
+        left: 0;
+        max-height: 190px;
+        overflow-y: auto;
+        position: absolute;
+        right: 0;
+        top: calc(100% + 2px);
+        z-index: 1060;
+    }
+
+    .name-suggestions.show {
+        display: block;
+    }
+
+    .name-suggestion {
+        background: transparent;
+        border: 0;
+        cursor: pointer;
+        display: block;
+        padding: 8px 10px;
+        text-align: right;
+        white-space: nowrap;
+        width: 100%;
+    }
+
+    .name-suggestion:hover,
+    .name-suggestion:focus {
+        background: #f7eef6;
+        outline: none;
+    }
+
+    @media (max-width: 575px) {
+        .modal-body p {
+            width: 100% !important;
+        }
+
+        .name-autocomplete,
+        .name-autocomplete input {
+            width: 100%;
+        }
+    }
+  </style>
+</head>
+<body>
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+        לימוד אישי
+  	</button>
+</center>
+
+
+    <!-- Change date Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">לימוד אישי</h4>
+            </div>
+            
+            <!-- Modal body -->
+            <div class="modal-body" style="direction:rtl;!important;">
+                 <p style="display: inline-block; width: 248px;">הכנס שם מלא:</p>
+                 <div class="name-autocomplete">
+                    <input type="text" value="נפתלי ביליג" id="ID" autocomplete="off" />
+                    <div id="marrigeNames" class="name-suggestions" role="listbox"></div>
+                 </div>
+                 <div style="margin-top:12px;">
+                    <p style="margin-bottom:6px;">בחר מולד מפגש:</p>
+                    <label style="display:block;">
+                        <input type="radio" name="birthClock" value="sun" checked />
+                        מולד החמה - מה עליי לתת? ומה היעד שלי בחיים
+                    </label>
+                    <label style="display:block;">
+                        <input type="radio" name="birthClock" value="moon" />
+                        מולד הלבנה - מה זכותי לקבל? ומה מניע אותי בחיים
+                    </label>
+                    <!--
+                    <label style="display:block;">
+                        <input type="radio" name="birthClock" value="both" />
+                        משולב - חמה ולבנה
+                    </label>
+                    -->
+                 </div>
+                 <label style="display:block; margin-top:12px;">
+                    <input type="checkbox" id="saveDefaultID" />
+                    שמור כברירת מחדל
+                 </label>
+            </div>
+            
+            <!-- Modal footer -->
+            <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="get_marrige_essential();">אישור</button>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+  
+</div>
+
+<script>
+    var defaultIdStorageKey = "jclock-personal-learning-default-id";
+    var defaultClockStorageKey = "jclock-personal-learning-default-man-clock";
+    var marrigeNameOptions = [];
+
+    function loadDefaultID()
+    {
+        var savedID = localStorage.getItem(defaultIdStorageKey);
+        if(savedID)
+        {
+            document.getElementById("ID").value = savedID;
+        }
+
+        var savedClock = localStorage.getItem(defaultClockStorageKey);
+        var clockInput = document.querySelector('input[name="birthClock"][value="' + savedClock + '"]');
+        if(clockInput)
+        {
+            clockInput.checked = true;
+        }
+    }
+
+    function saveDefaultIDIfNeeded()
+    {
+        var idInput = document.getElementById("ID");
+        var saveDefault = document.getElementById("saveDefaultID").checked;
+        if(saveDefault)
+        {
+            localStorage.setItem(defaultIdStorageKey, idInput.value.trim());
+            localStorage.setItem(defaultClockStorageKey, getSelectedBirthClock());
+        }
+    }
+
+    function populateMarrigeNameOptions()
+    {
+        if(!Array.isArray(window.marrigeDB))
+            return;
+
+        var names = [];
+        var seenNames = {};
+        window.marrigeDB.forEach(function(record) {
+            getMarrigeRecordNames(record).forEach(function(name) {
+                var normalizedName = normalizeMarrigeName(name);
+                if(normalizedName && !seenNames[normalizedName])
+                {
+                    seenNames[normalizedName] = true;
+                    names.push(name);
+                }
+            });
+        });
+
+        names.sort(function(a, b) {
+            return a.localeCompare(b, "he");
+        });
+
+        marrigeNameOptions = names;
+        renderMarrigeNameSuggestions(document.getElementById("ID").value);
+    }
+
+    function renderMarrigeNameSuggestions(value)
+    {
+        var list = document.getElementById("marrigeNames");
+        var cleanValue = normalizeMarrigeName(value);
+        var matches = marrigeNameOptions.filter(function(name) {
+            return !cleanValue || normalizeMarrigeName(name).indexOf(cleanValue) > -1;
+        }).slice(0, 12);
+
+        list.innerHTML = "";
+        matches.forEach(function(name) {
+            var option = document.createElement("button");
+            option.type = "button";
+            option.className = "name-suggestion";
+            option.setAttribute("role", "option");
+            option.textContent = name;
+            option.addEventListener("pointerdown", function(event) {
+                event.preventDefault();
+                document.getElementById("ID").value = name;
+                hideMarrigeNameSuggestions();
+            });
+            list.appendChild(option);
+        });
+
+        list.classList.toggle("show", matches.length > 0);
+    }
+
+    function hideMarrigeNameSuggestions()
+    {
+        document.getElementById("marrigeNames").classList.remove("show");
+    }
+
+    function setupMarrigeNameAutocomplete()
+    {
+        var idInput = document.getElementById("ID");
+        idInput.addEventListener("focus", function() {
+            renderMarrigeNameSuggestions(idInput.value);
+        });
+        idInput.addEventListener("input", function() {
+            renderMarrigeNameSuggestions(idInput.value);
+        });
+        idInput.addEventListener("click", function() {
+            renderMarrigeNameSuggestions(idInput.value);
+        });
+        document.addEventListener("pointerdown", function(event) {
+            if(!event.target.closest(".name-autocomplete"))
+                hideMarrigeNameSuggestions();
+        });
+    }
+
+    function normalizeMarrigeName(name)
+    {
+        return (name || "").trim().replace(/\s+/g, " ").toLowerCase();
+    }
+
+    function getMarrigeRecordNames(record)
+    {
+        if(!record)
+            return [];
+
+        return [record.ID, record.eID].filter(function(name) {
+            return normalizeMarrigeName(name);
+        });
+    }
+
+    function findMarrigeTimesByID(id)
+    {
+        var cleanId = normalizeMarrigeName(id);
+        return window.marrigeDB.filter(function(marrigeTime) {
+            return getMarrigeRecordNames(marrigeTime).some(function(name) {
+                return normalizeMarrigeName(name) == cleanId;
+            });
+        });
+    }
+
+    function getSelectedBirthClock()
+    {
+        var checkedClock = document.querySelector('input[name="birthClock"]:checked');
+        return checkedClock ? checkedClock.value : "sun";
+    }
+
+    function isHebrewText(value)
+    {
+        return /[\u0590-\u05FF]/.test(value || "");
+    }
+
+    function parseBooleanClockValue(value)
+    {
+        if(value === true || value === "true" || value === 1 || value === "1")
+            return true;
+
+        if(value === false || value === "false" || value === 0 || value === "0")
+            return false;
+
+        return null;
+    }
+
+    function getClockValue(record, clock, suffix, allowGenericFallback)
+    {
+        var prefixes = clock == "sun" ? ["sun", "solar", "chama"] : ["moon", "lunar", "levana"];
+        for(var i = 0; i < prefixes.length; i++)
+        {
+            var key = prefixes[i] + suffix;
+            if(record[key] != null)
+                return record[key];
+        }
+
+        if(!allowGenericFallback)
+            return null;
+
+        if(suffix == "HebrewDay" && record.hebrewDay != null)
+            return record.hebrewDay;
+
+        if(suffix == "HebrewHour")
+        {
+            if(record.hebrewHour != null)
+                return record.hebrewHour;
+        }
+
+        return null;
+    }
+
+    function getExplicitClockType(record)
+    {
+        return (record.clockType || record.birthClock || record.mazalType || record.type || "").toString().toLowerCase();
+    }
+
+    function isClockType(record, clock)
+    {
+        var isMoon = parseBooleanClockValue(record.isMoon);
+        if(isMoon !== null)
+            return clock == "moon" ? isMoon : !isMoon;
+
+        var clockType = getExplicitClockType(record);
+        if(clock == "sun")
+            return clockType == "sun" || clockType == "solar" || clockType == "chama";
+
+        return clockType == "moon" || clockType == "lunar" || clockType == "levana";
+    }
+
+    function getMarrigeTimeForSelectedClock(marrigeTime)
+    {
+        var clock = getSelectedBirthClock();
+        if(clock == "both")
+            clock = "moon";
+
+        return getMarrigeTimeForClock(marrigeTime, clock);
+    }
+
+    function getMarrigeTimeForClock(marrigeTime, clock)
+    {
+        var records = Array.isArray(marrigeTime) ? marrigeTime : [marrigeTime];
+        var explicitRecord = records.find(function(record) {
+            return record && isClockType(record, clock);
+        });
+        var selectedRecord = explicitRecord || records.find(function(record) {
+            return record && getClockValue(record, clock, "HebrewDay", false) != null && getClockValue(record, clock, "HebrewHour", false) != null;
+        }) || records[0];
+
+        var day = getClockValue(selectedRecord, clock, "HebrewDay", true);
+        var hour = getClockValue(selectedRecord, clock, "HebrewHour", true);
+        if(day != null && hour != null)
+            return { hebrewDay: day, hebrewHour: hour };
+
+        if(selectedRecord && isClockType(selectedRecord, clock))
+            return selectedRecord;
+
+        var currentIndex = window.marrigeDB.indexOf(selectedRecord);
+        var adjacentTimes = [window.marrigeDB[currentIndex - 1], window.marrigeDB[currentIndex + 1]];
+        var adjacentMatch = adjacentTimes.find(function(candidate) {
+            if(!candidate || candidate.phoneNumber == null || candidate.phoneNumber != selectedRecord.phoneNumber)
+                return false;
+
+            return isClockType(candidate, clock);
+        });
+        if(adjacentMatch)
+            return adjacentMatch;
+
+        var samePersonTimes = window.marrigeDB.filter(function(candidate) {
+            return candidate.phoneNumber != null && candidate.phoneNumber == selectedRecord.phoneNumber;
+        });
+        var explicitMatch = samePersonTimes.find(function(candidate) {
+            return isClockType(candidate, clock);
+        });
+        if(explicitMatch)
+            return explicitMatch;
+
+        var pairedMatch = samePersonTimes.find(function(candidate) {
+            var candidateIsHebrew = isHebrewText(candidate.ID);
+            return clock == "sun" ? candidateIsHebrew : !candidateIsHebrew;
+        });
+        return pairedMatch || selectedRecord;
+    }
+
+    function getCombinedClockParams(marrigeTime)
+    {
+        var moonTime = getMarrigeTimeForClock(marrigeTime, "moon");
+        var sunTime = getMarrigeTimeForClock(marrigeTime, "sun");
+        return "&clock=both" +
+            "&moonHebrewDay=" + moonTime.hebrewDay +
+            "&moonHebrewHour=" + moonTime.hebrewHour +
+            "&sunHebrewDay=" + sunTime.hebrewDay +
+            "&sunHebrewHour=" + sunTime.hebrewHour;
+    }
+
+ 	async function get_marrige_essential()
+ 	{
+		var url_obj = new URL(document.location.href);
+		var lon = url_obj.searchParams.get("longitude");        
+		var lat = url_obj.searchParams.get("latitude");
+	
+		var location = "";
+		if(lon)
+			location = "&longitude=" + lon + "&latitude=" + lat; 
+	
+        if(!Array.isArray(window.marrigeDB))
+        {
+            alert("Could not load the marriage database.");
+            return;
+        }
+
+        saveDefaultIDIfNeeded();
+        var marrigeTimes = findMarrigeTimesByID(document.getElementById("ID").value);
+        if(marrigeTimes.length > 0)
+        {
+            var selectedClock = getSelectedBirthClock();
+            var combinedParams = "";
+            if(selectedClock == "both")
+                combinedParams = getCombinedClockParams(marrigeTimes);
+
+            if(selectedClock == "both")
+            {
+                document.location.href = "../../../family/index.html?period=personal&lang=he" + combinedParams + location;
+                return;
+            }
+
+            var marrigeTime = getMarrigeTimeForSelectedClock(marrigeTimes);
+            document.location.href = "../../me/he/index.html?hebrewDay=" + marrigeTime.hebrewDay + "&hebrewHour=" + marrigeTime.hebrewHour + "&period=personal" + location; 
+        }
+        else
+        {
+            alert("תעודת הזהות לא קיימת במערכת");
+			document.location.href='/BirthCalculator/public/he/index.html';
+            //document.location.href = "../../me/he/index.html"; 
+        } 
+    }
+ 	$(document).ready(function()
+    {
+        loadDefaultID();
+        populateMarrigeNameOptions();
+        setupMarrigeNameAutocomplete();
+  		$('[data-toggle="tooltip"]').tooltip();   
+  	});</script>
+
+</body>
+</html>

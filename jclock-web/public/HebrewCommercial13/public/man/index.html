@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+    <title>Hebrew Commercial</title> 
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">
+	<link rel="stylesheet" type="text/css" href="./css/commercialstylesheet.css" id="commercial_css"> 
+    <style>
+        html.embedded-commercial,
+        html.embedded-commercial body,
+        html.embedded-commercial #container {
+            background: transparent !important;
+            background-color: transparent !important;
+            background-image: none !important;
+        }
+    </style>
+    <script>
+        if (new URL(document.location.href).searchParams.get("embedded") == "1")
+            document.documentElement.className += " embedded-commercial";
+    </script>
+    <meta charset="UTF-8">
+    <meta name="description" content="">
+    <meta name="keywords" content="">
+    <meta name="author" content="simchanaftali Bilig">
+</head>
+
+<body onclick="if (!isEmbeddedCommercial()) showBackground();">
+
+    <div  id="container">		
+		<div class="dropdown">
+			<button class="dropbtn"></button>
+		</div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			</table>
+        </div>
+		<center>
+			<div id="commercial" style="margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+				<div class="day" />
+			</div>
+		</center>
+    </div>
+
+    <script type="text/javascript" src="./conf/commercialsData.json"></script>
+    <script type="text/javascript" src="./js/Geolocation.js"></script>
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="./js/HebrewClock.js?v=20260624_1"></script>
+    <script type="text/javascript" src="./js/Gender.js"></script>
+    <script type="text/javascript" src="./js/Religion.js"></script>
+	<script type="text/javascript" src="../shared/js/CommercialMazal.js?v=20260619_1"></script>
+	<script type="text/javascript" src="./js/AutoCommercial.js?v=20260619_4"></script>
+	<Script type="text/javascript" src="./js/HebrewDate.js"></script>
+    <script type="text/javascript" src="./js/Commercial.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+    <script type="text/javascript" src="./js/Times.js"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="./js/SunTime.js"></script>
+    <script type="text/javascript" src="./js/TimeAdj.js"></script>
+    <script type="text/javascript" src="./js/Dst.js"></script>
+    <script type="text/javascript" src="./js/Dates.js?v=20260624_1"></script>
+    <script type="text/javascript" src="./js/Location.js"></script>
+    <script type="text/javascript" src="./js/DraggableCommercial.js"></script>
+
+
+	
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+	var birthYear,birthMonth,birthDay,birthGMT,birthHour,birthMin,birthSec,birthMs; //get fixed time from url
+    var defaultLatitude = "31.7768514";
+    var defaultLongitude = "35.2331664";
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+	
+	var sunset = 0;
+	var misheyakir;
+	var tzeit;
+	
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+	
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+
+	var isShowBackground = false;
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'        
+    }
+    
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+
+    getLocation();  //activate the clock
+
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+		showPosition();
+    }
+
+    function showPosition(position)
+    {
+        var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");        
+        var lat = url.searchParams.get("latitude");        
+		birthYear = url.searchParams.get("year");
+		birthMonth = url.searchParams.get("month");
+		birthDay = url.searchParams.get("day");
+		birthHour = url.searchParams.get("hour");
+		birthMin = url.searchParams.get("min");
+		birthSec = url.searchParams.get("sec");
+		birthMs = url.searchParams.get("ms");
+		birthGMT = url.searchParams.get("gmt");
+        if(lat)
+        {
+            //tz = https://maps.googleapis.com/maps/api/timezone/outputFormat?parameters
+        }
+
+        longitude = lon ? lon : defaultLongitude;
+        latitude = lat ? lat : defaultLatitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        
+		ReCalcCommercialToPeriod(true);
+		
+        //genderInitFunction();
+        setmazal();
+		
+        //נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openInNewTab() {
+        var win = window.open(mazal_url, '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+		clearInterval(oTimer);
+
+		localStorage.setItem("hebrewday", hebrewday);
+		localStorage.setItem("lbHourClock", lbHourClock);
+		localStorage.setItem("lbHour", lbHour);
+		localStorage.setItem("lbMinute", lbMinute);
+		localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        
+        //localStorage.setItem("mida", document.getElementById("Mazal").value);
+
+        var win = window.open("../moon.html", '_blank');
+        win.focus();
+    }
+
+	function showBackground()
+	{
+		if(isEmbeddedCommercial())
+			return;
+
+		if(isShowBackground == false) 
+		{
+		//console.log(isShowBackground);
+			document.getElementById("thecss").href = "./css/stylesheetBackground.css";
+			isShowBackground = true;	
+		} 
+		else 
+		{
+		//console.log(isShowBackground);
+			document.getElementById("thecss").href = "./css/stylesheet.css";
+			isShowBackground = false;
+		}
+	}
+
+	function isEmbeddedCommercial()
+	{
+		return new URL(document.location.href).searchParams.get("embedded") == "1";
+	}
+
+    </script>
+
+
+
+</body>
+</html>

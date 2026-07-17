@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Time Product</title>
+  <style>
+    html,
+    body {
+      height: 100%;
+      margin: 0;
+      font-family: Arial, Helvetica, sans-serif;
+      background: #eef3ea;
+      color: #172018;
+    }
+
+    body {
+      overflow: hidden;
+    }
+
+    .product-grid {
+      box-sizing: border-box;
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-rows: minmax(0, 1fr) minmax(0, 1fr);
+      gap: 10px;
+      height: 100%;
+      padding: 10px;
+      direction: ltr;
+    }
+
+    .store-button {
+      display: flex;
+      min-height: 0;
+      overflow: hidden;
+      flex-direction: column;
+      border: 1px solid #b8c7b3;
+      border-radius: 8px;
+      background: #dcdcdc;
+      color: inherit;
+      direction: rtl;
+      text-decoration: none;
+      box-shadow: 0 4px 14px rgba(20, 45, 25, 0.12);
+      transition: transform 150ms ease, box-shadow 150ms ease, border-color 150ms ease;
+    }
+
+    .store-button:hover,
+    .store-button:focus {
+      border-color: #204b31;
+      box-shadow: 0 8px 20px rgba(20, 45, 25, 0.22);
+      outline: none;
+      transform: translateY(-1px);
+    }
+
+    .store-button:focus-visible {
+      outline: 3px solid rgba(32, 75, 49, 0.28);
+      outline-offset: 2px;
+    }
+
+    .store-button.garmin {
+      grid-column: 1 / -1;
+    }
+
+    .store-title {
+      margin: 0;
+      padding: 8px 10px;
+      background: #204b31;
+      color: #fff;
+      font-size: 16px;
+      font-weight: 700;
+      line-height: 1.25;
+      text-align: center;
+    }
+
+    .preview {
+      position: relative;
+      flex: 1;
+      min-height: 0;
+      overflow: hidden;
+      background: #eee;
+    }
+
+    .preview img {
+      display: block;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    .open-label {
+      position: absolute;
+      right: 12px;
+      bottom: 12px;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: rgba(32, 75, 49, 0.94);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1;
+      box-shadow: 0 3px 10px rgba(0, 0, 0, 0.25);
+    }
+
+    @media (max-width: 900px) {
+      body {
+        overflow: auto;
+      }
+
+      .product-grid {
+        display: flex;
+        height: auto;
+        min-height: 100%;
+        flex-direction: column;
+      }
+
+      .store-button {
+        min-height: 0;
+      }
+
+      .store-button.garmin {
+        grid-column: auto;
+      }
+
+      .preview {
+        flex: none;
+      }
+
+      .preview img {
+        height: auto;
+        object-fit: contain;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="product-grid" aria-label="שעונים אנלוגיים של בעל הפטנט">
+    <a class="store-button" href="https://play.google.com/store/apps/details?id=tech.solusoft.jewish_time" target="_blank" rel="noopener" aria-label="פתח את Jewish Time בחנות Android">
+      <h2 class="store-title">Android - Analog JClock</h2>
+      <span class="preview">
+        <img src="./PlayStore.png" alt="צילום מסך של Jewish Time ב-Google Play">
+        <span class="open-label">פתח דף</span>
+      </span>
+    </a>
+
+    <a class="store-button" href="https://apps.apple.com/us/app/jewish-time/id1598200550" target="_blank" rel="noopener" aria-label="פתח את Jewish Time בחנות Apple">
+      <h2 class="store-title">Apple - Analog JClock</h2>
+      <span class="preview">
+        <img src="./App Store.png" alt="צילום מסך של Jewish Time ב-App Store">
+        <span class="open-label">פתח דף</span>
+      </span>
+    </a>
+
+    <a class="store-button garmin" href="https://apps.garmin.com/apps/4d3cc36a-42f7-4d31-a332-c9d6d6844863" target="_blank" rel="noopener" aria-label="פתח את Jewish Time ב-Garmin Connect IQ">
+      <h2 class="store-title">Garmin - Digital JClock</h2>
+      <span class="preview">
+        <img src="./Garmin.png" alt="צילום מסך של Jewish Time ב-Garmin Connect IQ">
+        <span class="open-label">פתח דף</span>
+      </span>
+    </a>
+  </main>
+</body>
+</html>

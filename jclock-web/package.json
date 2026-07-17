@@ -1,0 +1,8 @@
+{
+  "name": "jclock126-sites",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node tools/build-sites.mjs"
+  }
+}

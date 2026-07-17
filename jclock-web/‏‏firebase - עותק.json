@@ -1,0 +1,11 @@
+{
+  "hosting": {
+    "site": "jclock126",
+    "public": "public",
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

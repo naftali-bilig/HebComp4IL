@@ -1,0 +1,36 @@
+.modal-content
+{
+    background-image: url(./shofar.jpg);
+    /* background-repeat: no-repeat; */
+    background-blend-mode: exclusion;
+    background-position-x: center;
+    background-size: contain;
+}
+
+.modal-body
+{
+	font-weight: bold;
+    font-size: 15px;
+    color: #f58888;
+}
+
+.modal-body1
+{
+	color: #ff8100;
+}
+
+.modal-title
+{
+	color: white;
+}
+
+.close:not(:disabled):not(.disabled) {
+    cursor: pointer;
+    color: white;
+}
+
+#hebrewYear, #mazalDay, #mazalWeek
+{
+	background-color: transparent;
+	color: white;
+}

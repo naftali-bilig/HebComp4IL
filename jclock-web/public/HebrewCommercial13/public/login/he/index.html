@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>הזדהות</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="../style.css">
+  
+</head>
+<body >
+	<script type="text/javascript" src="../js/hebrewDate.js"></script>
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+   		הזדהות
+  	</button>
+</center>
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          	<button type="button" class="close" data-dismiss="modal">×</button>
+            <h4 class="modal-title">הזדהות</h4>
+        </div>
+        
+        <!-- Modal body -->
+		<div class="btn-group btn-group-toggle" data-toggle="buttons">
+		  <label class="btn btn-secondary active" style="background-color: #007bff;" onclick="refToHebrewClock('boy')";>
+			<input type="radio" name="options" id="boy" onclick="refToHebrewClock('boy')"; > בן
+		  </label>
+			<label class="btn btn-secondary" style="background-color: #e83e8c;" onclick="refToHebrewClock('girl')";>
+			<input type="radio" name="options" id="girl" onclick="refToHebrewClock('girl')";> בת
+		  </label>	
+		  
+		</div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+			<label style="width:100%" >	תאריך לידה
+				<input type="date" id="dateOfBirth" class="form-control" data-toggle="datepicker"> 
+			</label>
+		</div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	function refToHebrewClock(input)
+	{
+		var boy = input == 'boy';
+		
+		if(document.getElementById('dateOfBirth').value == "")
+		{
+			if(boy == true)
+				window.location.href = "../../man/index.html";
+			else
+				window.location.href = "../../woman/index.html";
+		}
+		else
+		{
+			var dateOfBitrh = document.getElementById('dateOfBirth').value.split('-');
+			var hebrew_month_number = hebrewDate(dateOfBitrh[0], dateOfBitrh[1], dateOfBitrh[2],"Number")['month_name'];
+						
+			if(boy == true)
+				window.location.href = "../../man/index.html?selfShevet=" +hebrew_month_number;
+			else
+				window.location.href = "../../woman/index.html";
+		}
+	}
+
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>מחשבון צדקה מבוסס מעשרות</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="מחשבון צדקה מבוסס מעשרות">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="מחשבון צדקה מבוסס מעשרות">
+  <meta property="og:description" content="חישוב תרומה גדולה, מעשר ראשון ומעשר עני">
+  <meta property="og:image" content="https://jclock126.web.app/assets/hebrew-giving.png?v=2">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://jclock126.web.app/assets/hebrew-giving.png?v=2">
+  <link rel="icon" type="image/png" href="/assets/hebrew-giving.png">
+  <link rel="apple-touch-icon" href="/assets/hebrew-giving.png">
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <style>
+    body { min-height: 100vh; background: #000 url('/assets/hebrew-giving.png') center center / cover no-repeat fixed; }
+    .modal-content { background: rgba(255, 255, 255, 0.96); }
+  </style>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+   		מחשבון צדקה מבוסס מעשרות
+  	</button>
+</center>
+
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header">
+          	<button type="button" class="close" data-dismiss="modal">×</button>
+            <h4 class="modal-title" title="כהן == יהודי || לוי == משוגע/נביא || עני == מוסלמי">מחשבון צדקה מבוסס מעשרות</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body" style="direction:rtl;!important;">
+          <p style="display: inline-block; width: 248px;">משכורת נטו</p><input id="income"  />
+          <br/>
+          <p style="display: inline-block; width: 248px;">הוצאות</p><input id="expense"/>
+          <hr>
+          <p style="display: inline-block; width: 248px;">חיסכון</p><input readonly id="savings" onclick="calculateSavings();"/>          
+          <hr>
+          <div role="note" style="color: #000; background-color: #fff; border: 1px solid #000; padding: 12px; margin-bottom: 16px; font-weight: bold;">
+            <div>תרומה גדולה - ליהודי בלבד</div>
+            <div>מעשר ראשון - למשוגע/נביא בלבד</div>
+            <div>מעשר עני - למוסלמי בלבד</div>
+            <div><a href="https://www.youtube.com/shorts/krcQ6ilKonU" target="_blank" rel="noopener noreferrer">לצפייה בסרטון הסברה</a></div>
+          </div>
+          <p href="#" data-toggle="tooltip" title="מיועד לכהן" style="display: inline-block; width: 248px;" >תרומה גדולה</p><input readonly id="truma" />
+          <br/>
+          <p href="#" data-toggle="tooltip" title="מיועד ללוי" style="display: inline-block; width: 248px;" >מעשר ראשון</p><input readonly  id="mahaser_01"/>
+		  <br/>
+          <p href="#" data-toggle="tooltip" title="לוי מחויב להביא לכהן" style="display: inline-block; width: 248px;" >תרומת מעשר</p><input readonly id="mahaser_01__truma" />
+          <br/>
+          <p href="#" data-toggle="tooltip" title="מעשר שני מוציאים בירושלים בלבד בשנים אבד''ה לשמיטה / מעשר עני מוציאים בכל מקום בשנים ג''ו לשמיטה" style="display: inline-block; width: 248px;" >מעשר שני/עני</p><input readonly id="mahaser_02"/>
+          <div style="margin-top: 16px;"><a href="/HebrewClock13/public/man/yovelMazalCalculator/he/index.html" target="_blank" rel="noopener noreferrer">מחשבון השנים/יובל</a></div>
+          <div style="margin-top: 16px;"><a class="btn btn-primary" href="/HebrewClock13/public/man/hope/index.html">חזרה לשער העיר</a></div>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">סגור</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	function calculateSavings()
+	{
+		var income = document.getElementById("income").value;
+		income = income.replace(",","");
+
+		var expense = document.getElementById("expense").value;
+		expense = expense.replace(",","");
+
+		document.getElementById("savings").value = (parseFloat(income) - parseFloat(expense)) * 1.00; 
+		document.getElementById("truma").value = document.getElementById("savings").value * (1/40) // עין רעה והכי מושכת - בשורת קוד הזאת תיקנתי לחנה-לאה בת מרים, אשתי, את הראייה, שורש ומהות מחלתה
+		document.getElementById("mahaser_01").value = (document.getElementById("savings").value - document.getElementById("truma").value)/10;
+		document.getElementById("mahaser_01__truma").value = document.getElementById("mahaser_01").value * (1/10) 
+		document.getElementById("mahaser_02").value = (document.getElementById("savings").value - document.getElementById("truma").value - document.getElementById("mahaser_01").value)/10;
+	}
+
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+
+</script>
+
+</body>
+</html>

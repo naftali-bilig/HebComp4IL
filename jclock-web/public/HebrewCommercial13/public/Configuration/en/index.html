@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Birthday hebrewHour Calculator</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+   <style>
+  /* Set the size of the div element that contains the map */
+  #map {
+	height: 400px;  /* The height is 400 pixels */
+	width: 100%;  /* The width is the width of the web page */
+   }
+  </style>
+</head>
+<body>
+
+<div class="container mt-3" style="margin-top: 1rem!important;">
+  <!-- Button to Open the Modal -->
+<center>
+  <button  id="btn" type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">
+	Birthday hebrewHour Calculator
+  </button>
+</center>
+
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header"> 
+          	<button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Birthday hebrewHour Calculator</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+			<p href="#" data-toggle="tooltip" title="choose location"  style="display: inline-block; width: 248px;">Choose birth location</p>
+			<div id="map"></div>		  
+			<hr/>
+			<p href="#" data-toggle="tooltip" title="Longitude Date Of Birth" style="display: inline-block; width: 248px;">Date Of Birth</p><input type="date" id="dateOfBirth"  value="32"/>
+			<p href="#" data-toggle="tooltip" title="Hour of Birth" style="display: inline-block; width: 248px;">Hour of Birth</p><input type="time" id="hourOfBirth"  value="32"/>			
+			<br>
+			<p href="#" data-toggle="tooltip" title="In israel, winter=3, summer=2" style="display: inline-block; width: 248px;">GMT</p><input type="number" id="GMT"  value="3"/>
+			<hr/>
+			
+        </div>        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-success" onclick="calculateHebrewHour();">Calculate Hebrew birthHour</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	document.getElementById('btn').click();
+
+	function calculateHebrewHour()
+	{		
+		var latitude = marker.position.lat();
+		var longitude = marker.position.lng();
+		var hourStr = document.getElementById('hourOfBirth').value;
+		var hour = Number(hourStr.split(':')[0]);
+		var min = Number(hourStr.split(':')[1]);
+		var dateStr = document.getElementById('dateOfBirth').value;
+		var year = Number(dateStr.split('-')[0]);
+		var month = Number(dateStr.split('-')[1]);
+		var day = Number(dateStr.split('-')[2]);
+		var gmt = document.getElementById('GMT').value;
+		
+		//document.location.href = "https://hebrewclock13.web.app/man/simple/index.html?latitude=30&longitude=32&hour=20&min=43&year=1987&month=3&day=4&gmt=3";
+		document.location.href = "https://hebrewclock13.web.app/man/simple/index.html?latitude=" + latitude + 
+																					"&longitude=" + longitude +
+																					"&hour=" + hour + 
+																					"&min=" + min + 
+																					"&year=" + year + 
+																					"&month=" + month + 
+																					"&day=" + day + 
+																					"&gmt=" + gmt;
+	}
+
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+
+	var marker;
+	var latitude,longitude;
+
+    //var longitude;
+    //var latitude;
+
+    // Initialize and add the map
+    getLocation();  //activate the clock
+
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+    }
+
+    function showPosition(position)
+    {   
+        longitude = position.coords.longitude;
+        latitude = position.coords.latitude;
+        initMap();
+    }
+
+//var marker;
+function initMap() {
+  // The location of Uluru
+  var uluru = {lat: latitude, lng: longitude};
+  // The map, centered at Uluru
+  var map = new google.maps.Map(
+      document.getElementById('map'), {zoom: 18, center: uluru});
+      
+  // The marker, positioned at Uluru
+  marker = new google.maps.Marker({draggable: true, position: uluru, map: map});
+
+//   google.maps.event.addListener(marker, 'dragend', function(evt){
+//     console.log('<p>Marker dropped: Current Lat: ' + evt.latLng.lat().toFixed(3) + ' Current Lng: ' + evt.latLng.lng().toFixed(3));
+// });
+
+
+}
+    </script>
+    <script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=AIzaSyDuCtGQgL9XzjoxMPog_YewcPqKlEmPXy4&callback=initMap">
+    
+    </script>
+
+</body>
+</html>

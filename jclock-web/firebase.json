@@ -1,0 +1,148 @@
+{
+  "hosting": {
+    "site": "jclock126",
+    "public": "public",
+    "redirects": [
+      {
+        "source": "/HebrewGiving",
+        "destination": "/HebrewClock13/public/woman/mahasrot/index.html",
+        "type": 302
+      },
+      {
+        "source": "/08/now",
+        "destination": "/#08",
+        "type": 302
+      },
+      {
+        "source": "/09/now",
+        "destination": "/#09",
+        "type": 302
+      }
+    ],
+    "rewrites": [
+      {
+        "source": "/sun/now",
+        "destination": "/man-now.html"
+      },
+      {
+        "source": "/moon/now",
+        "destination": "/woman-now.html"
+      },
+      {
+        "source": "/man-now",
+        "destination": "/man-now.html"
+      },
+      {
+        "source": "/woman-now",
+        "destination": "/woman-now.html"
+      },
+      {
+        "source": "/{01,02,04,05,06}/now",
+        "destination": "/man-now.html"
+      },
+      {
+        "source": "/{03,07}/now",
+        "destination": "/woman-now.html"
+      },
+      {
+        "source": "/01-09/now",
+        "destination": "/index.html"
+      },
+      {
+        "source": "/man/now",
+        "destination": "/man-now.html"
+      },
+      {
+        "source": "/woman/now",
+        "destination": "/woman-now.html"
+      },
+      {
+        "source": "/man/app",
+        "destination": "/man-now.html"
+      },
+      {
+        "source": "/woman/app",
+        "destination": "/woman-now.html"
+      },
+      {
+        "source": "/man/חצות",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/man/בוקר",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/man/צהריים",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/man/ערב",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/woman/חצות",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/woman/בוקר",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/woman/צהריים",
+        "destination": "/learning-shortcut.html"
+      },
+      {
+        "source": "/woman/ערב",
+        "destination": "/learning-shortcut.html"
+      }
+    ],
+    "headers": [
+      {
+        "source": "/{man,woman}/{now,app}",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/js/now-app.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/HebrewClock13/public/shared/laws-open-word.js",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
+          }
+        ]
+      },
+      {
+        "source": "/HebrewClock13/public/{man,woman}/me/{he,en}/laws/index.html",
+        "headers": [
+          {
+            "key": "Cache-Control",
+            "value": "no-store, max-age=0"
+          },
+          {
+            "key": "Referrer-Policy",
+            "value": "unsafe-url"
+          }
+        ]
+      }
+    ],
+    "ignore": [
+      "firebase.json",
+      "**/.*",
+      "**/node_modules/**"
+    ]
+  }
+}

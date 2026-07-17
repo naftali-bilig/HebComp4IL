@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script> 
+    <title>pray schedule</title>  
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">    
+    <link rel="stylesheet" type="text/css" href="../../../shared/css/stylesheet.css" id="commercial_css">    
+    <meta charset="UTF-8">
+    <meta name="description" content="שעון עברי המציג את זמן השמש בשביל לקדש את הלבנה">
+    <meta name="keywords" content="HebrewClock,kidush levana,moon,sunclock, hebrew time,
+Sanctification of the Month,kidush hachodesh, שעון עברי, שעות זמניות, קידוש החודש, שעה זמנית,קידוש הלבנה, ראש חודש ">
+    <meta name="author" content="Naftali Bilig">
+</head>
+
+<body>
+
+    <div id="container" onclick="pause()">
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <button onclick="englishInternalSportFunction()" class="english_btn"></button>
+            <!-- <button onclick="genderFunction()" class="gender married"></button> -->
+            <button onclick = "religionFunction()" class="religion cristianity"></button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="../../../mo-ed/en/index.html" style="cursor: pointer;">Choose date at location</a>  
+                <a href="../../../location/en/index.html" style="cursor: pointer;">Change location</a>  
+                <a href="../../../date/en/index.html" style="cursor: pointer;">Change Date</a>  
+                <a href="../../../me/en/index.html" id="hourly__learning">Self learning</a>
+                <a href="../../../me/en/islam/index.html" id="monthly__learning">Learning with Muslim</a>
+                <a href="../../../me/en/cristian/index.html" id="yearly__learning">Learning with Christian</a>
+                <a href="../../../me/en/jewish/index.html" id="Jubilee__learning">Learning with Jew</a>  
+				<a href="./internal_sport.html">Soul working Scheulde</a>
+				<a href="./external_sport.html">Sport Schedule</a>
+				<a href="./schedule.html">Work Schedule</a>				
+                <a href="./index.html">Pray Schedule</a>
+				<a href="../../../me/en/guide.html">Manual</a>
+            </div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style = "text-align:center;">
+           <button id="stop" onclick="stop()" />Stop
+        </div>
+        <br />
+        <br />
+
+
+        <div style="text-align:center;">
+            <input id="hour_1_idx" class="zmanim_index" type="text" value="(1)">
+            <input hidden id="hour_1__label" class="zmanim_text" type="text" value="Sun prayer" />
+			<input id="hour_1__scheulde" class="zmanim_text" type="text" value="Thinking about my faith" />
+            <input id="hour_1__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_2_idx" class="zmanim_index" type="text" value="(2)">
+            <input hidden id="hour_2__label" class="zmanim_text" type="text" value="Venus prayer" />
+			<input id="hour_2__schedule" class="zmanim_text" type="text" value="Security through walking" />
+			<input id="hour_2__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_3_idx" class="zmanim_index" type="text" value="(3)">
+            <input hidden id="hour_3__label" class="zmanim_text" type="text" value="Mercury prayer" />
+            <input id="hour_3__schedule" class="zmanim_text" type="text" value="Simplicity through walking" />
+            <input id="hour_3__value" class="zmanim_hour" type="text" />
+        </div>
+		<hr>
+        <div style="text-align:center;">
+            <input id="hour_4_idx" class="zmanim_index" type="text" value="(4)">
+            <input hidden id="hour_4__label" class="zmanim_text" type="text" value="Moon prayer" />
+			<input id="hour_4__schedule" class="zmanim_text" type="text" value="Belive in my thoughts" />
+			<input id="hour_4__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_5_idx" class="zmanim_index" type="text" value="(5)">
+            <input hidden id="hour_5__label" class="zmanim_text" type="text" value="Saturn prayer" />
+            <input id="hour_5__schedule" class="zmanim_text" type="text" value="Listening to be connected" />
+			<input id="hour_5__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_6_idx" class="zmanim_index" type="text" value="(6)">
+            <input hidden id="hour_6__label" class="zmanim_text" type="text" value="Jupiter prayer" />
+			<input id="hour_6__schedule" class="zmanim_text" type="text" value="Fight for my love" />
+            <input id="hour_6__value" class="zmanim_hour" type="text" />
+        </div>
+        <hr>
+		<div style="text-align:center;">
+            <input id="hour_7_idx" class="zmanim_index" type="text" value="(7)">
+            <input hidden id="hour_7__label" class="zmanim_text" type="text" value="Mars prayer" />
+			<input id="hour_7__schedule" class="zmanim_text" type="text" value="Giving only to my friends" />
+            <input id="hour_7__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_8_idx" class="zmanim_index" type="text" value="(8)">
+            <input hidden id="hour_8__label" class="zmanim_text" type="text" value="Sun prayer" />
+            <input id="hour_8__schedule" class="zmanim_text" type="text" value="Reciving for be happy" />
+			<input id="hour_8__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_9_idx" class="zmanim_index" type="text" value="(9)">
+            <input hidden id="hour_9__label" class="zmanim_text" type="text" value="" />
+            <input id="hour_9__schedule" class="zmanim_text" type="text" value="Speaking confidently" />
+			<input id="hour_9__value" class="zmanim_hour" type="text" />
+        </div>
+        <hr>
+		<div style="text-align:center;">
+            <input id="hour_10_idx" class="zmanim_index" type="text" value="(10)">
+            <input hidden id="hour_10__label" class="zmanim_text" type="text" value="" />
+			<input id="hour_10__schedule" class="zmanim_text" type="text" value="Connect innocently" />
+            <input id="hour_10__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_11_idx" class="zmanim_index" type="text" value="(11)">
+            <input hidden id="hour_11__label" class="zmanim_text" type="text" value="" />
+            <input id="hour_11__schedule" class="zmanim_text" type="text" value="Be happy with my appearance" />
+			<input id="hour_11__value" class="zmanim_hour" type="text" />
+        </div>
+        <div style="text-align:center;">
+            <input id="hour_12_idx" class="zmanim_index" type="text" value="(12)">
+            <input hidden id="hour_12__label" class="zmanim_text" type="text" value="" />
+            <input id="hour_12__schedule" class="zmanim_text" type="text" value="Pray humbly" />
+			<input id="hour_12__value" class="zmanim_hour" type="text" />
+        </div>
+
+        <div id="commercial" style="text-align:center; margin-bottom:10px; margin-top:10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<img class="day" />
+        </div>
+
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="./js/HebrewClock.js"></script>
+    <script type="text/javascript" src="../js/Gender.js"></script>
+    <script type="text/javascript" src="../../../shared/en/js/Commercial.js"></script>
+	<script type="text/javascript" src="../js/Religion.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+    <script type="text/javascript" src="./js/suncalc.js"></script>
+    <script type="text/javascript" src="./js/Times.js"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="../js/SunTime.js"></script>
+    <script type="text/javascript" src="../js/TimeAdj.js"></script>
+    <script type="text/javascript" src="../js/Dst.js"></script>
+    <script type="text/javascript" src="../js/Dates.js"></script>
+    <script type="text/javascript" src="../js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+	
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'        
+	}
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+    getLocation();  //activate the clock
+
+
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(showPosition);
+        }
+    }
+
+    function showPosition(position)
+    {
+        var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");        
+        var lat = url.searchParams.get("latitude");        
+        if(lat)
+        {
+        //    tz = https://maps.googleapis.com/maps/api/timezone/outputFormat?parameters
+        }
+
+        longitude = lon? lon : position.coords.longitude;
+        latitude = lat? lat : position.coords.latitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        
+        //genderInitFunction();
+        setmazal();
+		
+        //נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openInNewTab() {
+        var win = window.open(mazal_url, '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        //localStorage.setItem("mida", document.getElementById("Mazal").value);
+
+        var win = window.open("../moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>

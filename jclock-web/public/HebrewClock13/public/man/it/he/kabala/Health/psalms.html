@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-111266340-1"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-111266340-1');
+	</script>
+	
+	<script async src="//pagead2.googlesyndication.com/pagead/js/adsbygoogle.js"></script>
+	<script>
+	(adsbygoogle = window.adsbygoogle || []).push({
+		google_ad_client: "ca-pub-1007867022366730",
+		enable_page_level_ads: true
+	});
+	</script>
+	<meta charset="UTF-8">
+  <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">
+  <link rel="stylesheet" type="text/css" href="../../../../shared/css/stylesheet.css" id="commercial_css">    
+	<title>תוכנה לריפוי מחלה</title>	
+</head>
+<style>
+#myProgress {
+  width: 100%;
+  background-color: #ddd;
+}
+
+#myBar {
+  width: 1%;
+  height: 30px;
+  background-color: #0000FF;
+}
+
+#myProgress1 {
+  width: 100%;
+  background-color: #ddd;
+}
+
+#myBar1 {
+  width: 1%;
+  height: 30px;
+  background-color: #FF0000;
+}
+
+</style>
+<body dir="rtl">
+
+<h1>אמירת אותיות השם המלא בפרק קי"ט ע"י 
+  <a id="cellphone1" href="tel:+972542267262">הבת של מרים</a>
+</h1>
+
+<div id="myProgress">
+  <div id="myBar"></div>
+</div>
+
+<br>
+<button id="stop" onclick="move()">בוצע</button> 
+
+
+<h1>אמירת אותיות השם המלא בפרק קי"ט ע"י
+  <a id="cellphone2" href="tel:+972542267262">ישועה</a> 
+</h1>
+
+<div id="myProgress1">
+  <div id="myBar1"></div>
+</div>
+
+<br>
+<button id="stop" onclick="move1()">בוצע</button> 
+
+<br><br><br><br>
+<button id="stop" style="direction:center; dir:center;" onclick="finish_pzalms()">סיימנו</button> 
+
+
+<script>
+flag = 0;
+flag1 = 0;
+
+
+/*
+var x1 = document.getElementById("cellphone1").href;
+var y1 = document.getElementById("cellphone2").href;
+
+x1.href = cellphone1;
+if(lbhour <= 12)
+	y1.href="tel:+972587401735";
+else`
+	y1.href="tel:+972527401735";
+*/
+
+function move() {
+  flag=1;
+  var elem = document.getElementById("myBar");   
+  var width = 1;
+  var id = setInterval(frame, 10);
+  function frame() {
+    if (width >= 100) {
+      clearInterval(id);
+    } else {
+      width++; 
+      elem.style.width = width + '%'; 
+    }
+  }
+}
+
+function move1() {
+  if (flag == 0)
+	return;
+  flag1 = 1;
+  var elem = document.getElementById("myBar1");   
+  var width = 1;
+  var id = setInterval(frame, 10);
+  function frame() {
+    if (width >= 100) {
+      clearInterval(id);
+    } else {
+      width++; 
+      elem.style.width = width + '%'; 
+    }  
+  }
+}
+
+
+function finish_pzalms() 
+{
+	if(flag1 == 1)
+    {
+		var win = window.open('../../moon.html', '_blank');
+		win.focus();
+	}
+}
+
+
+</script>
+
+</body>
+</html>

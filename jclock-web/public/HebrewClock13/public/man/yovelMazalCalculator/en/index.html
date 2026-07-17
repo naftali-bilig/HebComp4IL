@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hebrew Giving</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <link rel="stylesheet" href="../shared/style.css">
+</head>
+<body >
+
+<div class="container mt-3" style="margin-top: 1rem!important;">
+  <!-- Button to Open the Modal -->
+<center>
+  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">
+	Hebrew Yovel Mazal Calculator
+  </button>
+</center>
+
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header"> 
+          	<button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title">Hebrew Yovel Mazal Calculator</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          <p href="#" data-toggle="tooltip" title="HebrewYear couting from the begining of the creation, around 5700 and more" style="display: inline-block; width: 248px; color:#e11a1a;">Hebrew Year</p><input id="hebrewYear" value="5782" />
+          <hr>
+		  <p href="#" data-toggle="tooltip" title="the External Mazal of the yovel for the current hebrew year" style="display: inline-block; width: 248px; color:#e11a1a;" onclick="calculateMazal()">shmita week number of the yovel</p><input readonly id="mazalWeek"/>           
+	      <p href="#" data-toggle="tooltip" title="the Iמternal Mazal of the yovel for the current hebrew year" style="display: inline-block; width: 248px; color:#e11a1a;" onclick="calculateMazal()">year of the shimta week</p><input readonly id="mazalDay" />
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+		  <button type="button" class="btn btn-success" style="display:block; float:right;"; onclick="calculateMazal()";>Calculate</button>
+          <button type="button" class="btn btn-danger" style="display:block; float:left;"; data-dismiss="modal">Close</button>  
+  </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	function calculateMazal()
+	{
+		var hebrewYear = (parseInt(document.getElementById("hebrewYear").value)); 
+		
+		yovelYear = hebrewYear%49;
+		if(yovelYear == 0)
+			yovelYear = 49;
+		
+		if(yovelYear%7 == 0)
+			yovelWeek = yovelYear/7;
+		else	
+			yovelWeek =  Math.floor(yovelYear/7) + 1;
+		
+		document.getElementById("mazalWeek").value = yovelWeek;
+		
+		yovelDay = yovelYear%7;
+		if(yovelDay == 0)
+			yovelDay=7;
+		
+		document.getElementById("mazalDay").value = yovelDay;
+	}
+
+	
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+</script>
+
+
+</body>
+</html>

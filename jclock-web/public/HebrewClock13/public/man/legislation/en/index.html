@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Law essennce</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+    Law essennce
+  </button>
+</center>
+
+
+    <!-- Change date Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header">
+              <button type="button" class="close" data-dismiss="modal">×</button>
+              <h4 class="modal-title">Law essennce</h4>
+          </div>
+          
+          <!-- Modal body -->
+          <div class="modal-body">
+               <p style="display: inline-block; width: 248px;">Law ID:</p><input type="text" value="148450" id="ID" />          
+          </div>
+          
+          <!-- Modal footer -->
+          <div class="modal-footer">
+              <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="get_law_essential();">Ok</button>
+          </div>
+            
+        </div>
+        </div>
+    </div>
+  
+</div>
+
+<script type="text/javascript" src="../../shared/multiLanguage/js/LawDB.js"></script>
+<script>
+	function get_law_essential()
+	{
+		var legislationTime = lawDB.find(legislationTime=>legislationTime.ID == document.getElementById("ID").value);
+		if( legislationTime != null )
+		  document.location.href = "../../me/en/index.html?hebrewDay=" + legislationTime.hebrewDay + "&hebrewHour=" + legislationTime.hebrewHour;  
+		else
+		{  
+		  alert("The Law doesn't exist in the database");
+		  document.location.href = "../../me/en/index.html";  
+		}
+  }
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});</script>
+
+</body>
+</html>

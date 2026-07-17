@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>מחשבון המזל</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://cdn.rtlcss.com/bootstrap/v4.2.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+</head>
+<body >
+
+<div class="container mt-3">
+  <!-- Button to Open the Modal -->
+<center>
+	<button id="btn" type="button" class="btn btn-primary" data-toggle="modal" data-target="#myModal">
+   		מחשבון המזל
+  	</button>
+</center>
+
+
+    <!-- Change date Modal -->
+    <div class="modal fade" id="myModal">
+        <div class="modal-dialog">
+        <div class="modal-content">
+        
+            <!-- Modal Header -->
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal">×</button>
+                <h4 class="modal-title">מחשבון המזל</h4>
+            </div>
+            
+            <!-- Modal body -->
+            <div class="modal-body" style="direction:rtl;!important;">
+                 <p style="display: inline-block; width: 248px;">תאריך מלאכותי:</p><input type="date" value="1985-12-20" id="date" />          
+            </div>
+            
+            <!-- Modal footer -->
+            <div class="modal-footer">
+            <button type="button" class="btn btn-danger" data-dismiss="modal" onclick="activate_clock_at_date();">אישור</button>
+            </div>
+            
+        </div>
+        </div>
+    </div>
+  
+</div>
+
+<script>
+	function activate_clock_at_date()
+	{
+        isArtDate = true;
+		var artDate = document.getElementById("date").value; 
+        year = artDate.substring(0,4);       //curren date
+        month = artDate.substring(5,7); 
+        day = artDate.substring(8,10);
+
+		var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");        
+        var lat = url.searchParams.get("latitude");
+	
+		var location = "";
+			
+		if(lon && lat)
+		{
+		    longitude = lon ? lon : position.coords.longitude;
+			latitude = lat ? lat : position.coords.latitude; 
+			
+			location = "&longitude=" +lon + "&latitude=" + lat;
+		}
+			
+		document.location.href = "../../it/he/kabala/index.html?year=" + year + "&month=" +  month + "&day=" + day + location;
+
+		/*
+        set_dst();
+        set_art_date(year,month,day);  
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        
+        genderInitFunction();
+        setmazal();
+		
+        //נחלה
+        commercialFunction();
+        setShevet();
+		*/
+    }
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});</script>
+
+</body>
+</html>

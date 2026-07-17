@@ -1,0 +1,18 @@
+{
+  "name": "ראו באורי שזורח – נשים",
+  "short_name": "ראו באורי",
+  "lang": "he",
+  "dir": "rtl",
+  "start_url": "/woman/app",
+  "scope": "/woman/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#ffffff",
+  "icons": [
+    {
+      "src": "/HebrewClock13/public/woman/me/he/pic/female.png",
+      "sizes": "72x72",
+      "type": "image/png"
+    }
+  ]
+}

@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>בית המקדש השלישי</title>
+    <meta name="description" content="חשמל זה גם אש לפי ההלכה היהודית">
+    <meta property="og:title" content="בית המקדש השלישי">
+    <meta property="og:description" content="חשמל זה גם אש לפי ההלכה היהודית">
+    <meta property="og:type" content="website">
+</head>
+<body>
+    <center>
+        <canvas id="myCanvas" width="800" height="650" style="border:1px solid #d3d3d3; max-width:100%; height:auto;">
+            Your browser does not support the HTML5 canvas tag.
+        </canvas>
+    </center>
+
+    <script src="/HebrewClock13/public/man/hope/js/circle.js"></script>
+    <script>
+        drawCircle();
+        var mouseX = 0;
+        var mouseY = 0;
+        var canvas = document.getElementById("myCanvas");
+
+        canvas.addEventListener("mousemove", function (event) {
+            var bounds = canvas.getBoundingClientRect();
+            mouseX = (event.clientX - bounds.left) * (canvas.width / bounds.width);
+            mouseY = (event.clientY - bounds.top) * (canvas.height / bounds.height);
+        }, false);
+
+        canvas.addEventListener("click", function () {
+            var mouseRadius = Math.sqrt(Math.pow(mouseX - 400, 2) + Math.pow(mouseY - 320, 2));
+
+            if (mouseRadius <= 30) {
+                window.location = "https://ceves.net/";
+                return;
+            }
+
+            if (mouseRadius < 300) {
+                window.location = "/HebrewGiving";
+            }
+        }, false);
+    </script>
+</body>
+</html>

@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Global site tag (gtag.js) - Google Analytics -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+
+        gtag('config', 'UA-30684949-2');
+    </script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+    <title>שעון עברי</title>  
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">   
+    <link rel="stylesheet" type="text/css" href="./css/progressBar.css" id="thecss">   
+	<link rel="shortcut icon" type="image/x-icon" href="../hebrewclock.png" />
+</head>
+
+<body id="hebrewClock">
+	<!-- The core Firebase JS SDK is always required and must be listed first -->
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-app.js"></script>
+
+	<!-- TODO: Add SDKs for Firebase products that you want to use
+		 https://firebase.google.com/docs/web/setup#available-libraries -->
+	<script src="https://www.gstatic.com/firebasejs/8.8.0/firebase-analytics.js"></script>
+
+	<script>
+	  // Your web app's Firebase configuration
+	  // For Firebase JS SDK v7.20.0 and later, measurementId is optional
+	  var firebaseConfig = {
+		apiKey: "AIzaSyC_o6BkcBq_KHMuNWJU0try__AUjw9IHfk",
+		authDomain: "hebrewclock13.firebaseapp.com",
+		projectId: "hebrewclock13",
+		storageBucket: "hebrewclock13.appspot.com",
+		messagingSenderId: "284970515106",
+		appId: "1:284970515106:web:15952320f357f3582575fb",
+		measurementId: "G-GRQJVJC2E0"
+	  };
+	  // Initialize Firebase
+	  firebase.initializeApp(firebaseConfig);
+	  firebase.analytics();
+	</script>
+
+    <div id="container" ondblclick="pause()">
+		<div style = "text-align:center; margin-bottom:10px; ">
+            <table style="width:850px;">
+                <input class ="ChirstianClock" id="ChirstianHour" type="text" value="11"/>
+                <input class ="ChirstianClock" id="Text2" type="text" value=":"/>
+                <input class ="ChirstianClock" id="ChirstianMinute" type="text" value="59" onclick="Tefila();"/>
+                <input class ="ChirstianClock" id="Text4" type="text" value=":"/>
+                <input class ="ChirstianClock" id="ChirstianSecond" type="text"  value="59" onclick="yovelMazalCalculator();"//>
+            </table>
+            <table style="width:850px;">
+                    <input class ="clock" id="Hour" type="text" value = "11" onclick="openSpecialHebrewClock();"/>
+                    <input class ="clock" id="Text2" type="text" value = ":" onclick="openSpecialHebrewGiving();" />
+                    <input class ="clock" id="Minute" type="text" value = "1079" onclick="openSpecialChristianClock();"/>
+                    <input class ="clock" id="Text4" type="text" value = ":" onclick="openSpecialHebrewGiving();"/>
+                    <input class ="clock" id="Second" type="text" value = "75" onclick="openSpecialMuslimClock();"/>
+            </table>
+
+            <div>
+				<div>
+				<center>
+				<div> 
+					<a id="Mazal" href="tel:+972587401735" style="text-decoration: unset;"></a>
+				</div>
+				<div id="commercial" style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+					<img class="day" />
+				</div>
+				<div class="circular" style="display:none";>
+					<div class="inner"></div>
+					<div class="number">ברכות השחר</div>
+					<div class="circle">
+						<div class="bar left">
+							<div class="progress"></div>
+						</div>
+						<div class="bar right">
+							<div class="progress"></div>
+						</div>
+					</div>
+				</div>
+				</center>
+			</div>
+			</div>
+			<br>			
+        </div>		
+    </div>
+
+	<script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="../shared/he/js/NadlanCommercial.js"></script>
+	<script type="text/javascript" src="./js/Geolocation.js"></script>
+    <script type="text/javascript" src="./js/SunAlert.js"></script>
+    <script type="text/javascript" src="./js/HebrewClock.js"></script>
+	<script type="text/javascript" src="./js/Times.js"></script>
+    <script type="text/javascript" src="./js/SunTime.js"></script>
+    <script type="text/javascript" src="./js/TimeAdj.js"></script>
+    <script type="text/javascript" src="./js/Dst.js"></script>
+    <script type="text/javascript" src="./js/Dates.js"></script>
+    <script type="text/javascript" src="./js/Location.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+	<script type="text/javascript" src="./js/Tefila.js"></script>
+
+    
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+	
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+
+	//pray variables
+	var dawn;  			// 1.2 zmanit hour before sunrise 	 --  זמן קריאת שמע של שחרית 
+	
+/*1*/ var tzitzit =14;			// 55 zmanit  minutes before sunrise -- ציצית
+/*2*/ var birkutHashahar; // 42 regular minutes before sunrise -- ברכות השחר  
+/*3*/ var patachEliyaou;  // 38 regular minutes before sunrise -- פתח אליהו
+/*4*/ var korbanot;		// 35 regular minutes before sunrise -- קורבנות
+/*5*/ var psokeiDzimra;	// 22 regular minutes before sunrise -- פסוקי דזמרה
+/*6*/ var YozerOr;		// 08 regular minutes before sunrise -- יוצר אור
+/*7*/ var kriyahtShema;	// 04 regular minutes before sunrise -- קריאת שמע
+
+    getLocation();  //activate the clock
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+        if (navigator.geolocation)
+        {
+            navigator.geolocation.getCurrentPosition(showPosition,showError);
+        }
+    }
+  
+    function showPosition(position)
+    {
+        var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");        
+        var lat = url.searchParams.get("latitude");        
+        if(lat)
+        {
+            //tz = https://maps.googleapis.com/maps/api/timezone/outputFormat?parameters
+        }
+
+        longitude = lon ? lon : position.coords.longitude;
+        latitude = lat ? lat : position.coords.latitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        setmazal();
+		
+        commercialFunction();
+    }
+	
+	function openSpecialHebrewGiving()
+	{
+        //return;
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../mahasrot/he/index.html";
+        else
+            window.location.href = "../mahasrot/en/index.html";		
+	}
+	
+    function openSpecialHebrewClock()
+    {
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../me/he/kabala/index.html";
+        else
+            window.location.href = "../me/en/kabala/index.html";
+    }
+    
+    function openSpecialMuslimClock()
+    {
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../is/he/kabala/index.html";
+        else
+            window.location.href = "../is/en/kabala/index.html";
+    }
+
+    function openSpecialChristianClock()
+    {
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../it/he/kabala/index.html";
+        else
+            window.location.href = "../it/en/kabala/index.html";
+    }
+	
+	function yovelMazalCalculator()
+	{
+        var userLang = navigator.language || navigator.userLanguage; 
+        if (userLang = "he") 
+            window.location.href = "../yovelMazalCalculator/he/index.html";
+        else
+            window.location.href = "../yovelMazalCalculator/en/index.html";
+	
+	}
+
+
+    </script>
+
+</body>
+</html>

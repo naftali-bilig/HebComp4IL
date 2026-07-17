@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+	<title>שעון עברי</title>  
+    <link rel="stylesheet" type="text/css" href="./css/moon.css" id="thecss">  
+    <link rel="stylesheet" type="text/css" href="../../shared/css/stylesheet.css" id="commercial_css">    
+</head>
+
+<body>
+
+    <div id="container" onclick="pause()">
+        <br />
+        <br />
+        <div style="text-align:center;">
+            <img id="A" src="./pic/A.jpg" alt="A" width="400" height="200" onclick="send_email();">
+            <img id="B" src="./pic/B.jpg" alt="B" width="400" height="200">
+        </div>
+        <div style = "text-align:center;">
+            <img id="C" src="./pic/C.jpg" alt="C" width="400" height="200">
+            <img id="D" src="./pic/D.jpg" alt="D" width="400" height="200">
+        </div>
+        <!-- <div style="text-align:center;">
+            <input id="test" class="zmanim_hour" type="text" style="width:400px" />
+            <input id="Text10" class="zmanim_text" type="text" value="בדיקה" />
+        </div>--> 
+    </div>
+
+<script type="text/javascript">
+    var lbHour = localStorage.getItem("lbHour", lbHour);
+    var lbHourClock = localStorage.getItem("lbHourClock", lbHourClock);
+    var lbMinute = localStorage.getItem("lbMinute", lbMinute);
+    var lbSecond = localStorage.getItem("lbSecond", lbSecond);
+    var hebrew_day = localStorage.getItem("hebrewday", hebrew_day);
+    var omer = localStorage.getItem("omer", omer);
+    var mida = localStorage.getItem("mida", mida);
+
+    time_adj();
+    //document.getElementById("test").value = mida;//time_adj();
+
+    function time_adj()
+    {
+        var str;
+
+        //---dispaying the clock---
+
+        //hour
+        if (lbHour < 10)
+            str = "0" + (parseInt(lbHour));
+        else
+            str = parseInt(lbHour);
+
+        //minute
+        if (lbMinute < 10)
+            str = str + ":" + "000" + lbMinute;
+        else if (lbMinute < 100)
+            str = str + ":" + "00" + lbMinute;
+        else if (lbMinute < 1000)
+            str = str + ":" + "0" + lbMinute;
+        else
+            str = str + ":" + lbMinute;
+
+        //seconds
+        if (lbSecond < 10)
+            str = str + ":" + "0" + lbSecond;
+        else
+            str = str + ":" + lbSecond;
+
+        return str;
+    }
+
+    function send_email()
+    {
+        var subject;
+        var body;
+        //subject = "Evidence Sanctification of the Month";
+        subject = "עדות החודש";
+
+        body =  "Name: \nPhone: \nLocation of vision: \n" + 
+                "Day of vision: " + hebrew_day + "\n" +
+                "Hour of vision: " + time_adj() + "\n" +
+                "Story: " + "\n" +
+                "\n\n" +
+                "with great respect!";
+
+        window.open("mailto:kidush.levana007@gmail.com?subject=" + subject + "&body=" + encodeURIComponent(body));
+    }
+</script>
+
+
+
+</body>
+</html>
