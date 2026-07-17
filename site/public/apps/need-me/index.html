@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Need-Me</title>
+  <link rel="stylesheet" href="./styles.css">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js" async defer></script>
+</head>
+<body>
+  <main class="app-shell">
+    <section class="workspace" aria-labelledby="page-title">
+      <div class="masthead">
+        <div>
+          <p class="eyebrow" data-i18n="brandName">Need-Me</p>
+          <h1 id="page-title" data-i18n="pageTitle">שיבוץ פרסום לפי זמן</h1>
+        </div>
+        <div class="masthead-actions">
+          <button id="languageToggleButton" class="secondary-button" type="button" aria-label="Switch language">English</button>
+          <button id="googleConnectButton" class="secondary-button" type="button" data-i18n="connectGoogle">התחבר לגוגל</button>
+        </div>
+      </div>
+
+      <form id="plannerForm" class="planner-form">
+        <fieldset class="product-bar" aria-label="מוצר למכירה">
+          <label class="product-field">
+            <span data-i18n="productLabel">מוצר</span>
+            <select id="productInput" name="product" required>
+              <option value="">טוען מוצרים...</option>
+            </select>
+          </label>
+
+          <label class="checkbox-field period-toggle">
+            <input id="periodStartOnlyInput" name="periodStartOnly" type="checkbox">
+            <span data-i18n="periodStartOnly">רק תחילת תקופה</span>
+          </label>
+
+          <button class="primary-button calculate-button" type="submit" data-i18n="calculate">חשב תחילת זמן פרסום</button>
+        </fieldset>
+
+        <fieldset class="form-group">
+          <legend data-i18n="storeGroup">מתי אני עומד בחנות</legend>
+
+          <label>
+            <span data-i18n="startDate">תאריך לעמידה בחנות</span>
+            <input id="startDateInput" name="startDate" type="date" required>
+          </label>
+
+          <label>
+            <span data-i18n="daysToCheck">ימים לבדיקה</span>
+            <input id="daysInput" name="days" type="number" min="1" max="31" value="1" required>
+          </label>
+
+          <label>
+            <span data-i18n="monthsAhead">חודשים קדימה</span>
+            <input id="monthsInput" name="months" type="number" min="1" max="588" value="6" required>
+          </label>
+
+          <label id="workStartField">
+            <span data-i18n="workStart">עובד משעה</span>
+            <input id="workStartInput" name="workStart" type="time" value="08:00" required>
+          </label>
+
+          <label id="workEndField">
+            <span data-i18n="workEnd">עובד עד שעה</span>
+            <input id="workEndInput" name="workEnd" type="time" value="14:00" required>
+          </label>
+
+          <label>
+            <span data-i18n="timeZone">אזור זמן</span>
+            <select id="timeZoneInput" name="timeZone" required>
+              <option value="Asia/Jerusalem">Asia/Jerusalem</option>
+              <option value="Asia/Hebron">Asia/Hebron</option>
+              <option value="Europe/London">Europe/London</option>
+              <option value="America/New_York">America/New_York</option>
+              <option value="America/Los_Angeles">America/Los_Angeles</option>
+            </select>
+          </label>
+
+          <label>
+            <span data-i18n="region">יבשת / אזור</span>
+            <select id="regionInput" name="region" required>
+              <option value="north-america" data-i18n="regionNorthAmerica">צפון אמריקה - שעון חמה</option>
+              <option value="asia" data-i18n="regionAsia">אסיה - שעון חמה</option>
+              <option value="europe" data-i18n="regionEurope">אירופה - שעון לבנה</option>
+              <option value="south-america" data-i18n="regionSouthAmerica">דרום אמריקה - שעון חמה</option>
+              <option value="australia" data-i18n="regionAustralia">אוסטרליה - שעון חמה</option>
+              <option value="italy" data-i18n="regionItaly">איטליה - שעון חמה</option>
+              <option value="africa" data-i18n="regionAfrica">אפריקה - שעון לבנה</option>
+              <option value="middle-east" data-i18n="regionMiddleEast">המזרח התיכון - שעון חמה ולבנה</option>
+              <option value="ireland" data-i18n="regionIreland">אירלנד - שעון חמה ולבנה</option>
+            </select>
+          </label>
+
+          <label id="audienceField">
+            <span data-i18n="audience">מוכר ל</span>
+            <select id="audienceInput" name="audience">
+              <option value="boys" data-i18n="boys">בנים</option>
+              <option value="girls" data-i18n="girls">בנות</option>
+            </select>
+          </label>
+
+          <label>
+            <span data-i18n="rangeMode">טווח בדיקה</span>
+            <select id="rangeModeInput" name="rangeMode" required>
+              <option value="days" data-i18n="rangeDays">ימים ושעות שנבחרו</option>
+              <option value="months" data-i18n="rangeMonths">חודשים קדימה</option>
+              <option value="shmita" data-i18n="rangeShmita">מחזור שמיטה נוכחי</option>
+              <option value="yovel" data-i18n="rangeYovel">יובל נוכחי</option>
+            </select>
+          </label>
+
+          <label>
+            <span data-i18n="duration">משך פרסום</span>
+            <select id="durationInput" name="duration">
+              <option value="60" data-i18n="oneHour">שעה</option>
+              <option value="30" data-i18n="halfHour">חצי שעה</option>
+              <option value="120" data-i18n="twoHours">שעתיים</option>
+            </select>
+          </label>
+
+        </fieldset>
+
+        <div class="form-actions">
+          <button id="createCalendarButton" class="secondary-button" type="button" disabled data-i18n="createCalendar">צור אירועים ביומן</button>
+        </div>
+      </form>
+
+      <section class="status-band" aria-live="polite">
+        <div>
+          <span class="metric-label" data-i18n="found">נמצאו</span>
+          <strong id="slotCount">0</strong>
+        </div>
+        <div>
+          <span class="metric-label" data-i18n="range">טווח</span>
+          <strong id="rangeText">-</strong>
+        </div>
+        <div>
+          <span class="metric-label" data-i18n="calendar">יומן</span>
+          <strong id="calendarStatus" data-i18n="notConnected">לא מחובר</strong>
+        </div>
+      </section>
+
+      <section class="results-panel" aria-labelledby="results-title">
+        <div class="results-header">
+          <h2 id="results-title" data-i18n="resultsTitle">חלונות פרסום</h2>
+          <button id="downloadJsonButton" class="text-button" type="button" disabled data-i18n="downloadJson">הורד JSON</button>
+        </div>
+        <ol id="resultsList" class="results-list"></ol>
+      </section>
+    </section>
+  </main>
+
+  <script src="https://Bind-Me.net/ProductDB.js"></script>
+  <script src="../login/js/hebrewDate.js"></script>
+  <script src="../shared/js/CommercialMazal.js"></script>
+  <script src="../woman/js/suncalc.js"></script>
+  <script src="commercial-time-anchors.js"></script>
+  <script src="it-adapter.js"></script>
+  <script src="app.js?v=20260624-period-start-top"></script>
+</body>
+</html>

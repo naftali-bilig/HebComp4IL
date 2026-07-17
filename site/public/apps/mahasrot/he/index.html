@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>מחשבון צדקה מבוסס מעשרות</title>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; min-height: 100vh; padding: 24px; color: #18231d; background: linear-gradient(145deg, #eaf7ef, #f8f3df); font-family: Arial, sans-serif; }
+    main { width: min(720px, 100%); margin: auto; padding: 24px; border: 1px solid #c9d9ce; border-radius: 22px; background: rgba(255,255,255,.94); box-shadow: 0 18px 50px rgba(26,58,37,.14); }
+    h1 { margin-top: 0; color: #185b38; font-size: clamp(1.6rem, 5vw, 2.35rem); }
+    .field { display: grid; grid-template-columns: 1fr minmax(130px, 220px); align-items: center; gap: 12px; margin: 12px 0; }
+    input { width: 100%; padding: 10px 12px; border: 1px solid #aebeb3; border-radius: 10px; font: inherit; direction: ltr; }
+    input[readonly] { background: #f0f5f1; font-weight: 700; }
+    video { display: block; width: 100%; max-height: 65vh; margin: 20px 0; border-radius: 14px; background: #000; }
+    .note { padding: 14px; border-radius: 12px; background: #f6f0d9; line-height: 1.65; }
+    a { color: #185b38; font-weight: 700; }
+    @media (max-width: 520px) { body { padding: 10px; } main { padding: 18px; } .field { grid-template-columns: 1fr; gap: 5px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>מחשבון צדקה מבוסס מעשרות</h1>
+    <div class="field"><label for="income">משכורת נטו</label><input id="income" inputmode="decimal"></div>
+    <div class="field"><label for="expense">הוצאות</label><input id="expense" inputmode="decimal"></div>
+    <div class="field"><label for="savings">חיסכון</label><input id="savings" readonly></div>
+    <div class="note">
+      <div>תרומה גדולה — ליהודי בלבד</div>
+      <div>מעשר ראשון — למשוגע/נביא בלבד</div>
+      <div>מעשר עני — למוסלמי בלבד</div>
+    </div>
+    <video controls preload="metadata" playsinline aria-label="סרטון הסבר על חלוקת השעה העברית">
+      <source src="../How_the_Hebrew_Clock_Divides_an_Hour.mp4" type="video/mp4">
+      הדפדפן אינו תומך בניגון הסרטון.
+    </video>
+    <div class="field"><label for="truma">תרומה גדולה</label><input id="truma" readonly></div>
+    <div class="field"><label for="mahaser1">מעשר ראשון</label><input id="mahaser1" readonly></div>
+    <div class="field"><label for="trumatMahaser">תרומת מעשר</label><input id="trumatMahaser" readonly></div>
+    <div class="field"><label for="mahaser2">מעשר שני/עני</label><input id="mahaser2" readonly></div>
+    <p><a href="/jclock/index.html">חזרה לשעון ירושלים</a></p>
+  </main>
+  <script>
+    const ids = ["income", "expense"];
+    const number = value => Number(String(value).replaceAll(",", "")) || 0;
+    const format = value => Number.isFinite(value) ? value.toFixed(2).replace(/\.00$/, "") : "";
+    function calculate() {
+      const savings = number(income.value) - number(expense.value);
+      const truma = savings / 40;
+      const mahaser1 = (savings - truma) / 10;
+      const trumatMahaser = mahaser1 / 10;
+      const mahaser2 = (savings - truma - mahaser1) / 10;
+      document.querySelector("#savings").value = format(savings);
+      document.querySelector("#truma").value = format(truma);
+      document.querySelector("#mahaser1").value = format(mahaser1);
+      document.querySelector("#trumatMahaser").value = format(trumatMahaser);
+      document.querySelector("#mahaser2").value = format(mahaser2);
+    }
+    ids.forEach(id => document.querySelector(`#${id}`).addEventListener("input", calculate));
+    calculate();
+  </script>
+</body>
+</html>

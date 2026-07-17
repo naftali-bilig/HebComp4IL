@@ -18,6 +18,21 @@
 </head>
 
 <body id="hebrewClock">
+    <nav class="site-apps-nav" aria-label="ניווט באתר">
+      <details class="site-apps-menu">
+        <summary>כל האפליקציות</summary>
+        <div class="site-apps-list">
+          <a class="site-app-featured" href="/apps/need-me/">Need-Me</a>
+          <a href="/apps/birth-calculator/he/">חישוב תאריך לידה וזמן עבריים</a>
+          <a href="/apps/hebrew-schedule/">יומן זמן עברי</a>
+          <a href="/apps/mahasrot/he/">מחשבון מעשרות</a>
+          <a href="/jclock/index.html">שעון ירושלים</a>
+          <span class="site-apps-divider" aria-hidden="true"></span>
+          <a href="/learning/man/me/he/index.html">דפי לימוד — איש</a>
+          <a href="/learning/woman/me/he/index.html">דפי לימוד — אישה</a>
+        </div>
+      </details>
+    </nav>
     <main class="windows-desktop" aria-label="קידוש החודש">
       <section class="toolbar-window" aria-label="קידוש החודש">
         <div class="window-grip" aria-hidden="true"></div>
@@ -454,9 +469,9 @@
 		var mazalHebrewDay = getMazalHebrewDay();
         var userLang = navigator.language || navigator.userLanguage; 
         if (userLang.includes("he")) 
-            window.location.href = "../me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;
+            window.location.href = "/learning/man/me/he/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;
         else
-            window.location.href = "../me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;	
+            window.location.href = "/learning/man/me/en/index.html?hebrewDay="+ mazalHebrewDay +"&hebrewHour=" + Number(lbHour+1) + isPersonalMazal + location;	
 	}
     </script>
 

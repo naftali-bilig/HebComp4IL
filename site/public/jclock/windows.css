@@ -975,3 +975,47 @@ html[data-umid-theme="true"] button {
   text-overflow: ellipsis;
   white-space: normal;
 }
+.site-apps-nav {
+  position: fixed;
+  inset-block-start: 16px;
+  inset-inline-end: 16px;
+  z-index: 1000;
+  direction: rtl;
+  font-family: Arial, sans-serif;
+}
+.site-apps-menu { position: relative; }
+.site-apps-menu summary {
+  cursor: pointer;
+  list-style: none;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 999px;
+  padding: 10px 16px;
+  color: #fff;
+  background: rgba(11, 16, 22, 0.88);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  font-weight: 700;
+}
+.site-apps-menu summary::-webkit-details-marker { display: none; }
+.site-apps-menu summary::after { content: " ▾"; }
+.site-apps-menu[open] summary::after { content: " ▴"; }
+.site-apps-list {
+  position: absolute;
+  inset-block-start: calc(100% + 8px);
+  inset-inline-end: 0;
+  display: grid;
+  min-width: 270px;
+  padding: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 16px;
+  background: rgba(11, 16, 22, 0.97);
+  box-shadow: 0 16px 42px rgba(0, 0, 0, 0.45);
+}
+.site-apps-list a { padding: 11px 12px; border-radius: 10px; color: #f4f7fb; text-decoration: none; }
+.site-apps-list a:hover, .site-apps-list a:focus-visible { background: rgba(255, 255, 255, 0.11); }
+.site-apps-list .site-app-featured { color: #8ff0c1; font-weight: 800; }
+.site-apps-divider { height: 1px; margin: 6px 8px; background: rgba(255, 255, 255, 0.16); }
+@media (max-width: 640px) {
+  .site-apps-nav { inset-block-start: 10px; inset-inline-end: 10px; }
+  .site-apps-menu summary { padding: 8px 12px; font-size: 14px; }
+  .site-apps-list { min-width: min(270px, calc(100vw - 20px)); }
+}

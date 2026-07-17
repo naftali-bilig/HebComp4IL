@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+
+    <title>לימוד עצמי</title>
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">
+    <link rel="stylesheet" type="text/css" href="../../shared/css/stylesheet.css" id="commercial_css">
+    <meta charset="UTF-8">
+    <meta name="description" content="שעון עברי המציג את זמן השמש בשביל לקדש את הלבנה">
+    <meta name="keywords" content="שעון עברי">
+    <meta name="author" content="אחירע בן עינן">
+</head>
+
+<body>
+    <div id="container" ondblclick="pause()">
+		<div id="city-name"> </div>
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <!--<button onclick="genderFunction()" class="gender female"></button>-->
+            <button onclick="englishFunction()" class="hebrew_btn"></button>
+            <!--<button onclick="pause()" class="refresh_btn refresh_btn_hebrew"></button>-->
+			<div id="myDropdown" class="dropdown-content">
+ <!--               <a href="./index.html" id="hourly__learning">לימוד עצמי</a>
+                <a href="../../marrige/he/index.html" id="hourly__learning">לימוד זוגי</a>
+                <a href="../../children/he/index.html" id="hourly__learning">לימוד על ילדים</a>
+				<a href="./islam/index.html" id="monthly__learning">לימוד עם מוסלמי/ה</a>
+				<a href="./cristian/index.html" id="yearly__learning">לימוד עם נוצרי/ה</a>
+                <a href="./jewish/index.html" id="Jubilee__learning">לימוד עם יהודי/ה</a>-->
+				<a href="./kabala/index.html">לו"ז תפילה</a>
+				<a href="../../marrige/he/index.html" id="hourly__learning">לימוד אישי</a>
+				<a onclick="sederLimud('Automate');" id="Automate__learning">לימוד על פי הלוז</a>
+				<a onclick="sederLimud('Dovid');" id="hourly__learning">סדר חצות</a>
+				<a onclick="sederLimud('Month');" id="yearly__learning">סדר בוקר</a>
+				<a onclick="sederLimud('Year');" id="monthly__learning">סדר צהריים</a>
+				<a onclick="sederLimud('Jubilee');" id="Jubilee__learning">סדר ערב</a>
+				<a href="../../../../../BirthCalculator/public/he/index.html" id="hourly__learning">חישוב הלימוד האישי</a>
+<!--                <a href="./guide.html">מדריך למשתמש</a>-->
+			</div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <button id="stop" onclick="stop()" />עצור
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input style="display: none; font-weight: bold;" class="day" id="Mazal"  type="text" value = "" onclick="openMidaInNewTab(1);"/>
+        </div>
+        <div style = "text-align:center; margin-bottom:10px;">
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet_01"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_01"  type="text" value = ""  onclick = "window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_02"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972504261721')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_02"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet_03"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972526073090')" />
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_03"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_04"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972547290108')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_04"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_05"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972545604438')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_05"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_06"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+97229932480')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_06"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_07"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972523996201')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_07"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_08"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972506247802')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_08"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Shevet_09"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972523682216')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_09"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet_10"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972542267262')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_10"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet_11"  type="text" value = "" onclick="openMidaInNewTab(0);" <!--יוסף-->
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_11"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet_12"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick= "window.open('tel:+972527401735')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Shevet__mida_12"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf_01"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_01"  type="text" value = ""  onclick = "window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_02"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972504261721')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_02"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf_03"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972526073090')" />
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_03"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_04"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972547290108')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_04"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_05"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972545604438')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_05"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_06"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+97229932480')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_06"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_07"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972523996201')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_07"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_08"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972506247802')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_08"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+			<input style="display: none; font-weight: bold;" class="day" id="Aluf_09"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972523682216')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_09"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf_10"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick = "window.open('tel:+972542267262')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_10"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf_11"  type="text" value = "" onclick="openMidaInNewTab(0);" <!--יוסף-->
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_11"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf_12"  type="text" value = "" onclick="openMidaInNewTab(0);" ondblclick= "window.open('tel:+972527401735')"/>
+            <input style="display: none; font-weight: bold;" class="day" id="Aluf__mida_12"  type="text" value = "" onclick="window.open('tel:+972587401735')" ondblclick = "window.open('tel:+972543517530')"/>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <div class="masechet-split"><input class="day" id="Masechet"  type="text" value="" /><button type="button" class="masechet-indigo-area" onclick="openKehatiAppInNewTab();" aria-label=""></button></div>
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="day" id="Sefer"  type="text" value="" />
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="day" id="Parasha" type="text" value="" />
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+            <input class="day" id="Laws" type="text" value="חוקים" onclick="openLawsInNewTab();" />
+        </div>
+
+		<!--
+        <div style="text-align:center; margin-bottom:10px;">
+			<select id="lawsDropdown" class="day" >
+				<option value="">בחר חוק ישראלי</option>
+			</select>
+        </div>
+	-->
+
+        <div id="commercial" style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<div class="day"></div>
+        </div>
+
+        <br />
+        <br />
+    </div>
+
+
+
+    <script type="text/javascript" src="./js/Religion.js"></script>
+	<script type="text/javascript" src="../../simple/js/suncalc.js"></script>
+    <script type="text/javascript" src="./js/HebrewDate.js?v=4"></script>
+    <script type="text/javascript" src="../../shared/he/js/Geolocation.js"></script>
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="./js/HebrewClock.js?v=2"></script>
+    <script type="text/javascript" src="./js/SederLimud.js"></script>
+    <script type="text/javascript" src="../../shared/he/js/Commercial.js?v=4"></script>
+	<script type="text/javascript" src="./js/Mazal.js"></script>
+	<script type="text/javascript" src="./js/Gender.js"></script>
+    <script type="text/javascript" src="./js/Sefer.js"></script>
+    <script type="text/javascript" src="./js/Masechet.js"></script>
+    <script type="text/javascript" src="./js/Parasha.js"></script>
+    <script type="text/javascript" src="./js/LawsData.js"></script>
+    <script type="text/javascript" src="./js/Laws.js"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+	<script type="text/javascript" src="./js/Times.js?v=2"></script>
+    <script type="text/javascript" src="./js/SunTime.js"></script>
+    <script type="text/javascript" src="./js/TimeAdj.js"></script>
+    <script type="text/javascript" src="./js/Dst.js"></script>
+    <script type="text/javascript" src="./js/Dates.js?v=2"></script>
+    <script type="text/javascript" src="./js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+	var israelLeg = [];
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+	var birthYear,birthMonth,birthDay,birthGMT,birthHour,birthMin;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+    var mida_url;
+    var x;
+    var sefer_929_url;
+    var sefer_url;
+    var masechet_url;
+    var parasha_url;
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'
+	}
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+    getLocation();  //activate the clock
+
+    //document.getElementById("Masechet").value = "ברכות";
+
+    var directDefaultLearningKey = "jclockDirectDefaultLearning:" + window.location.pathname;
+
+    function markDirectDefaultLearningRequest(url)
+    {
+        if (!url.search)
+            sessionStorage.setItem(directDefaultLearningKey, "1");
+    }
+
+    function shouldSetDefaultHebrewDateParams(url)
+    {
+        return !url.search ||
+            sessionStorage.getItem(directDefaultLearningKey) === "1" ||
+            (
+                url.searchParams.get("longitude") &&
+                url.searchParams.get("latitude") &&
+                !url.searchParams.get("period") &&
+                !url.searchParams.get("hebrewDay") &&
+                !url.searchParams.get("hebrewHour")
+            );
+    }
+
+    function clearDirectDefaultLearningRequest()
+    {
+        sessionStorage.removeItem(directDefaultLearningKey);
+    }
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+
+        var defaultLongitude = "35.2331664";
+        var defaultLatitude = "31.7768514";
+        var defaultUrl = new URL(document.location.href);
+        markDirectDefaultLearningRequest(defaultUrl);
+        if (defaultUrl.searchParams.get("longitude") !== defaultLongitude || defaultUrl.searchParams.get("latitude") !== defaultLatitude)
+        {
+            defaultUrl.searchParams.set("longitude", defaultLongitude);
+            defaultUrl.searchParams.set("latitude", defaultLatitude);
+            window.location.replace(defaultUrl.href);
+            return;
+        }
+        var url = new URL(document.location.href);
+		var lon = url.searchParams.get("longitude");
+        var lat = url.searchParams.get("latitude");
+		birthYear = url.searchParams.get("year");
+		birthMonth = url.searchParams.get("month");
+		birthDay = url.searchParams.get("day");
+		birthHour = url.searchParams.get("hour");
+		birthMin = url.searchParams.get("min");
+		birthGMT = url.searchParams.get("gmt");
+
+		if(lon && lat && !birthHour)
+		{
+		    longitude = lon ? lon : position.coords.longitude;
+			latitude = lat ? lat : position.coords.latitude;
+
+			console.log("manual location");
+
+			birthDay = url.searchParams.get("hebrewDay");
+			birthHour = url.searchParams.get("hebrewHour");
+
+			religionFunction();
+			set_dst();
+			set_default_date();
+			list_pos();
+			hebrewclock();
+			if (setDefaultHebrewDateParams(url))
+			    return;
+			oTimerclock();
+			//tora learning
+			//genderInitFunction();
+			setmazal();
+			setMasechet();
+			setSefer();
+			setParasha();
+			setLaws();
+			sederLimud('Dummy');
+
+			//נחלה
+			setShevet();
+			commercialFunction();
+
+
+			return;
+		}
+        else showPosition({ coords: { longitude: defaultLongitude, latitude: defaultLatitude } });
+
+    }
+
+
+    function getDefaultMoonLearningPeriod()
+    {
+        var defaultHebrewHour = lbHour + 1;
+        if (defaultHebrewHour > 24)
+            defaultHebrewHour = defaultHebrewHour - 24;
+
+        if (defaultHebrewHour <= 6)
+            return "Jubilee";
+        if (defaultHebrewHour <= 12)
+            return "Dovid";
+        if (defaultHebrewHour <= 18)
+            return "Month";
+        return "Year";
+    }
+
+    function redirectToCurrentLearningShortcut(learningMethod)
+    {
+        var url = new URL(document.location.href);
+        if (url.searchParams.get("shortcut") !== "now")
+            return false;
+
+        var shortcutNames = {
+            Dovid: "חצות",
+            Month: "בוקר",
+            Year: "צהריים",
+            Jubilee: "ערב"
+        };
+        window.location.replace("/woman/" + shortcutNames[learningMethod]);
+        return true;
+    }
+
+    function setDefaultHebrewDateParams(url)
+    {
+        if (url.searchParams.get("hebrewDay") && url.searchParams.get("hebrewHour"))
+        {
+            clearDirectDefaultLearningRequest();
+            return false;
+        }
+
+        if (!shouldSetDefaultHebrewDateParams(url))
+            return false;
+
+        var date = new Date();
+        var defaultHebrewDay = date.getDay() + 1;
+        var h = date.getHours();
+        var m = date.getMinutes();
+        var s = date.getSeconds();
+
+        if ((h == sunsetH && m == sunsetM && s >= sunsetS) ||
+            (h == sunsetH && m > sunsetM) ||
+            (h > sunsetH))
+            if ((h == 23 && m == 23 && s <= 59) ||
+                (h == 23 && m < 59) ||
+                (h < 23))
+                defaultHebrewDay = defaultHebrewDay + 1;
+
+        if (defaultHebrewDay == 8)
+            defaultHebrewDay = 1;
+
+        var defaultHebrewHour = lbHour + 1;
+        if (defaultHebrewHour > 24)
+            defaultHebrewHour = defaultHebrewHour - 24;
+
+        clearDirectDefaultLearningRequest();
+        var learningMethod = getDefaultMoonLearningPeriod();
+        if (!redirectToCurrentLearningShortcut(learningMethod))
+            sederLimud(learningMethod);
+        return true;
+    }
+
+
+    function showPosition(position)
+    {
+        var url = new URL(document.location.href);
+        var lon = url.searchParams.get("longitude");
+        var lat = url.searchParams.get("latitude");
+		birthYear = url.searchParams.get("year");
+		birthMonth = url.searchParams.get("month");
+		birthDay = url.searchParams.get("day");
+		birthHour = url.searchParams.get("hour");
+		birthMin = url.searchParams.get("min");
+		birthGMT = url.searchParams.get("gmt");
+        if(lat)
+        {
+            //tz = https://maps.googleapis.com/maps/api/timezone/outputFormat?parameters
+        }
+
+        longitude = lon ? lon : position.coords.longitude;
+        latitude = lat ? lat : position.coords.latitude;
+
+		birthDay = url.searchParams.get("hebrewDay");
+		birthHour = url.searchParams.get("hebrewHour");
+
+		religionFunction();
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        if (setDefaultHebrewDateParams(url))
+            return;
+        oTimerclock();
+        //tora learning
+        //genderInitFunction();
+        setmazal();
+        setMasechet();
+        setSefer();
+        setParasha();
+		setLaws();
+		sederLimud('Dummy');
+
+		//נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+     //link to mazal information
+     function openMidaInNewTab(x) {
+        var win;
+        if (x == 1)
+            win = window.open(mazal_url, '_blank');
+        else if(x == 0)
+            win = window.open(mida_url, '_blank');
+        win.focus();
+    }
+
+    function bindLearningLinkGestures(elementId, openInSefaria, openInApp)
+    {
+        var element = document.getElementById(elementId);
+        var clickTimer;
+        var longPressTimer;
+        var longPressTriggered = false;
+
+        element.addEventListener('click', function(event) {
+            if (longPressTriggered) {
+                longPressTriggered = false;
+                return;
+            }
+            if (event.detail > 1)
+                return;
+            clearTimeout(clickTimer);
+            clickTimer = setTimeout(openInSefaria, 250);
+        });
+
+        element.addEventListener('dblclick', function(event) {
+            event.preventDefault();
+            clearTimeout(clickTimer);
+            clearTimeout(longPressTimer);
+            openInApp();
+        });
+
+        element.addEventListener('pointerdown', function(event) {
+            if (event.button !== 0)
+                return;
+            longPressTriggered = false;
+            clearTimeout(longPressTimer);
+            longPressTimer = setTimeout(function() {
+                clearTimeout(clickTimer);
+                longPressTriggered = true;
+                openInApp();
+            }, 600);
+        });
+
+        ['pointerup', 'pointercancel', 'pointerleave'].forEach(function(eventName) {
+            element.addEventListener(eventName, function() {
+                clearTimeout(longPressTimer);
+            });
+        });
+
+        element.addEventListener('contextmenu', function(event) {
+            if (longPressTriggered)
+                event.preventDefault();
+        });
+    }
+
+    function openMasechetInSefariaInNewTab()
+    {
+        window.location.href = masechet_url || 'https://www.sefaria.org/Mishnah_Berakhot.1?lang=he';
+    }
+
+    function openKehatiAppInNewTab()
+    {
+        var userAgent = navigator.userAgent || navigator.vendor || window.opera || '';
+        var isAndroid = /android/i.test(userAgent);
+        var isIOS = /iPad|iPhone|iPod/.test(userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+        var url = 'https://www.alonshvut-archive.org.il/objDoc.asp?PID=771256&OID=774375&DivID=1';
+
+        if (isAndroid) {
+            url = 'https://play.google.com/store/search?q=%D7%9E%D7%A9%D7%A0%D7%94%20%D7%A7%D7%94%D7%AA%D7%99&c=apps';
+        } else if (isIOS) {
+            url = 'https://apps.apple.com/us/search?term=%D7%9E%D7%A9%D7%A0%D7%94%20%D7%A7%D7%94%D7%AA%D7%99';
+        }
+
+        window.location.href = url;
+    }
+
+    function open929AppInNewTab()
+    {
+        window.location.href = sefer_929_url || 'https://www.929.org.il/page/1';
+    }
+
+    function openSeferInSefariaInNewTab()
+    {
+        window.location.href = sefer_url || 'https://www.sefaria.org/Genesis.1?lang=he';
+    }
+
+    function openRabbiElonAppInNewTab() {
+        window.location.href = 'http://ravoldsite.com/archives/archives_h.html';
+    }
+
+    function openParashaInSefariaInNewTab() {
+        var sefariaUrl = (typeof parasha_url !== 'undefined' && parasha_url) ? parasha_url : 'https://www.sefaria.org/Genesis.1.1?lang=he';
+        window.location.href = sefariaUrl;
+    }
+
+    bindLearningLinkGestures('Masechet', openMasechetInSefariaInNewTab, openKehatiAppInNewTab);
+    bindLearningLinkGestures('Sefer', openSeferInSefariaInNewTab, open929AppInNewTab);
+    bindLearningLinkGestures('Parasha', openParashaInSefariaInNewTab, openRabbiElonAppInNewTab);
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+        setmazal();
+        setMasechet();
+        setSefer();
+        setParasha();
+        setLaws();
+        sederLimud();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        localStorage.setItem("mida", document.getElementById("Mazal").value);
+        localStorage.setItem("masechet", document.getElementById("Masechet").value);
+        localStorage.setItem("sefer", document.getElementById("Sefer").value);
+        localStorage.setItem("laws", document.getElementById("Laws").value);
+
+
+        var win = window.open("./moon.html", '_blank');
+        win.focus();
+    }
+
+
+    </script>
+
+
+
+</body>
+</html>

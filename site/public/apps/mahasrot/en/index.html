@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Hebrew Giving</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hebrew Giving calculator based on mahasrot">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Hebrew Giving">
+  <meta property="og:description" content="Calculate T'ruma G'dola, Mahaser Rishon and Mahaser Ani">
+  <meta property="og:image" content="https://jclock126.web.app/assets/hebrew-giving.png?v=2">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:image" content="https://jclock126.web.app/assets/hebrew-giving.png?v=2">
+  <link rel="icon" type="image/png" href="/assets/hebrew-giving.png">
+  <link rel="apple-touch-icon" href="/assets/hebrew-giving.png">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.4.0/js/bootstrap.min.js"></script>
+  <style>
+    body { min-height: 100vh; background: #000 url('/assets/hebrew-giving.png') center center / cover no-repeat fixed; }
+    .modal-content { background: rgba(255, 255, 255, 0.96); }
+  </style>
+</head>
+<body >
+
+<div class="container mt-3" style="margin-top: 1rem!important;">
+  <!-- Button to Open the Modal -->
+<center>
+  <button type="button" class="btn btn-info btn-lg" data-toggle="modal" data-target="#myModal">
+	Hebrew Giving
+  </button>
+</center>
+
+
+  <!-- The Modal -->
+  <div class="modal fade" id="myModal">
+    <div class="modal-dialog">
+      <div class="modal-content">
+      
+        <!-- Modal Header -->
+        <div class="modal-header"> 
+          	<button type="button" class="close" data-dismiss="modal">&times;</button>
+            <h4 class="modal-title" title="Choen == Jew || Levi == Crazy\Prophet || Ani == Muslim">Hebrew Giving</h4>
+        </div>
+        
+        <!-- Modal body -->
+        <div class="modal-body">
+          <p style="display: inline-block; width: 248px;">Bank income</p><input id="income"  />
+          <br/>
+          <p style="display: inline-block; width: 248px;">Bank expense</p><input id="expense"/>
+          <hr>
+          <p style="display: inline-block; width: 248px;">Savings</p><input readonly id="savings" onclick="calculateSavings();"/>          
+          <hr>
+          <div role="note" style="color: #000; background-color: #fff; border: 1px solid #000; padding: 12px; margin-bottom: 16px; font-weight: bold;">
+            <div>T'ruma G'dola - For a Jew Only</div>
+            <div>Mahaser Rishon - For a Crazy Person/Prophet Only</div>
+            <div>Mahaser Ani - For a Muslim Only</div>
+            <div><a href="https://www.youtube.com/shorts/krcQ6ilKonU" target="_blank" rel="noopener noreferrer">Watch the explanatory video</a></div>
+          </div>
+          <p href="#" data-toggle="tooltip" title="Addressed to Choen person only" style="display: inline-block; width: 248px;" >T'ruma G'dola</p><input readonly id="truma" />
+          <br/>
+          <p href="#" data-toggle="tooltip" title="Addressed to Levi" style="display: inline-block; width: 248px;" >Mahaser Rishon</p><input readonly id="mahaser_01"/>
+		  <br/> 
+          <p href="#" data-toggle="tooltip" title="Levi must give to Choen" style="display: inline-block; width: 248px;" >T'rumat Mahaser</p><input readonly id="mahaser_01__truma" />
+          <br/>
+          <p href="#" data-toggle="tooltip" title="Mahaser sheni spended at Jerusalem only around 1,2,4,5 la'Shmita / Mahaser ani being spended everywhere around 3,6 la'Shmita" style="display: inline-block; width: 248px;" >Mahaser Sheni/Ani</p><input readonly id="mahaser_02"/>
+          <div style="margin-top: 16px;"><a href="/HebrewClock13/public/man/yovelMazalCalculator/en/index.html" target="_blank" rel="noopener noreferrer">Years/Yovel Calculator</a></div>
+          <div style="margin-top: 16px;"><a class="btn btn-primary" href="/HebrewClock13/public/man/hope/index.html">Back to the City Gate</a></div>
+        </div>
+        
+        <!-- Modal footer -->
+        <div class="modal-footer">
+          <button type="button" class="btn btn-danger" data-dismiss="modal">Close</button>
+        </div>
+        
+      </div>
+    </div>
+  </div>
+  
+</div>
+
+<script>
+	function calculateSavings()
+	{
+		var income = document.getElementById("income").value;
+		income = income.replace(",","");
+
+		var expense = document.getElementById("expense").value;
+		expense = expense.replace(",","");
+
+		document.getElementById("savings").value = (parseFloat(income) - parseFloat(expense)) * 1.00; 		
+		document.getElementById("truma").value = document.getElementById("savings").value * (1/60) 
+		document.getElementById("mahaser_01").value = (document.getElementById("savings").value - document.getElementById("truma").value)/10;
+		document.getElementById("mahaser_01__truma").value = document.getElementById("mahaser_01").value * (1/10) 
+		document.getElementById("mahaser_02").value = (document.getElementById("savings").value - document.getElementById("truma").value - document.getElementById("mahaser_01").value)/10;	
+	}
+	
+	$(document).ready(function()
+	{
+		$('[data-toggle="tooltip"]').tooltip();   
+	});
+</script>
+
+
+</body>
+</html>

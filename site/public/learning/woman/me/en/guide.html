@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+    <title>Guide</title>
+    <link rel="stylesheet" type="text/css" href="./css/stylesheet.css" id="thecss">
+    <link rel="stylesheet" type="text/css" href="../../shared/css/stylesheet.css" id="commercial_css">
+    <meta charset="UTF-8">
+    <meta name="description" content="A Hebrew Clock that shows the time of the Sun for sanctify the Moon">
+    <meta name="keywords" content="Hebrew Clock">
+    <meta name="author" content="Naftali Bilig">
+</head>
+
+<body>
+    <div id="container" onclick="pause()">
+        <div class="dropdown" ondblclick="shevetFunction()">
+			<button onclick="myFunction()" class="dropbtn"></button>
+            <button onclick="englishFunction(2)" class="english_btn"></button>
+            <button onclick="genderFunction()" class="gender married"></button>
+			<div id="myDropdown" class="dropdown-content">
+				<a href="./index.html" id="hourly__learning">Self learning</a>
+				<a href="./islam/index.html" id="monthly__learning">Learning with Muslim</a>
+                <a href="./cristian/index.html" id="yearly__learning">Learning with Christian</a>
+				<a href="./jewish/index.html" id="Jubilee__learning">Learning with Jew</a>
+				<a href="./kabala/index.html">Pray Schedule</a>
+				<a href="./guide.html">Manual</a>
+			</div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style = "text-align:center; margin-bottom:10px; visibility:hidden;">
+            <input id="Mazal"  type="text" value = "" onclick="openMidaInNewTab(1);" ondblclick="openMidaInNewTab(0);" />
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+			<table style="width:100%; align:center;">
+				<tr>
+					<td style="width:33%">
+					<td/>
+					<td style="font-weight:bold; font-size:30px;">
+						A sundial designed to sanctify the moon<br/><br/>
+						The clock displays the solar time from sunset - 00 to sunrise - 12 and to sunset again - 24<br/><br/>
+						In order to sanctify the month, you have to enter the "Self learning" and look intuitively on all the issues that appear in the clock together, look at the association that emerges from all the subjects together and press the green button - Stop<br/><br/>
+						A screen opens with 4 pictures of the moon, only one of which is the correct image for the moon's sanctification, the upper left image<br/><br/>
+						An email should be sent to the court to be sent to the court. In Hebrew, the association should be entered in one word or a few words that explain how the association is related to subjects that appeared in the "Self learning". In the body of the message, all the details in English must be entered so that I can make a monetary transfer The exact one I'll talk to in WhatsApp
+					<td/>
+					<td style="width:33%">
+					<td/>
+				<tr/>
+			<table/>
+		</div>
+        <div id="commercial" style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<img class="day" />
+        </div>
+        <br />
+        <br />
+    </div>
+
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="./js/HebrewClock.js"></script>
+    <script type="text/javascript" src="./js/Gender.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+    <script type="text/javascript" src="../../shared/en/js/Commercial.js"></script>
+    <script type="text/javascript" src="./js/Sefer.js"></script>
+    <script type="text/javascript" src="./js/Masechet.js"></script>
+    <script type="text/javascript" src="./js/Parasha.js"></script>
+    <script type="text/javascript" src="./js/Shevet.js"></script>
+	<script type="text/javascript" src="./js/Times.js"></script>
+    <script type="text/javascript" src="./js/SunTime.js"></script>
+    <script type="text/javascript" src="./js/TimeAdj.js"></script>
+    <script type="text/javascript" src="./js/Dst.js"></script>
+    <script type="text/javascript" src="./js/Dates.js"></script>
+    <script type="text/javascript" src="./js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+    var mida_url;
+    var x;
+    var sefer_url;
+    var parasha_url;
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'
+	}
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+    getLocation();  //activate the clock
+
+    //document.getElementById("Masechet").value = "ברכות";
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+
+        var defaultLongitude = "35.2331664";
+        var defaultLatitude = "31.7768514";
+        var defaultUrl = new URL(document.location.href);
+        if (defaultUrl.searchParams.get("longitude") !== defaultLongitude || defaultUrl.searchParams.get("latitude") !== defaultLatitude)
+        {
+            defaultUrl.searchParams.set("longitude", defaultLongitude);
+            defaultUrl.searchParams.set("latitude", defaultLatitude);
+            window.location.replace(defaultUrl.href);
+            return;
+        }
+        showPosition({ coords: { longitude: defaultLongitude, latitude: defaultLatitude } });
+    }
+
+    function showPosition(position)
+    {
+        longitude = position.coords.longitude;
+        latitude = position.coords.latitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+		oTimerclock();
+        //tora learning
+        genderInitFunction();
+        setmazal();
+        //setMasechet();
+        //setSefer();
+        //setParasha();
+
+		//נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openMidaInNewTab(x) {
+        var win;
+        if (x == 1)
+            win = window.open(mazal_url, '_blank');
+        else if(x == 0)
+            win = window.open(mida_url, '_blank');
+        win.focus();
+    }
+
+    function openMasechetInNewTab()
+    {
+        var win = window.open('https://www.sefaria.org/Mishnah_Berakhot.1?lang=bi', '_blank');
+        win.focus();
+    }
+
+    function openSeferInNewTab() {
+        var win = window.open('https://play.google.com/store/apps/details?id=org.sefaria.sefaria', '_blank');
+        win.focus();
+    }
+    function openSeferInSefariaInNewTab() {
+        var sefariaUrl = (typeof sefer_url !== 'undefined' && sefer_url) ? sefer_url : 'https://www.sefaria.org/Genesis.1?lang=bi';
+        var win = window.open(sefariaUrl, '_blank');
+        win.focus();
+    }
+
+    var parashaClickTimer;
+    function openParashaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        parashaClickTimer = setTimeout(function() {
+            var win = window.open('http://ravoldsite.com/archives/archives_h.html', '_blank');
+            win.focus();
+        }, 250);
+    }
+
+    function openParashaInSefariaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        var sefariaUrl = (typeof parasha_url !== 'undefined' && parasha_url) ? parasha_url : 'https://www.sefaria.org/Genesis.1.1?lang=bi';
+        var win = window.open(sefariaUrl, '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        localStorage.setItem("mida", document.getElementById("Mazal").value);
+        localStorage.setItem("masechet", document.getElementById("Masechet").value);
+        localStorage.setItem("sefer", document.getElementById("Sefer").value);
+
+
+        var win = window.open("./moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="he" dir="rtl">
+<head>
+    <title>חוקים לפי שעה עברית</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            margin: 0;
+            background: #f7f7f7;
+            color: #111;
+            font-family: Arial, sans-serif;
+        }
+
+        main {
+            max-width: 980px;
+            margin: 0 auto;
+            padding: 24px 16px 40px;
+        }
+
+        h1 {
+            margin: 0 0 8px;
+            font-size: 44px;
+            text-align: center;
+        }
+
+        #lawsMeta {
+            margin-bottom: 24px;
+            font-size: 24px;
+            text-align: center;
+        }
+
+        .law-card {
+            margin-bottom: 12px;
+            padding: 16px;
+            border: 1px solid #d7d7d7;
+            border-radius: 6px;
+            background: #fff;
+        }
+
+        .law-card h2 {
+            margin: 0 0 10px;
+            font-size: 24px;
+            line-height: 1.35;
+        }
+
+        .law-details {
+            margin-bottom: 10px;
+            color: #444;
+            font-size: 18px;
+        }
+
+        .law-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .law-card a {
+            display: inline-block;
+            padding: 8px 14px;
+            border: 1px solid #0057b8;
+            border-radius: 6px;
+            background: #0057b8;
+            color: #fff;
+            font-size: 18px;
+            text-decoration: none;
+        }
+
+        .law-card a:hover {
+            background: #003f86;
+        }
+
+        .law-card a.open-in-word {
+            border-color: #000003;
+            background: #5EBED2;
+            color: #000003;
+        }
+
+        .law-card a[hidden] {
+            display: none !important;
+        }
+
+        .law-card a.open-in-word:hover,
+        .law-card a.open-in-word:focus-visible {
+            background: #4aa9bd;
+        }
+
+        .wordakn4il-error {
+            flex-basis: 100%;
+            color: #8a1010;
+            font-size: 15px;
+            line-height: 1.5;
+        }
+
+        body.wordakn4il-dialog-open {
+            overflow: hidden;
+        }
+
+        .wordakn4il-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 10000;
+            display: grid;
+            place-items: center;
+            padding: 18px;
+            background: rgba(0, 0, 3, .72);
+        }
+
+        .wordakn4il-overlay[hidden] {
+            display: none !important;
+        }
+
+        .wordakn4il-panel {
+            width: min(900px, 100%);
+            height: min(760px, 94vh);
+            display: grid;
+            grid-template-rows: auto 1fr;
+            overflow: hidden;
+            border: 2px solid #000003;
+            border-radius: 12px;
+            background: #fff;
+        }
+
+        .wordakn4il-close {
+            justify-self: start;
+            margin: 8px;
+            padding: 8px 16px;
+            border: 2px solid #000003;
+            border-radius: 6px;
+            background: #5EBED2;
+            color: #000003;
+            font: 700 16px Arial, sans-serif;
+            cursor: pointer;
+        }
+
+        .wordakn4il-frame {
+            width: 100%;
+            height: 100%;
+            border: 0;
+        }
+
+        .law-empty {
+            padding: 28px;
+            border: 1px solid #d7d7d7;
+            border-radius: 6px;
+            background: #fff;
+            font-size: 24px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <main>
+        <h1 id="lawsTitle">חוקים</h1>
+        <div id="lawsMeta"></div>
+        <section id="lawsList"></section>
+    </main>
+
+    <script type="text/javascript" src="../../../../woman/me/he/js/LawsData.js"></script>
+    <script type="text/javascript" src="../../../../woman/me/he/js/Laws.js"></script>
+    <script type="text/javascript" src="../../../../shared/laws-open-word.js?v=web07-20260715-0015"></script>
+    <script type="text/javascript">
+        renderLawsPage();
+        addOpenInWordButtons();
+    </script>
+</body>
+</html>

@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<!-- Global site tag (gtag.js) - Google Analytics -->
+	<script async src="https://www.googletagmanager.com/gtag/js?id=UA-30684949-2"></script>
+	<script>
+	  window.dataLayer = window.dataLayer || [];
+	  function gtag(){dataLayer.push(arguments);}
+	  gtag('js', new Date());
+
+	  gtag('config', 'UA-30684949-2');
+	</script>
+    <script data-ad-client="ca-pub-1007867022366730" async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js">
+    </script>
+    <title>סיפור היובל</title>
+    <link rel="stylesheet" type="text/css" href="../css/stylesheet.css" id="thecss">
+    <link rel="stylesheet" type="text/css" href="../../../shared/css/stylesheet.css" id="commercial_css">
+    <meta charset="UTF-8">
+    <meta name="description" content="שעון עברי המציג את זמן השמש בשביל לקדש את הלבנה">
+    <meta name="keywords" content="שעון עברי">
+    <meta name="author" content="אחירע בן עינן">
+</head>
+
+<body>
+    <div id="container" onclick="pause()">
+        <div class="dropdown" ondblclick="shevetFunction()">
+            <button onclick="myFunction()" class="dropbtn"></button>
+            <button onclick="genderFunction()" class="gender married disable"></button>
+			<button onclick="englishFunction(2)" class="hebrew_btn"></button>
+            <button onclick="pause()" class="refresh_btn refresh_btn_jewish"></button>
+            <div id="myDropdown" class="dropdown-content">
+                <a href="../index.html" id="hourly__learning">לימוד עצמי</a>
+                <a href="./index.html" id="monthly__learning">לימוד עם מוסלמי/ה</a>
+                <a href="../cristian/index.html" id="yearly__learning">לימוד עם נוצרי/ה</a>
+				<a href="../jewish/index.html" id="Jubilee__learning">לימוד עם יהודי/ה</a>
+                <a href="../kabala/index.html">לו"ז תפילה</a>
+                <a href="../guide.html">מדריך למשתמש</a>
+                <a href="./chosen_story.html">סיפור היובל</a>
+            </div>
+        </div>
+		<div style = "text-align:center; margin-bottom:10px; ">
+			<table style="width:850px;">
+				<input class ="clock" id="Hour" type="text" value = "11" />
+				<input class ="clock" id="Text2" type="text" value = ":" />
+				<input class ="clock" id="Minute" type="text" value = "1079"/>
+				<input class ="clock" id="Text4" type="text" value = ":"/>
+				<input class ="clock" id="Second" type="text" value = "75" />
+			<table/>
+        </div>
+        <div style = "text-align:center; margin-bottom:10px; visibility:hidden;">
+            <input  id="Mazal"  type="text" value = "" onclick="openMidaInNewTab(1);" ondblclick="openMidaInNewTab(0);" />
+        </div>
+        <div style="text-align:center; margin-bottom:10px;">
+			<table style="width:100%; align:center;">
+				<tr>
+					<td style="width:33%">
+					<td/>
+					<td style="font-weight:bold; font-size:30px;">
+                        פרק הזמן הכי משמעותי שקיבל עדות ותשלום דרך האתר<br><br>
+                        מולד היובל האחרון היה בשנת השתל"ד, 1973 נקבע על פי הלוח העברי וזמן המולד ולא על פי העדות המשתנה של אנשים
+                    <td/>
+					<td style="width:33%">
+					<td/>
+				<tr/>
+			<table/>
+		</div>
+        <div id="commercial" style="text-align:center; margin-bottom:10px; margin-top: 10px; display:flex !important; justify-content:center !important; width:100% !important; margin-left:0 !important; margin-right:0 !important;">
+			<img class="day" />
+        </div>
+        <br />
+        <br />
+    </div>
+
+    <script type="text/javascript" src="./js/Menu.js"></script>
+    <script type="text/javascript" src="../js/HebrewClock.js"></script>
+    <script type="text/javascript" src="../js/SederLimud.js"></script>
+    <script type="text/javascript" src="../../../shared/he/js/Commercial.js"></script>
+    <script type="text/javascript" src="./js/Mazal.js"></script>
+	<script type="text/javascript" src="./js/Shevet.js"></script>
+    <script type="text/javascript" src="../js/Times.js"></script>
+    <script type="text/javascript" src="../js/SunTime.js"></script>
+    <script type="text/javascript" src="../js/TimeAdj.js"></script>
+    <script type="text/javascript" src="../js/Dst.js"></script>
+    <script type="text/javascript" src="../js/Dates.js"></script>
+    <script type="text/javascript" src="../js/Location.js"></script>
+
+<script type="text/javascript">
+
+    //public variables
+    var longitude, latitude;  //current geo location
+    var latd = -1, latm = 0;  // lat on earth
+    var lngd = -1, lngm = 0;  // long on earth
+    var lat = 0, lng = 0;     // sun's location
+
+    var ns,ew;              // hemisphere
+    var dst; 	            // daylight saving time
+    var ampm = false; 	    // am/pm or 24 hour display
+
+    var monCount = [13, 1, 32, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366];
+    var flag = false;
+
+    var sunsetH;
+    var sunsetM;
+    var sunsetS;
+
+    var tz = (new Date().getTimezoneOffset() / -60); //current time zone
+
+    var month, day, year;       //curren date
+
+    var shaa_zmanit_night = 1;
+    var shaa_zmanit_day = 1;
+
+	var milisec_shaa_zmanit_night = 1000;
+    var milisec_shaa_zmanit_day = 1000;
+
+    var oTimer;                 //event for the running clock
+
+    var hebrewday;
+    var lbHour = 23;           //hour of the clock called also sha'a
+    var lbHourClock;            //hour for displaying
+    var lbMinute = 1075;       //minute of the clock called also chelek
+    var lbSecond = 70;         //second of the clock called also re'ga
+    var audio;
+    var omer;
+    var mazal_url;
+    var mida_url;
+    var x;
+    var sefer_url;
+    var parasha_url;
+
+	const genders = {
+        MARRIED: '10',
+        FEMALE: '01',
+        MALE: '00'
+    }
+
+    var gender;
+    if( localStorage["gender"] != null )
+        gender = localStorage["gender"];
+    else
+        gender = genders.MARRIED;
+
+    getLocation();  //activate the clock
+
+    //document.getElementById("Masechet").value = "ברכות";
+
+    //---get Location and activate the clock---
+    function getLocation()
+    {
+
+        var defaultLongitude = "35.2331664";
+        var defaultLatitude = "31.7768514";
+        var defaultUrl = new URL(document.location.href);
+        if (defaultUrl.searchParams.get("longitude") !== defaultLongitude || defaultUrl.searchParams.get("latitude") !== defaultLatitude)
+        {
+            defaultUrl.searchParams.set("longitude", defaultLongitude);
+            defaultUrl.searchParams.set("latitude", defaultLatitude);
+            window.location.replace(defaultUrl.href);
+            return;
+        }
+        showPosition({ coords: { longitude: defaultLongitude, latitude: defaultLatitude } });
+    }
+
+    function showPosition(position)
+    {
+        longitude = position.coords.longitude;
+        latitude = position.coords.latitude;
+
+        set_dst();
+        set_default_date();
+        list_pos();
+        hebrewclock();
+        oTimerclock();
+        //tora learning
+        //genderInitFunction();
+        setmazal();
+        //setMasechet();
+        //setSefer();
+        //setParasha();
+
+		//נחלה
+        setShevet();
+        commercialFunction();
+    }
+
+    //link to mazal information
+    function openMidaInNewTab(x) {
+        var win;
+        if (x == 1)
+            win = window.open(mazal_url, '_blank');
+        else if(x == 0)
+            win = window.open(mida_url, '_blank');
+        win.focus();
+    }
+
+    function openMasechetInNewTab()
+    {
+        var win = window.open('https://www.sefaria.org/Mishnah_Shekalim.1?lang=he', '_blank');
+        win.focus();
+    }
+
+    function openSeferInNewTab() {
+        var win = window.open('https://www.929.org.il/page/118', '_blank');
+        win.focus();
+    }
+    function openSeferInSefariaInNewTab() {
+        var sefariaUrl = (typeof sefer_url !== 'undefined' && sefer_url) ? sefer_url : 'https://www.sefaria.org/Numbers.1?lang=he';
+        var win = window.open(sefariaUrl, '_blank');
+        win.focus();
+    }
+
+    var parashaClickTimer;
+    function openParashaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        parashaClickTimer = setTimeout(function() {
+            var win = window.open('https://haravelon.co.il/tag/%D7%91%D7%A9%D7%9C%D7%97/', '_blank');
+            win.focus();
+        }, 250);
+    }
+
+    function openParashaInSefariaInNewTab() {
+        clearTimeout(parashaClickTimer);
+        var win = window.open('https://www.sefaria.org/Zohar,_Beshalach?vhe=Hebrew_Translation&lang=he', '_blank');
+        win.focus();
+    }
+
+    //pause the background music
+    function pause() {
+        audio.pause();
+    }
+
+    //kidush hachodesh on specific hour
+    function stop() {
+        clearInterval(oTimer);
+
+        localStorage.setItem("hebrewday", hebrewday);
+        localStorage.setItem("lbHourClock", lbHourClock);
+        localStorage.setItem("lbHour", lbHour);
+        localStorage.setItem("lbMinute", lbMinute);
+        localStorage.setItem("lbSecond", lbSecond);
+        localStorage.setItem("omer", omer);
+        localStorage.setItem("mida", document.getElementById("Mazal").value);
+        localStorage.setItem("masechet", document.getElementById("Masechet").value);
+        localStorage.setItem("sefer", document.getElementById("Sefer").value);
+
+
+        var win = window.open("./moon.html", '_blank');
+        win.focus();
+    }
+
+    </script>
+
+
+
+</body>
+</html>
