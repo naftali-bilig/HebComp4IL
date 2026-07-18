@@ -207,7 +207,7 @@ class MelodyPlaybackService : Service() {
         )
         return Notification.Builder(this, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.ic_media_play)
-            .setContentTitle("JClock · מנגינות")
+            .setContentTitle("ThirdTempale · מנגינות")
             .setContentText(statusText(state))
             .setContentIntent(openApp)
             .setOngoing(MelodyPlaybackController.isPlaybackRequested)
@@ -228,7 +228,7 @@ class MelodyPlaybackService : Service() {
     private fun createNotificationChannel() {
         val channel = NotificationChannel(
             CHANNEL_ID,
-            "מנגינות JClock",
+            "מנגינות ThirdTempale",
             NotificationManager.IMPORTANCE_LOW,
         ).apply { description = "נגינת מנגינות החודש מן השעון ומהטלפון" }
         getSystemService(NotificationManager::class.java).createNotificationChannel(channel)

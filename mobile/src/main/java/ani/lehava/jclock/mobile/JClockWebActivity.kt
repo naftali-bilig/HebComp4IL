@@ -11,6 +11,7 @@ import android.net.Uri
 import android.net.http.SslError
 import android.os.Build
 import android.os.Bundle
+import android.os.Message
 import android.view.Gravity
 import android.view.View
 import android.webkit.CookieManager
@@ -38,6 +39,8 @@ class JClockWebActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private lateinit var progress: ProgressBar
     private lateinit var backButton: Button
+    private lateinit var mobileUserAgent: String
+    private var isSefariaDesktopPresentation = false
     private var pendingGeoOrigin: String? = null
     private var pendingGeoCallback: GeolocationPermissions.Callback? = null
 
@@ -65,7 +68,7 @@ class JClockWebActivity : ComponentActivity() {
             visibility = View.GONE
         }
         backButton = toolbarButton("חזרה") {
-            if (webView.canGoBack()) webView.goBack() else finish()
+            goBackOrFinish()
         }
 
         configureWebView()
@@ -73,7 +76,7 @@ class JClockWebActivity : ComponentActivity() {
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
             override fun handleOnBackPressed() {
-                if (webView.canGoBack()) webView.goBack() else finish()
+                goBackOrFinish()
             }
         })
 
@@ -134,11 +137,17 @@ class JClockWebActivity : ComponentActivity() {
             allowUniversalAccessFromFileURLs = false
             mixedContentMode = WebSettings.MIXED_CONTENT_NEVER_ALLOW
             safeBrowsingEnabled = true
-            setSupportMultipleWindows(false)
+            setSupportMultipleWindows(true)
             javaScriptCanOpenWindowsAutomatically = false
             mediaPlaybackRequiresUserGesture = true
             cacheMode = WebSettings.LOAD_DEFAULT
-            userAgentString = "$userAgentString JClockAndroid/$versionName"
+            setSupportZoom(true)
+            builtInZoomControls = true
+            displayZoomControls = false
+            mobileUserAgent = "$userAgentString JClockAndroid/$versionName"
+            userAgentString = mobileUserAgent
+            useWideViewPort = false
+            loadWithOverviewMode = false
         }
 
         CookieManager.getInstance().apply {
@@ -162,6 +171,12 @@ class JClockWebActivity : ComponentActivity() {
             override fun onPageFinished(view: WebView, url: String?) {
                 progress.visibility = View.GONE
                 updateNavigation()
+                val pageUri = url?.let(Uri::parse)
+                if (pageUri != null && isSefariaHost(pageUri.host)) {
+                    installSefariaCopyMode(view)
+                } else if (pageUri != null && isLegacyClockLearningPage(pageUri)) {
+                    installLegacyClockMobileMode(view)
+                }
             }
 
             override fun doUpdateVisitedHistory(view: WebView, url: String?, isReload: Boolean) {
@@ -202,28 +217,17 @@ class JClockWebActivity : ComponentActivity() {
                 origin: String,
                 callback: GeolocationPermissions.Callback,
             ) {
+                if (!isSecureOrigin(origin)) {
+                    callback.invoke(origin, false, false)
+                    return
+                }
+
                 if (!isTrustedOrigin(origin)) {
                     callback.invoke(origin, false, false)
                     return
                 }
-                if (hasLocationPermission()) {
-                    callback.invoke(origin, true, false)
-                    return
-                }
 
-                pendingGeoCallback?.let { previous ->
-                    pendingGeoOrigin?.let { previousOrigin ->
-                        previous.invoke(previousOrigin, false, false)
-                    }
-                }
-                pendingGeoOrigin = origin
-                pendingGeoCallback = callback
-                locationPermission.launch(
-                    arrayOf(
-                        Manifest.permission.ACCESS_FINE_LOCATION,
-                        Manifest.permission.ACCESS_COARSE_LOCATION,
-                    ),
-                )
+                grantGeolocation(origin, callback)
             }
 
             override fun onGeolocationPermissionsHidePrompt() {
@@ -234,7 +238,68 @@ class JClockWebActivity : ComponentActivity() {
             override fun onPermissionRequest(request: PermissionRequest) {
                 request.deny()
             }
+
+            override fun onCreateWindow(
+                view: WebView,
+                isDialog: Boolean,
+                isUserGesture: Boolean,
+                resultMsg: Message,
+            ): Boolean {
+                if (!isUserGesture) return false
+                val transport = resultMsg.obj as? WebView.WebViewTransport ?: return false
+                val popup = WebView(this@JClockWebActivity)
+                popup.webViewClient = object : WebViewClient() {
+                    override fun shouldOverrideUrlLoading(
+                        view: WebView,
+                        request: WebResourceRequest,
+                    ): Boolean = redirectPopup(popup, request.url)
+
+                    @Deprecated("Deprecated in Android")
+                    override fun shouldOverrideUrlLoading(view: WebView, url: String): Boolean =
+                        redirectPopup(popup, Uri.parse(url))
+                }
+                transport.webView = popup
+                resultMsg.sendToTarget()
+                return true
+            }
         }
+    }
+
+    private fun grantGeolocation(
+        origin: String,
+        callback: GeolocationPermissions.Callback,
+    ) {
+        if (hasLocationPermission()) {
+            callback.invoke(origin, true, false)
+            return
+        }
+
+        pendingGeoCallback?.let { previous ->
+            pendingGeoOrigin?.let { previousOrigin ->
+                previous.invoke(previousOrigin, false, false)
+            }
+        }
+        pendingGeoOrigin = origin
+        pendingGeoCallback = callback
+        locationPermission.launch(
+            arrayOf(
+                Manifest.permission.ACCESS_FINE_LOCATION,
+                Manifest.permission.ACCESS_COARSE_LOCATION,
+            ),
+        )
+    }
+
+    private fun redirectPopup(popup: WebView, uri: Uri): Boolean {
+        if (uri.toString() == "about:blank") return false
+        popup.stopLoading()
+        popup.destroy()
+        val target = allowedNavigationTarget(uri)
+        if (target != null) {
+            loadInWebView(target)
+        } else {
+            toast("הקישור נחסם משום שאינו ברשימת האתרים המאושרים באפליקציה")
+        }
+        return true
     }
 
     private fun buildContent(): View {
@@ -243,7 +308,6 @@ class JClockWebActivity : ComponentActivity() {
             layoutDirection = View.LAYOUT_DIRECTION_RTL
             setBackgroundColor(Color.WHITE)
         }
-        root.addView(buildToolbar())
         root.addView(
             progress,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(3)),
@@ -252,6 +316,7 @@ class JClockWebActivity : ComponentActivity() {
             webView,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f),
         )
+        root.addView(buildToolbar())
         return root
     }
 
@@ -262,10 +327,11 @@ class JClockWebActivity : ComponentActivity() {
         setBackgroundColor(Color.rgb(31, 52, 69))
 
         addView(backButton)
-        addView(toolbarButton("בית") { webView.loadUrl(HOME_URL) })
+        addView(toolbarButton("בית") { loadInWebView(Uri.parse(HOME_URL)) })
+        addView(toolbarButton("ChatGPT") { loadInWebView(Uri.parse(CHATGPT_URL)) })
         addView(ImageView(this@JClockWebActivity).apply {
             setImageResource(R.drawable.hebrew_clock_logo_big)
-            contentDescription = "JClock"
+            contentDescription = "ThirdTempale"
             scaleType = ImageView.ScaleType.CENTER_CROP
         }, LinearLayout.LayoutParams(0, dp(48), 1f))
         addView(toolbarButton("רענן") { webView.reload() })
@@ -285,24 +351,45 @@ class JClockWebActivity : ComponentActivity() {
     }
 
     private fun loadRequestedUrl(source: Intent) {
-        val requested = source.getStringExtra(EXTRA_URL)?.let(Uri::parse)
-        val target = if (requested != null && isAllowedNavigation(requested)) {
-            requested.toString()
-        } else {
-            HOME_URL
-        }
-        webView.loadUrl(target)
+        val target = source.getStringExtra(EXTRA_URL)
+            ?.let(Uri::parse)
+            ?.let(::allowedNavigationTarget)
+            ?: Uri.parse(HOME_URL)
+        loadInWebView(target)
     }
 
     private fun handleNavigation(uri: Uri): Boolean {
-        if (isAllowedNavigation(uri)) return false
-        toast("הקישור החיצוני נחסם ונשארת בתוך JClock")
+        val target = allowedNavigationTarget(uri)?.let(::localizeLegacyLearningTarget)
+        if (target != null) {
+            val needsPresentationChange =
+                isSefariaDesktopPresentation != isSefariaHost(target.host)
+            if (target == uri && !needsPresentationChange) return false
+            loadInWebView(target)
+            return true
+        }
+        toast("הקישור נחסם משום שאינו ברשימת האתרים המאושרים באפליקציה")
         return true
     }
 
-    private fun isAllowedNavigation(uri: Uri): Boolean {
-        if (uri.toString() == "about:blank") return true
-        return uri.scheme.equals("https", ignoreCase = true) && isTrustedHost(uri.host)
+    private fun allowedNavigationTarget(uri: Uri): Uri? {
+        if (uri.toString() == "about:blank") return uri
+        val host = uri.host?.lowercase()
+        val scheme = uri.scheme?.lowercase()
+
+        if (host in LEGACY_RABBI_ELON_HOSTS && (scheme == "http" || scheme == "https")) {
+            return Uri.parse(RABBI_ELON_URL)
+        }
+        if (!isAllowedHost(host)) return null
+        return when (scheme) {
+            "https" -> uri
+            "http" -> uri.buildUpon().scheme("https").build()
+            else -> null
+        }
+    }
+
+    private fun isSecureOrigin(origin: String): Boolean {
+        val uri = runCatching { Uri.parse(origin) }.getOrNull() ?: return false
+        return uri.scheme.equals("https", ignoreCase = true) && !uri.host.isNullOrBlank()
     }
 
     private fun isTrustedOrigin(origin: String): Boolean {
@@ -311,6 +398,237 @@ class JClockWebActivity : ComponentActivity() {
     }
 
     private fun isTrustedHost(host: String?): Boolean = host?.lowercase() in TRUSTED_HOSTS
+
+    private fun isAllowedHost(host: String?): Boolean = host?.lowercase() in ALLOWED_HOSTS
+
+    private fun isSefariaHost(host: String?): Boolean = host?.lowercase() in SEFARIA_HOSTS
+
+    private fun isLegacyClockHost(host: String?): Boolean =
+        host.equals(LEGACY_CLOCK_HOST, ignoreCase = true)
+
+    private fun isLegacyClockLearningPage(uri: Uri): Boolean =
+        isLegacyClockHost(uri.host) && uri.path.orEmpty().lowercase().contains("/me/")
+
+    private fun localizeLegacyLearningTarget(target: Uri): Uri {
+        if (!isLegacyClockHost(target.host)) return target
+        val sourcePath = webView.url
+            ?.let(Uri::parse)
+            ?.path
+            .orEmpty()
+            .lowercase()
+        val targetPath = target.path.orEmpty()
+        if (!sourcePath.contains("/simple/") || !targetPath.lowercase().contains("/me/en/")) {
+            return target
+        }
+        return target.buildUpon()
+            .path(targetPath.replace("/me/en/", "/me/he/", ignoreCase = true))
+            .build()
+    }
+
+    private fun loadInWebView(uri: Uri) {
+        configurePresentationFor(uri)
+        webView.loadUrl(uri.toString())
+    }
+
+    private fun configurePresentationFor(uri: Uri) {
+        val showDesktopSefaria = isSefariaHost(uri.host)
+        if (showDesktopSefaria == isSefariaDesktopPresentation) return
+        isSefariaDesktopPresentation = showDesktopSefaria
+        webView.settings.apply {
+            // Sefaria intentionally uses its desktop layout for multi-segment copying.
+            // JClock and every other approved source return to the Android mobile layout.
+            userAgentString = if (showDesktopSefaria) DESKTOP_USER_AGENT else mobileUserAgent
+            useWideViewPort = showDesktopSefaria
+            loadWithOverviewMode = showDesktopSefaria
+        }
+    }
+
+    private fun goBackOrFinish() {
+        if (!webView.canGoBack()) {
+            finish()
+            return
+        }
+        val history = webView.copyBackForwardList()
+        val previous = history.getItemAtIndex(history.currentIndex - 1)?.url
+        previous?.let(Uri::parse)?.let(::configurePresentationFor)
+        webView.goBack()
+    }
+
+    private fun installLegacyClockMobileMode(view: WebView) {
+        view.evaluateJavascript(
+            """
+            (() => {
+                let viewport = document.querySelector('meta[name="viewport"]');
+                if (!viewport) {
+                    viewport = document.createElement('meta');
+                    viewport.name = 'viewport';
+                    document.head.appendChild(viewport);
+                }
+                viewport.content = 'width=device-width, initial-scale=1.0';
+
+                let style = document.getElementById('thirdtempale-legacy-mobile');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'thirdtempale-legacy-mobile';
+                    document.head.appendChild(style);
+                }
+                style.textContent = `
+                    html, body, #container {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                        overflow-x: hidden !important;
+                        margin-left: 0 !important;
+                        margin-right: 0 !important;
+                    }
+                    #container > div, #container table {
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                    }
+                    #container table { width: 100% !important; }
+                    .dropdown {
+                        background-size: 100% 100% !important;
+                        background-position: center !important;
+                        background-repeat: no-repeat !important;
+                    }
+                    .day, .month, .year, .yovel {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                        box-sizing: border-box !important;
+                        font-size: clamp(20px, 6.5vw, 34px) !important;
+                    }
+                    .clock {
+                        font-size: clamp(32px, 12vw, 58px) !important;
+                        box-sizing: border-box !important;
+                    }
+                    #Hour, #Second { width: 18% !important; }
+                    #Text2, #Text4 { width: 8% !important; }
+                    #Minute { width: 36% !important; }
+                    #stop {
+                        max-width: 60% !important;
+                        font-size: clamp(32px, 12vw, 58px) !important;
+                    }
+                    .masechet-split {
+                        width: 100% !important;
+                        max-width: 100% !important;
+                    }
+                    img, iframe, video {
+                        max-width: 100% !important;
+                        height: auto;
+                    }
+                `;
+            })();
+            """.trimIndent(),
+            null,
+        )
+    }
+
+    private fun installSefariaCopyMode(view: WebView) {
+        view.evaluateJavascript(
+            """
+            (() => {
+                if (document.getElementById('jclock-copy-toggle')) return;
+                const style = document.createElement('style');
+                style.id = 'jclock-copy-style';
+                style.textContent = `
+                    #jclock-copy-toggle {
+                        position: fixed; left: 16px; bottom: 16px; z-index: 2147483647;
+                        border: 0; border-radius: 22px; padding: 10px 15px;
+                        background: #1f3445; color: white; font: 600 14px Arial, sans-serif;
+                        box-shadow: 0 2px 10px rgba(0,0,0,.3); direction: rtl;
+                    }
+                    html.jclock-copy-mode .segmentText {
+                        outline: 2px solid rgba(31,52,69,.35); outline-offset: 3px;
+                        cursor: copy; -webkit-user-select: text !important; user-select: text !important;
+                    }
+                    html.jclock-copy-mode .segmentText.jclock-copy-selected {
+                        outline-color: #1f3445; background: rgba(94,190,210,.22) !important;
+                    }
+                `;
+                document.head.appendChild(style);
+
+                const button = document.createElement('button');
+                button.id = 'jclock-copy-toggle';
+                button.type = 'button';
+                button.textContent = 'בחירת קטעים';
+                button.setAttribute('aria-pressed', 'false');
+                document.body.appendChild(button);
+
+                let enabled = false;
+                const selected = new Set();
+
+                const setEnabled = value => {
+                    enabled = value;
+                    document.documentElement.classList.toggle('jclock-copy-mode', enabled);
+                    button.setAttribute('aria-pressed', String(enabled));
+                    button.textContent = enabled ? 'בחר קטעים (0)' : 'בחירת קטעים';
+                };
+
+                const copyText = async text => {
+                    try {
+                        await navigator.clipboard.writeText(text);
+                    } catch (_) {
+                        const area = document.createElement('textarea');
+                        area.value = text;
+                        area.style.position = 'fixed';
+                        area.style.opacity = '0';
+                        document.body.appendChild(area);
+                        area.select();
+                        document.execCommand('copy');
+                        area.remove();
+                    }
+                };
+
+                button.addEventListener('click', async event => {
+                    event.preventDefault();
+                    event.stopPropagation();
+                    if (!enabled) {
+                        setEnabled(true);
+                        return;
+                    }
+                    if (selected.size === 0) {
+                        setEnabled(false);
+                        return;
+                    }
+
+                    const orderedSegments = Array.from(document.querySelectorAll('.segmentText'))
+                        .filter(segment => selected.has(segment));
+                    const text = orderedSegments
+                        .map(segment => segment.innerText.trim())
+                        .filter(Boolean)
+                        .join('\n\n');
+                    await copyText(text);
+                    const copiedCount = orderedSegments.length;
+                    selected.forEach(segment => segment.classList.remove('jclock-copy-selected'));
+                    selected.clear();
+                    setEnabled(false);
+                    button.textContent = copiedCount + ' קטעים הועתקו';
+                    setTimeout(() => {
+                        if (!enabled) button.textContent = 'בחירת קטעים';
+                    }, 1300);
+                });
+
+                document.addEventListener('click', event => {
+                    if (!enabled) return;
+                    const segment = event.target.closest('.segmentText');
+                    if (!segment) return;
+                    event.preventDefault();
+                    event.stopPropagation();
+                    event.stopImmediatePropagation();
+                    if (selected.has(segment)) {
+                        selected.delete(segment);
+                        segment.classList.remove('jclock-copy-selected');
+                    } else {
+                        selected.add(segment);
+                        segment.classList.add('jclock-copy-selected');
+                    }
+                    button.textContent = 'העתק ' + selected.size + ' קטעים';
+                }, true);
+            })();
+            """.trimIndent(),
+            null,
+        )
+    }
 
     private fun hasLocationPermission(): Boolean =
         ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) ==
@@ -331,10 +649,49 @@ class JClockWebActivity : ComponentActivity() {
 
     companion object {
         private const val HOME_URL = "https://jclock.net/"
+        private const val CHATGPT_URL = "https://chatgpt.com/"
+        private const val RABBI_ELON_URL = "https://haravelon.co.il/"
+        private const val LEGACY_CLOCK_HOST = "jclock126.web.app"
+        private const val DESKTOP_USER_AGENT =
+            "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
+                "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         private const val EXTRA_URL = "ani.lehava.jclock.extra.URL"
         private val TRUSTED_HOSTS = setOf(
             "jclock.net",
             "www.jclock.net",
+            LEGACY_CLOCK_HOST,
+        )
+        private val SEFARIA_HOSTS = setOf(
+            "sefaria.org",
+            "www.sefaria.org",
+            "sefaria.org.il",
+            "www.sefaria.org.il",
+        )
+        private val ALLOWED_HOSTS = TRUSTED_HOSTS + SEFARIA_HOSTS + setOf(
+            "929.org.il",
+            "www.929.org.il",
+            "haravelon.co.il",
+            "www.haravelon.co.il",
+            "ceves.net",
+            "www.ceves.net",
+            "tuning-mg.com",
+            "www.tuning-mg.com",
+            "counting-the-omer.wixsite.com",
+            "play.google.com",
+            "apps.apple.com",
+            "world-coin.ai",
+            "www.world-coin.ai",
+            "shilat-medical.web.app",
+            "chatgpt.com",
+            "www.chatgpt.com",
+            "chat.openai.com",
+            "auth.openai.com",
+            "auth0.openai.com",
+            "login.openai.com",
+        )
+        private val LEGACY_RABBI_ELON_HOSTS = setOf(
+            "ravoldsite.com",
+            "www.ravoldsite.com",
         )
 
         fun intent(context: Context, url: String = HOME_URL): Intent =

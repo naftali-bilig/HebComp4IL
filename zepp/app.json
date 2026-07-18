@@ -4,7 +4,7 @@
     "appId": 1094762,
     "appName": "JClock",
     "appType": "app",
-    "version": { "code": 11, "name": "0.3.8" },
+    "version": { "code": 12, "name": "0.3.9" },
     "icon": "icon.png",
     "vender": "Naftali Bilig",
     "description": "JClock - Hebrew solar and lunar time. Copyright 2009-2026 Naftali Bilig."

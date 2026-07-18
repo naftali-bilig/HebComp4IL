@@ -80,7 +80,13 @@ object PhoneLocationRepository {
     }
 
     @SuppressLint("MissingPermission")
-    private fun resolveFixed(context: Context): Snapshot {
+    private fun resolveFixed(context: Context): Snapshot = resolveCurrentLocation(context, Mode.FIXED)
+
+    /** Mobile mode deliberately performs a fresh high-accuracy read on every watch poll. */
+    private fun resolveMobile(context: Context): Snapshot = resolveCurrentLocation(context, Mode.MOBILE)
+
+    @SuppressLint("MissingPermission")
+    private fun resolveCurrentLocation(context: Context, mode: Mode): Snapshot {
         if (!hasLocationPermission(context)) throw Failure.PermissionDenied()
 
         val client = LocationServices.getFusedLocationProviderClient(context)
@@ -102,7 +108,7 @@ object PhoneLocationRepository {
 
         if (current != null) {
             saveFix(context, current)
-            return localSnapshot(context, Mode.FIXED, current)
+            return localSnapshot(context, mode, current)
         }
 
         val cached = readFix(context)
@@ -118,30 +124,7 @@ object PhoneLocationRepository {
         val fallback = listOfNotNull(cached, last).maxByOrNull { it.capturedAt }
             ?: throw Failure.LocationUnavailable()
         saveFix(context, fallback)
-        return localSnapshot(context, Mode.FIXED, fallback)
-    }
-
-    private fun resolveMobile(context: Context): Snapshot {
-        if (!isMobileLocationEnabled(context)) return emptyMobileSnapshot(context, enabled = false)
-        if (!hasLocationPermission(context)) throw Failure.PermissionDenied()
-        val fix = readFix(context) ?: return emptyMobileSnapshot(context, enabled = true)
-        return localSnapshot(context, Mode.MOBILE, fix)
-    }
-
-    private fun emptyMobileSnapshot(context: Context, enabled: Boolean): Snapshot {
-        val now = System.currentTimeMillis()
-        val zone = ZoneId.systemDefault()
-        return Snapshot(
-            mode = Mode.MOBILE,
-            latitude = null,
-            longitude = null,
-            accuracy = null,
-            capturedAt = null,
-            timeZone = zone.id,
-            utcOffsetSeconds = zone.rules.getOffset(Instant.ofEpochMilli(now)).totalSeconds,
-            mobileLocationEnabled = enabled,
-            updated = false,
-        )
+        return localSnapshot(context, mode, fallback)
     }
 
     private fun jerusalemSnapshot(context: Context): Snapshot {
@@ -171,7 +154,7 @@ object PhoneLocationRepository {
             capturedAt = fix.capturedAt,
             timeZone = zone.id,
             utcOffsetSeconds = zone.rules.getOffset(Instant.ofEpochMilli(now)).totalSeconds,
-            mobileLocationEnabled = isMobileLocationEnabled(context),
+            mobileLocationEnabled = mode == Mode.MOBILE || isMobileLocationEnabled(context),
             updated = true,
         )
     }

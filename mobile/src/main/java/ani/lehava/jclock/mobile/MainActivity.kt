@@ -93,7 +93,7 @@ class MainActivity : ComponentActivity() {
 
     private fun birthUrl(): String {
         val now = ZonedDateTime.now()
-        return Uri.parse("https://jclock.net/apps/birth-calculator/he/").buildUpon()
+        return Uri.parse("https://jclock.net/BirthCalculator/public/he/index.html").buildUpon()
             .appendQueryParameter("date", now.format(DateTimeFormatter.ISO_LOCAL_DATE))
             .appendQueryParameter("time", now.format(DateTimeFormatter.ofPattern("HH:mm")))
             .appendQueryParameter("timeZone", now.zone.id)
@@ -108,7 +108,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(28), dp(36), dp(28), dp(36))
         }
         layout.addView(TextView(this).apply {
-            text = "JClock"
+            text = "ThirdTempale"
             textSize = 28f
             gravity = Gravity.CENTER
         })
@@ -325,7 +325,7 @@ class MainActivity : ComponentActivity() {
                 startActivity(
                     JClockWebActivity.intent(
                         this@MainActivity,
-                        "https://jclock.net/apps/birth-calculator/he/",
+                        "https://jclock.net/BirthCalculator/public/he/index.html",
                     ),
                 )
             }
@@ -363,7 +363,7 @@ class MainActivity : ComponentActivity() {
             setPadding(dp(22), dp(12), dp(22), dp(12))
         }
         AlertDialog.Builder(this)
-            .setTitle("JClock · רישיון וזכויות")
+            .setTitle("ThirdTempale · רישיון וזכויות")
             .setView(ScrollView(this).apply { addView(content) })
             .setPositiveButton("סגור", null)
             .show()

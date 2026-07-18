@@ -94,16 +94,16 @@ class MobileLocationService : Service() {
         manager.createNotificationChannel(
             NotificationChannel(
                 NOTIFICATION_CHANNEL,
-                "JClock mobile location",
+                "ThirdTempale mobile location",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
-                description = "Updates the JClock watch location while mobile mode is enabled"
+                description = "Updates the ThirdTempale watch location while mobile mode is enabled"
                 setShowBadge(false)
             },
         )
         return Notification.Builder(this, NOTIFICATION_CHANNEL)
             .setSmallIcon(android.R.drawable.ic_menu_mylocation)
-            .setContentTitle("JClock · מיקום נייד")
+            .setContentTitle("ThirdTempale · מיקום נייד")
             .setContentText("המיקום נשלח לחישוב השעון כל 6 שניות")
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)

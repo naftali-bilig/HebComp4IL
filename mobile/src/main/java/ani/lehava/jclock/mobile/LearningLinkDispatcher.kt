@@ -6,7 +6,7 @@ import android.net.Uri
 import org.json.JSONObject
 
 object LearningLinkDispatcher {
-    private const val BIRTH_CALCULATOR = "https://jclock.net/apps/birth-calculator/he/"
+    private const val BIRTH_CALCULATOR = "https://jclock.net/BirthCalculator/public/he/index.html"
 
     const val SUN_TITLE = "שעון חמה:\nמה צריך להיות באמת יעד המשימה?"
     const val MOON_TITLE = "שעון הלבנה:\nמה גרם לנו לעצור את השעון?"
@@ -33,18 +33,22 @@ object LearningLinkDispatcher {
         )
     }
 
-    private fun personalLearning(body: JSONObject): Uri = Uri.parse(BIRTH_CALCULATOR).buildUpon()
+    fun personalLearning(body: JSONObject): Uri = Uri.parse(BIRTH_CALCULATOR).buildUpon()
         .appendQueryParameter("date", body.optString("date"))
         .appendQueryParameter("time", body.optString("time"))
         .appendQueryParameter("timeZone", body.optString("timeZone", "Asia/Jerusalem"))
         .appendQueryParameter("auto", "1")
         .build()
 
-    /** Opens the personal-learning calculation inside the secured JClock WebView. */
+    /** Stores the watch event and opens the phone gateway for an explicit user choice. */
     fun forward(context: Context, body: JSONObject) {
+        WatchEventRepository.save(context, body)
         context.startActivity(
-            JClockWebActivity.intent(context, personalLearning(body).toString())
-                .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK),
+            Intent(context, MainActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_NEW_TASK or
+                    Intent.FLAG_ACTIVITY_CLEAR_TOP or
+                    Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            ),
         )
     }
 }

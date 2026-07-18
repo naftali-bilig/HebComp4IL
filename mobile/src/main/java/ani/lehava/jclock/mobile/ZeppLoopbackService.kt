@@ -64,7 +64,7 @@ class ZeppLoopbackService : Service() {
         manager.createNotificationChannel(
             NotificationChannel(
                 NOTIFICATION_CHANNEL,
-                "JClock watch connection",
+                "ThirdTempale watch connection",
                 NotificationManager.IMPORTANCE_LOW,
             ).apply {
                 description = "Keeps the private Zepp watch connection available"
@@ -73,7 +73,7 @@ class ZeppLoopbackService : Service() {
         )
         return Notification.Builder(this, NOTIFICATION_CHANNEL)
             .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-            .setContentTitle("JClock")
+            .setContentTitle("ThirdTempale")
             .setContentText("Zepp watch connection is active")
             .setOngoing(true)
             .setCategory(Notification.CATEGORY_SERVICE)
@@ -213,13 +213,13 @@ class ZeppLoopbackService : Service() {
         if (body.optString("protocol") != PING_PROTOCOL) throw HttpFailure(422, "invalid ping protocol")
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
-            NotificationChannel(PING_NOTIFICATION_CHANNEL, "JClock connection tests", NotificationManager.IMPORTANCE_HIGH),
+            NotificationChannel(PING_NOTIFICATION_CHANNEL, "ThirdTempale connection tests", NotificationManager.IMPORTANCE_HIGH),
         )
         manager.notify(
             PING_NOTIFICATION_ID,
             Notification.Builder(this, PING_NOTIFICATION_CHANNEL)
                 .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
-                .setContentTitle("JClock מחובר")
+                .setContentTitle("ThirdTempale מחובר")
                 .setContentText("הטלפון והשעון מתקשרים בהצלחה")
                 .setAutoCancel(true)
                 .build(),

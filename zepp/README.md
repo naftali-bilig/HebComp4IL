@@ -5,10 +5,15 @@ Program: no WebView or external server is required. The calculations themselves
 run locally on the watch. Jerusalem mode uses `Asia/Jerusalem`; Local mode uses
 the device's local clock and coordinates received from the Android companion.
 
+The watch screen mirrors the Galaxy Watch release: the same circular layout,
+Jerusalem/Local controls, stopped-clock action, three-hour time slider, Now
+button, solar/lunar orbit, and Jerusalem-anchored molad colors are preserved.
+
 The location modes are deliberately distinct:
 
-- Fixed location stores the phone position received when Local is pressed.
-- Mobile location is opt-in on the phone and refreshes the position every 6000 ms.
+- One press on Local stores one fixed high-accuracy phone GPS position.
+- Two presses on Local within 650 ms enable mobile mode and request a fresh
+  high-accuracy phone GPS position every 6000 ms.
 - Jerusalem stops local refreshes and restores the fixed Jerusalem coordinates.
 
 ## Build
