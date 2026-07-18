@@ -28,24 +28,16 @@ object MelodyPlaybackController {
 
     fun pause(context: Context) = dispatch(context, MelodyPlaybackService.ACTION_PAUSE)
 
-    fun stopLocal(context: Context) = dispatch(context, MelodyPlaybackService.ACTION_STOP_LOCAL)
-
     fun skip(context: Context) = dispatch(context, MelodyPlaybackService.ACTION_SKIP)
 
     /** Starts the persistent media command target while the Activity is visible. */
     fun prepare(context: Context) = dispatch(context, MelodyPlaybackService.ACTION_PREPARE)
 
-    fun playLocal(
-        context: Context,
-        uri: Uri,
-        displayName: String,
-        startPositionMillis: Int = 0,
-    ) {
+    fun playLocal(context: Context, uri: Uri, displayName: String) {
         val intent = Intent(context, MelodyPlaybackService::class.java)
             .setAction(MelodyPlaybackService.ACTION_PLAY_LOCAL)
             .setData(uri)
             .putExtra(MelodyPlaybackService.EXTRA_LOCAL_NAME, displayName)
-            .putExtra(MelodyPlaybackService.EXTRA_START_POSITION, startPositionMillis.coerceAtLeast(0))
             .addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         dispatchIntent(context, intent)
     }
