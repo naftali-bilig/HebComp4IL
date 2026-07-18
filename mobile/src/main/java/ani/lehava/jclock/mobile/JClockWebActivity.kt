@@ -16,6 +16,7 @@ import android.view.Gravity
 import android.view.View
 import android.webkit.CookieManager
 import android.webkit.GeolocationPermissions
+import android.webkit.JavascriptInterface
 import android.webkit.PermissionRequest
 import android.webkit.SafeBrowsingResponse
 import android.webkit.SslErrorHandler
@@ -34,6 +35,8 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import ani.lehava.jclock.mobile.music.MelodyPlaybackController
+import ani.lehava.jclock.mobile.music.MelodyPlaybackService
 
 class JClockWebActivity : ComponentActivity() {
     private lateinit var webView: WebView
@@ -72,6 +75,7 @@ class JClockWebActivity : ComponentActivity() {
         }
 
         configureWebView()
+        webView.addJavascriptInterface(BackgroundAudioBridge(), "JClockAudio")
         setContentView(buildContent())
 
         onBackPressedDispatcher.addCallback(this, object : OnBackPressedCallback(true) {
@@ -645,6 +649,48 @@ class JClockWebActivity : ComponentActivity() {
         Toast.makeText(this, message, Toast.LENGTH_LONG).show()
     }
 
+    private inner class BackgroundAudioBridge {
+        @JavascriptInterface
+        fun startBackgroundAudio(sourceUrl: String, positionMillis: Int, volumePercent: Int) {
+            val source = allowedYoumToveSource(sourceUrl)
+            if (source == null) {
+                runOnUiThread { toast("מקור הסרטון אינו מאושר ליום-טיוב") }
+                return
+            }
+            runOnUiThread {
+                MelodyPlaybackController.setVolume(
+                    this@JClockWebActivity,
+                    volumePercent.coerceIn(0, 100),
+                )
+                MelodyPlaybackController.playLocal(
+                    this@JClockWebActivity,
+                    source,
+                    "יום-טיוב",
+                    positionMillis.coerceAtLeast(0),
+                )
+            }
+        }
+
+        @JavascriptInterface
+        fun backgroundPositionMillis(): Int = MelodyPlaybackService.currentLocalPositionMillis()
+
+        @JavascriptInterface
+        fun stopBackgroundAudio() {
+            runOnUiThread { MelodyPlaybackController.stopLocal(this@JClockWebActivity) }
+        }
+    }
+
+    private fun allowedYoumToveSource(value: String): Uri? {
+        val uri = runCatching { Uri.parse(value) }.getOrNull() ?: return null
+        if (!uri.scheme.equals("https", ignoreCase = true) || uri.userInfo != null) return null
+        val host = uri.host?.lowercase() ?: return null
+        val path = uri.path.orEmpty()
+        val localMedia = host in TRUSTED_HOSTS && path.startsWith("/apps/youmtove/media/")
+        val tuningLimud = host == TUNING_LIBRARY_HOST && path.startsWith("/TuningLimud/")
+        if ((!localMedia && !tuningLimud) || !path.endsWith(".mp4", ignoreCase = true)) return null
+        return uri
+    }
+
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     companion object {
@@ -652,6 +698,7 @@ class JClockWebActivity : ComponentActivity() {
         private const val CHATGPT_URL = "https://chatgpt.com/"
         private const val RABBI_ELON_URL = "https://haravelon.co.il/"
         private const val LEGACY_CLOCK_HOST = "jclock126.web.app"
+        private const val TUNING_LIBRARY_HOST = "pub-71e18ce829fd428ea6d4aa9498a7e642.r2.dev"
         private const val DESKTOP_USER_AGENT =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
                 "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
