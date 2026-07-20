@@ -2,8 +2,10 @@ package ani.lehava.jclock.mobile
 
 import android.Manifest
 import android.annotation.SuppressLint
+import android.app.AlertDialog
 import android.content.Context
 import android.content.Intent
+import android.content.res.ColorStateList
 import android.content.pm.ApplicationInfo
 import android.content.pm.PackageManager
 import android.graphics.Color
@@ -14,6 +16,7 @@ import android.os.Bundle
 import android.os.Message
 import android.view.Gravity
 import android.view.View
+import android.view.ViewGroup
 import android.webkit.CookieManager
 import android.webkit.GeolocationPermissions
 import android.webkit.PermissionRequest
@@ -25,6 +28,8 @@ import android.webkit.WebSettings
 import android.webkit.WebView
 import android.webkit.WebViewClient
 import android.widget.Button
+import android.widget.EditText
+import android.widget.FrameLayout
 import android.widget.ImageView
 import android.widget.LinearLayout
 import android.widget.ProgressBar
@@ -34,15 +39,24 @@ import androidx.activity.ComponentActivity
 import androidx.activity.OnBackPressedCallback
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.core.content.ContextCompat
+import androidx.core.view.ViewCompat
+import androidx.core.view.WindowInsetsCompat
+import java.net.HttpURLConnection
+import java.net.URL
+import java.util.concurrent.Executors
 
 class JClockWebActivity : ComponentActivity() {
     private lateinit var webView: WebView
     private lateinit var progress: ProgressBar
     private lateinit var backButton: Button
+    private lateinit var contentRoot: LinearLayout
+    private lateinit var toolbar: LinearLayout
     private lateinit var mobileUserAgent: String
-    private var isSefariaDesktopPresentation = false
+    private var isDesktopPresentation = false
+    private var activeAppHost: String? = null
     private var pendingGeoOrigin: String? = null
     private var pendingGeoCallback: GeolocationPermissions.Callback? = null
+    private val registryExecutor = Executors.newSingleThreadExecutor()
 
     private val locationPermission = registerForActivityResult(
         ActivityResultContracts.RequestMultiplePermissions(),
@@ -114,6 +128,7 @@ class JClockWebActivity : ComponentActivity() {
         webView.stopLoading()
         webView.removeAllViews()
         webView.destroy()
+        registryExecutor.shutdownNow()
         super.onDestroy()
     }
 
@@ -164,6 +179,9 @@ class JClockWebActivity : ComponentActivity() {
                 handleNavigation(Uri.parse(url))
 
             override fun onPageStarted(view: WebView, url: String?, favicon: android.graphics.Bitmap?) {
+                val pageUri = url?.let(Uri::parse)
+                updateActiveAppMode(pageUri)
+                applyNativePageTheme(pageUri)
                 progress.visibility = View.VISIBLE
                 updateNavigation()
             }
@@ -172,7 +190,9 @@ class JClockWebActivity : ComponentActivity() {
                 progress.visibility = View.GONE
                 updateNavigation()
                 val pageUri = url?.let(Uri::parse)
-                if (pageUri != null && isSefariaHost(pageUri.host)) {
+                if (pageUri != null && isBirthCalculatorPage(pageUri)) {
+                    installBirthCalculatorUmidTheme(view)
+                } else if (pageUri != null && isSefariaHost(pageUri.host)) {
                     installSefariaCopyMode(view)
                 } else if (pageUri != null && isLegacyClockLearningPage(pageUri)) {
                     installLegacyClockMobileMode(view)
@@ -303,24 +323,30 @@ class JClockWebActivity : ComponentActivity() {
     }
 
     private fun buildContent(): View {
-        val root = LinearLayout(this).apply {
+        contentRoot = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             layoutDirection = View.LAYOUT_DIRECTION_RTL
             setBackgroundColor(Color.WHITE)
         }
-        root.addView(
+        ViewCompat.setOnApplyWindowInsetsListener(contentRoot) { view, insets ->
+            val statusBars = insets.getInsets(WindowInsetsCompat.Type.statusBars())
+            view.setPadding(statusBars.left, statusBars.top + dp(8), statusBars.right, 0)
+            insets
+        }
+        contentRoot.addView(
             progress,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, dp(3)),
         )
-        root.addView(
+        toolbar = buildToolbar()
+        contentRoot.addView(toolbar)
+        contentRoot.addView(
             webView,
             LinearLayout.LayoutParams(LinearLayout.LayoutParams.MATCH_PARENT, 0, 1f),
         )
-        root.addView(buildToolbar())
-        return root
+        return contentRoot
     }
 
-    private fun buildToolbar(): View = LinearLayout(this).apply {
+    private fun buildToolbar(): LinearLayout = LinearLayout(this).apply {
         orientation = LinearLayout.HORIZONTAL
         gravity = Gravity.CENTER_VERTICAL
         setPadding(dp(6), dp(4), dp(6), dp(4))
@@ -328,16 +354,64 @@ class JClockWebActivity : ComponentActivity() {
 
         addView(backButton)
         addView(toolbarButton("בית") { loadInWebView(Uri.parse(HOME_URL)) })
-        addView(toolbarButton("ChatGPT") { loadInWebView(Uri.parse(CHATGPT_URL)) })
-        addView(ImageView(this@JClockWebActivity).apply {
-            setImageResource(R.drawable.hebrew_clock_logo_big)
-            contentDescription = "ThirdTempale"
-            scaleType = ImageView.ScaleType.CENTER_CROP
-        }, LinearLayout.LayoutParams(0, dp(48), 1f))
+        addView(toolbarButton("Apps") { showAppsMenu() })
+        addView(buildDrawingShortcuts(), LinearLayout.LayoutParams(0, dp(48), 1f))
         addView(toolbarButton("רענן") { webView.reload() })
-        addView(toolbarButton("הגדרות") {
+        addView(toolbarButton("ניגון מכוון") {
             startActivity(Intent(this@JClockWebActivity, MainActivity::class.java))
         })
+    }
+
+    /**
+     * The drawing itself is the control: the three transparent hit areas follow
+     * the sun, moon/blue center, and rainbow from left to right. No visual
+     * buttons are added on top of the artwork.
+     */
+    private fun buildDrawingShortcuts(): View = FrameLayout(this).apply {
+        addView(
+            ImageView(this@JClockWebActivity).apply {
+                setImageResource(R.drawable.hebrew_clock_logo_big)
+                contentDescription = null
+                importantForAccessibility = View.IMPORTANT_FOR_ACCESSIBILITY_NO
+                scaleType = ImageView.ScaleType.FIT_XY
+            },
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+
+        addView(
+            LinearLayout(this@JClockWebActivity).apply {
+                orientation = LinearLayout.HORIZONTAL
+                layoutDirection = View.LAYOUT_DIRECTION_LTR
+                addView(drawingHotspot("השמש") { openCustomYouTube("sun") }, hotspotLayout())
+                addView(drawingHotspot("הירח") { openCustomYouTube("moon") }, hotspotLayout())
+                addView(drawingHotspot("הקשת") { openCustomYouTube("rainbow") }, hotspotLayout())
+            },
+            FrameLayout.LayoutParams(
+                FrameLayout.LayoutParams.MATCH_PARENT,
+                FrameLayout.LayoutParams.MATCH_PARENT,
+            ),
+        )
+    }
+
+    private fun drawingHotspot(symbol: String, action: () -> Unit) = View(this).apply {
+        contentDescription = "פתח את CustomYouTube דרך סמל $symbol"
+        tooltipText = "CustomYouTube · $symbol"
+        isClickable = true
+        isFocusable = true
+        setBackgroundColor(Color.TRANSPARENT)
+        setOnClickListener { action() }
+    }
+
+    private fun hotspotLayout() = LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, 1f)
+
+    private fun openCustomYouTube(source: String) {
+        startActivity(
+            Intent(this, CustomYouTubeActivity::class.java)
+                .putExtra(CustomYouTubeActivity.EXTRA_SHORTCUT_SOURCE, source),
+        )
     }
 
     private fun toolbarButton(label: String, action: () -> Unit) = Button(this).apply {
@@ -350,19 +424,186 @@ class JClockWebActivity : ComponentActivity() {
         setOnClickListener { action() }
     }
 
+    private fun showAppsMenu() {
+        val labels = APPS.map { it.label }.toTypedArray()
+        AlertDialog.Builder(this)
+            .setTitle("Apps")
+            .setItems(labels) { _, index -> openApp(APPS[index]) }
+            .setNegativeButton("ביטול", null)
+            .show()
+    }
+
+    private fun openApp(app: AppDestination) {
+        if (app.externalPackages.isNotEmpty()) {
+            activeAppHost = null
+            updateAppCookiePolicy()
+            openExternalApp(app)
+            return
+        }
+        if (app.host == NEED_ME_HOST) {
+            authorizeNeedMe(app)
+            return
+        }
+        openWebApp(app)
+    }
+
+    private fun openWebApp(app: AppDestination) {
+        activeAppHost = app.host
+        updateAppCookiePolicy()
+        loadInWebView(Uri.parse(app.url))
+    }
+
+    private fun authorizeNeedMe(app: AppDestination) {
+        val umid = getSharedPreferences(UMID_PREFERENCES, MODE_PRIVATE)
+            .getString(UMID_KEY, "")
+            ?.trim()
+            ?.uppercase()
+            .orEmpty()
+        if (!UMID_PATTERN.matches(umid)) {
+            toast("יש להזין תחילה UMID תקין באזור האישי")
+            return
+        }
+
+        val preferences = getSharedPreferences(NEED_ME_PREFERENCES, MODE_PRIVATE)
+        val storedFingerprint = preferences.getString(NEED_ME_FINGERPRINT_KEY, null)
+        if (storedFingerprint != null) {
+            validateNeedMeIdentifier(app, storedFingerprint, clearIfRejected = true)
+            return
+        }
+
+        val input = EditText(this).apply {
+            hint = "ID / eID"
+            isSingleLine = true
+            textDirection = View.TEXT_DIRECTION_LTR
+        }
+        AlertDialog.Builder(this)
+            .setTitle("אימות גישה ל־Need-Me")
+            .setMessage("ה־UMID תקין. כעת יש להזין מזהה הרשום במאגר Bind-Me.")
+            .setView(input)
+            .setNegativeButton("ביטול", null)
+            .setPositiveButton("אימות") { _, _ ->
+                val identifier = input.text.toString()
+                if (NeedMeRegistry.normalize(identifier).isEmpty()) {
+                    toast("לא הוזן מזהה")
+                } else {
+                    validateNeedMeIdentifier(
+                        app,
+                        NeedMeRegistry.fingerprint(identifier),
+                        clearIfRejected = false,
+                    )
+                }
+            }
+            .show()
+    }
+
+    private fun validateNeedMeIdentifier(
+        app: AppDestination,
+        fingerprint: String,
+        clearIfRejected: Boolean,
+    ) {
+        toast("בודק הרשאה…")
+        registryExecutor.execute {
+            val result = runCatching {
+                val identifiers = NeedMeRegistry.identifiers(downloadMarriageDatabase())
+                check(identifiers.isNotEmpty()) { "Empty identifier registry" }
+                identifiers.any { NeedMeRegistry.fingerprint(it) == fingerprint }
+            }
+            runOnUiThread {
+                result.fold(
+                    onSuccess = { allowed ->
+                        if (allowed) {
+                            getSharedPreferences(NEED_ME_PREFERENCES, MODE_PRIVATE)
+                                .edit()
+                                .putString(NEED_ME_FINGERPRINT_KEY, fingerprint)
+                                .apply()
+                            openWebApp(app)
+                        } else {
+                            if (clearIfRejected) {
+                                getSharedPreferences(NEED_ME_PREFERENCES, MODE_PRIVATE)
+                                    .edit()
+                                    .remove(NEED_ME_FINGERPRINT_KEY)
+                                    .apply()
+                            }
+                            toast("המזהה אינו רשום במאגר")
+                        }
+                    },
+                    onFailure = { toast("לא ניתן לאמת כעת מול Bind-Me") },
+                )
+            }
+        }
+    }
+
+    private fun downloadMarriageDatabase(): String {
+        val connection = URL(MARRIAGE_DB_URL).openConnection() as HttpURLConnection
+        connection.connectTimeout = 10_000
+        connection.readTimeout = 10_000
+        connection.instanceFollowRedirects = false
+        connection.setRequestProperty("Accept", "application/javascript,text/javascript")
+        connection.setRequestProperty("User-Agent", mobileUserAgent)
+        return try {
+            check(connection.responseCode == HttpURLConnection.HTTP_OK) {
+                "HTTP ${connection.responseCode}"
+            }
+            check(connection.contentLengthLong in -1..MAX_REGISTRY_BYTES) { "Registry too large" }
+            connection.inputStream.bufferedReader(Charsets.UTF_8).use { reader ->
+                val text = reader.readText()
+                check(text.toByteArray(Charsets.UTF_8).size <= MAX_REGISTRY_BYTES) {
+                    "Registry too large"
+                }
+                text
+            }
+        } finally {
+            connection.disconnect()
+        }
+    }
+
+    private fun openExternalApp(app: AppDestination) {
+        val launchIntent = app.externalPackages.firstNotNullOfOrNull { packageName ->
+            packageManager.getLaunchIntentForPackage(packageName)
+        }
+        if (launchIntent != null) {
+            startActivity(launchIntent)
+            return
+        }
+
+        val storePackage = app.externalPackages.first()
+        val marketIntent = Intent(
+            Intent.ACTION_VIEW,
+            Uri.parse("market://details?id=$storePackage"),
+        ).setPackage("com.android.vending")
+        runCatching { startActivity(marketIntent) }.getOrElse {
+            startActivity(
+                Intent(
+                    Intent.ACTION_VIEW,
+                    Uri.parse("https://play.google.com/store/apps/details?id=$storePackage"),
+                ),
+            )
+        }
+    }
+
     private fun loadRequestedUrl(source: Intent) {
-        val target = source.getStringExtra(EXTRA_URL)
-            ?.let(Uri::parse)
-            ?.let(::allowedNavigationTarget)
-            ?: Uri.parse(HOME_URL)
+        val requested = source.getStringExtra(EXTRA_URL)?.let(Uri::parse)
+        if (requested?.host.equals(NEED_ME_HOST, ignoreCase = true) ||
+            requested?.host.equals("www.$NEED_ME_HOST", ignoreCase = true)
+        ) {
+            authorizeNeedMe(NEED_ME_APP)
+            return
+        }
+        val target = requested?.let(::allowedNavigationTarget) ?: Uri.parse(HOME_URL)
         loadInWebView(target)
     }
 
     private fun handleNavigation(uri: Uri): Boolean {
+        if (uri.host.equals(NEED_ME_HOST, ignoreCase = true) ||
+            uri.host.equals("www.$NEED_ME_HOST", ignoreCase = true)
+        ) {
+            if (activeAppHost != NEED_ME_HOST) authorizeNeedMe(NEED_ME_APP)
+            return activeAppHost != NEED_ME_HOST
+        }
         val target = allowedNavigationTarget(uri)?.let(::localizeLegacyLearningTarget)
         if (target != null) {
             val needsPresentationChange =
-                isSefariaDesktopPresentation != isSefariaHost(target.host)
+                isDesktopPresentation != shouldUseDesktopPresentation(target)
             if (target == uri && !needsPresentationChange) return false
             loadInWebView(target)
             return true
@@ -375,6 +616,12 @@ class JClockWebActivity : ComponentActivity() {
         if (uri.toString() == "about:blank") return uri
         val host = uri.host?.lowercase()
         val scheme = uri.scheme?.lowercase()
+
+        activeAppHost?.let { appHost ->
+            val app = APPS.firstOrNull { it.host == appHost } ?: return null
+            if (scheme != "https" || host !in app.navigationHosts) return null
+            return uri
+        }
 
         if (host in LEGACY_RABBI_ELON_HOSTS && (scheme == "http" || scheme == "https")) {
             return Uri.parse(RABBI_ELON_URL)
@@ -409,6 +656,12 @@ class JClockWebActivity : ComponentActivity() {
     private fun isLegacyClockLearningPage(uri: Uri): Boolean =
         isLegacyClockHost(uri.host) && uri.path.orEmpty().lowercase().contains("/me/")
 
+    private fun isBirthCalculatorPage(uri: Uri): Boolean {
+        val host = uri.host.orEmpty().lowercase()
+        val path = uri.path.orEmpty().lowercase()
+        return host.contains("birthcalculator") || path.contains("/birthcalculator/")
+    }
+
     private fun localizeLegacyLearningTarget(target: Uri): Uri {
         if (!isLegacyClockHost(target.host)) return target
         val sourcePath = webView.url
@@ -426,22 +679,41 @@ class JClockWebActivity : ComponentActivity() {
     }
 
     private fun loadInWebView(uri: Uri) {
+        updateActiveAppMode(uri)
         configurePresentationFor(uri)
         webView.loadUrl(uri.toString())
     }
 
+    private fun updateActiveAppMode(uri: Uri?) {
+        val host = uri?.host?.lowercase()
+        val selectedApp = APPS.firstOrNull { it.host == host }
+        val currentApp = APPS.firstOrNull { it.host == activeAppHost }
+        activeAppHost = when {
+            selectedApp != null -> selectedApp.host
+            currentApp != null && host in currentApp.navigationHosts -> currentApp.host
+            else -> null
+        }
+        updateAppCookiePolicy()
+    }
+
+    private fun updateAppCookiePolicy() {
+        CookieManager.getInstance().setAcceptThirdPartyCookies(webView, false)
+    }
+
     private fun configurePresentationFor(uri: Uri) {
-        val showDesktopSefaria = isSefariaHost(uri.host)
-        if (showDesktopSefaria == isSefariaDesktopPresentation) return
-        isSefariaDesktopPresentation = showDesktopSefaria
+        val showDesktop = shouldUseDesktopPresentation(uri)
+        if (showDesktop == isDesktopPresentation) return
+        isDesktopPresentation = showDesktop
         webView.settings.apply {
-            // Sefaria intentionally uses its desktop layout for multi-segment copying.
-            // JClock and every other approved source return to the Android mobile layout.
-            userAgentString = if (showDesktopSefaria) DESKTOP_USER_AGENT else mobileUserAgent
-            useWideViewPort = showDesktopSefaria
-            loadWithOverviewMode = showDesktopSefaria
+            // Sefaria needs its desktop layout for multi-segment copying.
+            userAgentString = if (showDesktop) DESKTOP_USER_AGENT else mobileUserAgent
+            useWideViewPort = showDesktop
+            loadWithOverviewMode = showDesktop
         }
     }
+
+    private fun shouldUseDesktopPresentation(uri: Uri): Boolean =
+        isSefariaHost(uri.host)
 
     private fun goBackOrFinish() {
         if (!webView.canGoBack()) {
@@ -452,6 +724,100 @@ class JClockWebActivity : ComponentActivity() {
         val previous = history.getItemAtIndex(history.currentIndex - 1)?.url
         previous?.let(Uri::parse)?.let(::configurePresentationFor)
         webView.goBack()
+    }
+
+    private fun currentUmid(): String? =
+        getSharedPreferences(UMID_PREFERENCES, MODE_PRIVATE)
+            .getString(UMID_KEY, "")
+            ?.trim()
+            ?.uppercase()
+            ?.takeIf(UMID_PATTERN::matches)
+
+    private fun applyNativePageTheme(uri: Uri?) {
+        val umid = currentUmid()
+        if (uri == null || !isBirthCalculatorPage(uri) || umid == null) {
+            contentRoot.setBackgroundColor(Color.WHITE)
+            webView.setBackgroundColor(Color.WHITE)
+            toolbar.setBackgroundColor(DEFAULT_TOOLBAR_COLOR)
+            styleToolbarButtons(DEFAULT_BUTTON_BACKGROUND, Color.BLACK)
+            window.statusBarColor = DEFAULT_TOOLBAR_COLOR
+            window.navigationBarColor = Color.BLACK
+            return
+        }
+
+        val generalBackground = Color.parseColor("#${umid.substring(6, 12)}")
+        val buttonText = Color.parseColor("#${umid.substring(12, 18)}")
+        val buttonBackground = Color.parseColor("#${umid.substring(18, 24)}")
+        contentRoot.setBackgroundColor(generalBackground)
+        webView.setBackgroundColor(generalBackground)
+        toolbar.setBackgroundColor(generalBackground)
+        styleToolbarButtons(buttonBackground, buttonText)
+        window.statusBarColor = generalBackground
+        window.navigationBarColor = generalBackground
+    }
+
+    private fun styleToolbarButtons(background: Int, text: Int) {
+        fun style(view: View) {
+            if (view is Button) {
+                view.backgroundTintList = ColorStateList.valueOf(background)
+                view.setTextColor(text)
+            }
+            if (view is ViewGroup) {
+                for (index in 0 until view.childCount) style(view.getChildAt(index))
+            }
+        }
+        style(toolbar)
+    }
+
+    private fun installBirthCalculatorUmidTheme(view: WebView) {
+        val umid = currentUmid() ?: return
+        val generalText = "#${umid.substring(0, 6)}"
+        val generalBackground = "#${umid.substring(6, 12)}"
+        val buttonText = "#${umid.substring(12, 18)}"
+        val buttonBackground = "#${umid.substring(18, 24)}"
+        view.evaluateJavascript(
+            """
+            (() => {
+                let style = document.getElementById('jclock-umid-full-theme');
+                if (!style) {
+                    style = document.createElement('style');
+                    style.id = 'jclock-umid-full-theme';
+                    document.head.appendChild(style);
+                }
+                style.textContent = `
+                    html, body, .container, .container-fluid,
+                    .modal-content, .modal-header, .modal-body, .modal-footer,
+                    .timezone-preview, .color-preview, .umid-panel, .db-share {
+                        background-color: $generalBackground !important;
+                        color: $generalText !important;
+                    }
+                    body, body p, body span, body label, body h1, body h2,
+                    body h3, body h4, body h5, body h6,
+                    body .timezone-hint, body .privacy-note, body .color-preview-value {
+                        color: $generalText !important;
+                    }
+                    body input, body select, body textarea {
+                        background-color: $generalBackground !important;
+                        border-color: $generalText !important;
+                        color: $generalText !important;
+                    }
+                    body button, body .btn, body input[type='button'],
+                    body input[type='submit'] {
+                        background-color: $buttonBackground !important;
+                        border-color: $buttonText !important;
+                        color: $buttonText !important;
+                    }
+                    body a, body a:visited { color: $generalText !important; }
+                    body hr { border-color: $generalText !important; opacity: .45; }
+                `;
+                document.documentElement.style.backgroundColor = '$generalBackground';
+                document.documentElement.style.color = '$generalText';
+                document.body.style.backgroundColor = '$generalBackground';
+                document.body.style.color = '$generalText';
+            })();
+            """.trimIndent(),
+            null,
+        )
     }
 
     private fun installLegacyClockMobileMode(view: WebView) {
@@ -648,14 +1014,73 @@ class JClockWebActivity : ComponentActivity() {
     private fun dp(value: Int): Int = (value * resources.displayMetrics.density).toInt()
 
     companion object {
+        private data class AppDestination(
+            val label: String,
+            val url: String,
+            val host: String,
+            val navigationHosts: Set<String> = setOf(host),
+            val externalPackages: List<String> = emptyList(),
+        )
+
         private const val HOME_URL = "https://jclock.net/"
-        private const val CHATGPT_URL = "https://chatgpt.com/"
+        private const val NEED_ME_HOST = "need-me.net"
+        private const val MARRIAGE_DB_URL = "https://bind-me.net/MarrigeDB.js"
+        private const val NEED_ME_PREFERENCES = "need-me-access"
+        private const val NEED_ME_FINGERPRINT_KEY = "approved-identifier-sha256"
+        private const val MAX_REGISTRY_BYTES = 2_000_000L
+        private const val WHATSAPP_WEB_HOST = "web.whatsapp.com"
         private const val RABBI_ELON_URL = "https://haravelon.co.il/"
         private const val LEGACY_CLOCK_HOST = "jclock126.web.app"
         private const val DESKTOP_USER_AGENT =
             "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 " +
                 "(KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
         private const val EXTRA_URL = "ani.lehava.jclock.extra.URL"
+        private const val UMID_PREFERENCES = "jclock-personal"
+        private const val UMID_KEY = "umid"
+        private val UMID_PATTERN = Regex("[0-9A-F]{24}")
+        private val DEFAULT_TOOLBAR_COLOR = Color.rgb(31, 52, 69)
+        private val DEFAULT_BUTTON_BACKGROUND = Color.rgb(238, 238, 238)
+        private val NEED_ME_APP = AppDestination(
+            "Need-Me",
+            "https://need-me.net/",
+            NEED_ME_HOST,
+            navigationHosts = setOf(NEED_ME_HOST, "www.need-me.net"),
+        )
+        private val APPS = listOf(
+            NEED_ME_APP,
+            AppDestination("התבודדות", "https://chatgpt.com/", "chatgpt.com"),
+            AppDestination("נקדן", "https://nakdan.dicta.org.il/", "nakdan.dicta.org.il"),
+            AppDestination(
+                "תפילה",
+                "https://suno.com/me",
+                "suno.com",
+                externalPackages = listOf("com.suno.android"),
+            ),
+            AppDestination(
+                "חברים",
+                "https://web.whatsapp.com/",
+                WHATSAPP_WEB_HOST,
+                externalPackages = listOf("com.whatsapp", "com.whatsapp.w4b"),
+            ),
+            AppDestination(
+                "ריקודים",
+                "https://kling.ai/",
+                "kling.ai",
+                externalPackages = listOf("kling.ai.video.chat"),
+            ),
+            AppDestination(
+                "תורה",
+                "https://notebooklm.google.com/",
+                "notebooklm.google.com",
+                externalPackages = listOf("com.google.android.apps.labs.language.tailwind"),
+            ),
+            AppDestination(
+                "מחברת אישית",
+                "https://keep.google.com/",
+                "keep.google.com",
+                externalPackages = listOf("com.google.android.keep"),
+            ),
+        )
         private val TRUSTED_HOSTS = setOf(
             "jclock.net",
             "www.jclock.net",
@@ -679,6 +1104,8 @@ class JClockWebActivity : ComponentActivity() {
             "counting-the-omer.wixsite.com",
             "play.google.com",
             "apps.apple.com",
+            "birthcalculator.web.app",
+            "www.birthcalculator.web.app",
             "world-coin.ai",
             "www.world-coin.ai",
             "shilat-medical.web.app",
@@ -688,12 +1115,12 @@ class JClockWebActivity : ComponentActivity() {
             "auth.openai.com",
             "auth0.openai.com",
             "login.openai.com",
+            "nakdan.dicta.org.il",
         )
         private val LEGACY_RABBI_ELON_HOSTS = setOf(
             "ravoldsite.com",
             "www.ravoldsite.com",
         )
-
         fun intent(context: Context, url: String = HOME_URL): Intent =
             Intent(context, JClockWebActivity::class.java).putExtra(EXTRA_URL, url)
     }

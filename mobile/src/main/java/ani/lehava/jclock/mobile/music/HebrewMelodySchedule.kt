@@ -5,6 +5,7 @@ import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.ZoneOffset
+import java.util.Locale
 import kotlin.math.abs
 import kotlin.math.atan2
 import kotlin.math.cos
@@ -36,6 +37,39 @@ class HebrewMelodySchedule(
     fun window(now: Instant = Instant.now()): Window {
         val month = musicMonthNumberFromNisan(now)
         return Window(month, folderForMonth(month), cacheExpiresAt(now))
+    }
+
+    /**
+     * Monthly trial period keyed by the Hebrew month and year.
+     *
+     * The new period starts during Hebrew day 29 at JClock hour 23:0000:00:
+     * one proportional daylight hour before Jerusalem sunset. This is the same
+     * boundary used by the Garmin clock for the final daytime hour before Rosh
+     * Chodesh. Day 30 also belongs to the coming period.
+     */
+    fun trialPeriodKey(now: Instant): String {
+        val current = hebrewDateAt(now)
+        val period = if (current.day == 30 || isRoshChodeshEveResetTime(now, current)) {
+            nextHebrewMonth(current)
+        } else {
+            current
+        }
+        return String.format(Locale.US, "%04d-%02d", period.year, period.monthFromNisan)
+    }
+
+    private fun isRoshChodeshEveResetTime(now: Instant, current: HebrewDate): Boolean {
+        if (current.day != 29) return false
+        val civilDate = now.atZone(zoneId).toLocalDate()
+        val resetAt = roshChodeshEveResetAt(civilDate) ?: return false
+        return !now.isBefore(resetAt)
+    }
+
+    internal fun roshChodeshEveResetAt(civilDate: LocalDate): Instant? {
+        val sun = sunTimes(civilDate)
+        val proportionalHour = (sun.sunset - sun.sunrise) / 12.0
+        val resetHour = sun.sunset - proportionalHour
+        if (!resetHour.isFinite()) return null
+        return civilHourToInstant(civilDate, resetHour)
     }
 
     fun musicMonthNumberFromNisan(now: Instant = Instant.now()): Int {
@@ -225,6 +259,26 @@ class HebrewMelodySchedule(
     }
 
     private fun isHebrewLeapYear(year: Int): Boolean = (7 * year + 1) % 19 < 7
+
+    private fun nextHebrewMonth(date: HebrewDate): HebrewDate {
+        val nextYear: Int
+        val nextMonth: Int
+        when {
+            date.monthFromNisan == 6 -> {
+                nextYear = date.year + 1
+                nextMonth = 7
+            }
+            date.monthFromNisan == lastHebrewMonth(date.year) -> {
+                nextYear = date.year
+                nextMonth = 1
+            }
+            else -> {
+                nextYear = date.year
+                nextMonth = date.monthFromNisan + 1
+            }
+        }
+        return HebrewDate(nextYear, nextMonth, 1)
+    }
 
     private fun lastHebrewMonth(year: Int): Int = if (isHebrewLeapYear(year)) 13 else 12
 

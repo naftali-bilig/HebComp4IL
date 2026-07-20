@@ -66,12 +66,12 @@ AppSideService(
     onInit() {
       this.pendingInFlight = {}
       this.retryTimers = {}
-      this.retryPending(PENDING_SNAPSHOT_KEY, isSnapshot)
+      // Stop-point delivery is one-shot. Clear payloads queued by older builds.
+      settingsLib.removeItem(PENDING_SNAPSHOT_KEY)
       this.retryPending(PENDING_MUSIC_KEY, isMusicToggle)
     },
 
     onRun() {
-      this.retryPending(PENDING_SNAPSHOT_KEY, isSnapshot)
       this.retryPending(PENDING_MUSIC_KEY, isMusicToggle)
     },
 
@@ -262,11 +262,23 @@ AppSideService(
       const pendingKey = isSnapshotRequest ? PENDING_SNAPSHOT_KEY : PENDING_MUSIC_KEY
       this.relayPayload(payload)
         .then((result) => respond(null, result))
-        .catch((error) => respond(null, this.queuePayload(pendingKey, payload, error)))
+        .catch((error) => {
+          if (isSnapshotRequest) {
+            logger.warn(`stop point not delivered: ${error && error.message ? error.message : error}`)
+            respond(null, {
+              delivered: false,
+              queued: false,
+              dropped: true,
+              eventId: payload.eventId
+            })
+          } else {
+            respond(null, this.queuePayload(pendingKey, payload, error))
+          }
+        })
     },
 
     onDestroy() {
-      this.clearRetry(PENDING_SNAPSHOT_KEY)
+      settingsLib.removeItem(PENDING_SNAPSHOT_KEY)
       this.clearRetry(PENDING_MUSIC_KEY)
     }
   })

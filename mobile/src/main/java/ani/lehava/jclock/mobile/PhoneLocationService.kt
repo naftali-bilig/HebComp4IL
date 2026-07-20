@@ -14,6 +14,15 @@ import java.util.TimeZone
 
 class PhoneLocationService : WearableListenerService() {
     override fun onMessageReceived(event: MessageEvent) {
+        if (event.path == DISPLAY_PREFERENCE_REQUEST_PATH) {
+            respond(
+                event.sourceNodeId,
+                JSONObject().put("keepScreenOn", keepWatchScreenOn()),
+                DISPLAY_PREFERENCE_RESPONSE_PATH,
+            )
+            return
+        }
+
         if (event.path == "/jclock/music/toggle") {
             MelodyPlaybackController.toggle(this)
             return
@@ -48,7 +57,8 @@ class PhoneLocationService : WearableListenerService() {
                             .put("latitude", location.latitude)
                             .put("longitude", location.longitude)
                             .put("accuracy", location.accuracy)
-                            .put("timeZone", TimeZone.getDefault().id),
+                            .put("timeZone", TimeZone.getDefault().id)
+                            .put("keepScreenOn", keepWatchScreenOn()),
                     )
                 }
             }
@@ -57,11 +67,24 @@ class PhoneLocationService : WearableListenerService() {
             }
     }
 
-    private fun respond(node: String, body: JSONObject) {
+    private fun keepWatchScreenOn(): Boolean =
+        getSharedPreferences("jclock-personal", MODE_PRIVATE)
+            .getBoolean("keep_watch_screen_on", false)
+
+    private fun respond(
+        node: String,
+        body: JSONObject,
+        path: String = "/jclock/location/response",
+    ) {
         Wearable.getMessageClient(this).sendMessage(
             node,
-            "/jclock/location/response",
+            path,
             body.toString().toByteArray(),
         )
+    }
+
+    companion object {
+        const val DISPLAY_PREFERENCE_REQUEST_PATH = "/jclock/display/preference/request"
+        const val DISPLAY_PREFERENCE_RESPONSE_PATH = "/jclock/display/preference/response"
     }
 }

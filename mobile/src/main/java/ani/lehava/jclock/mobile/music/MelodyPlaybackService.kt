@@ -16,6 +16,7 @@ import android.os.IBinder
 import android.os.Looper
 import ani.lehava.jclock.mobile.MainActivity
 import java.io.File
+import java.util.concurrent.Executors
 
 class MelodyPlaybackService : Service() {
     private lateinit var player: MelodyPlayer
@@ -23,6 +24,15 @@ class MelodyPlaybackService : Service() {
     private var foregroundStarted = false
     private lateinit var audioManager: AudioManager
     private lateinit var focusRequest: AudioFocusRequest
+    private lateinit var schedule: HebrewMelodySchedule
+    private lateinit var accessGate: MelodyAccessGate
+    private val mainHandler = Handler(Looper.getMainLooper())
+    private val accessExecutor = Executors.newSingleThreadExecutor()
+    private var accessRequestToken = 0L
+    private var accessCheckInFlight = false
+    private var trialPlaybackActive = false
+    private var trialStarted = false
+    private var activeTrialPeriod: String? = null
 
     override fun onCreate() {
         super.onCreate()
@@ -37,13 +47,15 @@ class MelodyPlaybackService : Service() {
                     change == AudioManager.AUDIOFOCUS_LOSS ||
                     change == AudioManager.AUDIOFOCUS_LOSS_TRANSIENT
                 ) {
-                    Handler(Looper.getMainLooper()).post { stopPlayback() }
+                    mainHandler.post { stopPlayback() }
                 }
             }
             .build()
         val catalogClient = MelodyCatalogClient()
+        schedule = HebrewMelodySchedule()
+        accessGate = MelodyAccessGate(this, schedule)
         player = MelodyPlayer(
-            schedule = HebrewMelodySchedule(),
+            schedule = schedule,
             catalogClient = catalogClient,
             cache = MelodyCache(File(filesDir, "monthly-melodies"), catalogClient),
             onStateChanged = ::onPlayerState,
@@ -62,6 +74,10 @@ class MelodyPlaybackService : Service() {
         when (intent?.action) {
             ACTION_PAUSE -> stopPlayback()
             ACTION_SKIP -> {
+                if (trialPlaybackActive) {
+                    onPlayerState(MelodyPlayer.State.Error(TRIAL_USED_MESSAGE))
+                    return
+                }
                 val wasPlayingLocalFile = localPlayer != null
                 stopLocalPlayer()
                 if (MelodyPlaybackController.isPlaybackRequested && !wasPlayingLocalFile) {
@@ -71,7 +87,10 @@ class MelodyPlaybackService : Service() {
                 }
             }
             ACTION_SET_VOLUME -> setVolume(intent.getIntExtra(EXTRA_VOLUME, 28))
-            ACTION_PLAY_LOCAL -> playLocal(intent.data, intent.getStringExtra(EXTRA_LOCAL_NAME))
+            ACTION_PLAY_LOCAL -> authorizeLocalPlayback(
+                intent.data,
+                intent.getStringExtra(EXTRA_LOCAL_NAME),
+            )
             ACTION_PLAY -> startCatalogPlayback()
             ACTION_PREPARE, null -> updateNotification(MelodyPlaybackController.state)
             ACTION_TOGGLE -> {
@@ -84,6 +103,9 @@ class MelodyPlaybackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        accessRequestToken++
+        accessCheckInFlight = false
+        accessExecutor.shutdownNow()
         stopLocalPlayer()
         player.close()
         runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
@@ -95,17 +117,108 @@ class MelodyPlaybackService : Service() {
 
     private fun startCatalogPlayback() {
         stopLocalPlayer()
-        if (!requestAudioFocus()) return
-        MelodyPlaybackController.isPlaybackRequested = true
-        player.start()
+        if (trialPlaybackActive) {
+            beginCatalogPlayback(singleTrackOnly = true)
+            return
+        }
+
+        authorize(
+            allowTrial = true,
+            onFullAccess = {
+                clearTrialSession()
+                beginCatalogPlayback(singleTrackOnly = false)
+            },
+            onMonthlyTrial = { periodKey ->
+                trialPlaybackActive = true
+                trialStarted = false
+                activeTrialPeriod = periodKey
+                beginCatalogPlayback(singleTrackOnly = true)
+            },
+        )
     }
 
     private fun stopPlayback() {
+        cancelAccessCheck()
         MelodyPlaybackController.isPlaybackRequested = false
         stopLocalPlayer()
         player.pause()
         runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
         if (foregroundStarted) updateNotification(MelodyPlayer.State.Paused)
+    }
+
+    private fun beginCatalogPlayback(singleTrackOnly: Boolean) {
+        if (!requestAudioFocus()) {
+            if (!trialStarted) clearTrialSession()
+            return
+        }
+        MelodyPlaybackController.isPlaybackRequested = true
+        player.start(singleTrackOnly = singleTrackOnly)
+    }
+
+    private fun authorizeLocalPlayback(uri: Uri?, displayName: String?) {
+        if (uri == null) {
+            onPlayerState(MelodyPlayer.State.Error("לא נבחר קובץ שמע"))
+            return
+        }
+        authorize(
+            allowTrial = false,
+            onFullAccess = { playLocal(uri, displayName) },
+            onMonthlyTrial = { _ -> },
+        )
+    }
+
+    private fun authorize(
+        allowTrial: Boolean,
+        onFullAccess: () -> Unit,
+        onMonthlyTrial: (String) -> Unit,
+    ) {
+        if (accessCheckInFlight) return
+        accessCheckInFlight = true
+        val token = ++accessRequestToken
+        onPlayerState(MelodyPlayer.State.LoadingCatalog)
+
+        accessExecutor.execute {
+            val result = runCatching { accessGate.decide() }
+            mainHandler.post {
+                if (token != accessRequestToken) return@post
+                accessCheckInFlight = false
+                result.fold(
+                    onSuccess = { decision ->
+                        when (decision) {
+                            MelodyAccessGate.Decision.FullAccess -> onFullAccess()
+                            is MelodyAccessGate.Decision.MonthlyTrial -> {
+                                if (allowTrial) onMonthlyTrial(decision.periodKey)
+                                else denyAccess(MID_REQUIRED_MESSAGE)
+                            }
+                            MelodyAccessGate.Decision.TrialAlreadyUsed ->
+                                denyAccess(TRIAL_USED_MESSAGE)
+                            MelodyAccessGate.Decision.AutomaticTimeRequired ->
+                                denyAccess(AUTOMATIC_TIME_MESSAGE)
+                        }
+                    },
+                    onFailure = {
+                        denyAccess("לא ניתן לאמת את ה־UMID ואת זמן ראש החודש. יש לבדוק חיבור לאינטרנט.")
+                    },
+                )
+            }
+        }
+    }
+
+    private fun cancelAccessCheck() {
+        if (!accessCheckInFlight) return
+        accessRequestToken++
+        accessCheckInFlight = false
+    }
+
+    private fun denyAccess(message: String) {
+        MelodyPlaybackController.isPlaybackRequested = false
+        onPlayerState(MelodyPlayer.State.Error(message))
+    }
+
+    private fun clearTrialSession() {
+        trialPlaybackActive = false
+        trialStarted = false
+        activeTrialPeriod = null
     }
 
     private fun playLocal(uri: Uri?, displayName: String?) {
@@ -178,6 +291,22 @@ class MelodyPlaybackService : Service() {
     }
 
     private fun onPlayerState(state: MelodyPlayer.State) {
+        if (state is MelodyPlayer.State.Playing && trialPlaybackActive && !trialStarted) {
+            activeTrialPeriod?.let(accessGate::markTrialUsed)
+            trialStarted = true
+        }
+
+        if (state is MelodyPlayer.State.TrialFinished) {
+            MelodyPlaybackController.isPlaybackRequested = false
+            clearTrialSession()
+            runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
+        } else if (state is MelodyPlayer.State.Error && trialPlaybackActive && trialStarted) {
+            MelodyPlaybackController.isPlaybackRequested = false
+            clearTrialSession()
+            player.pause()
+            runCatching { audioManager.abandonAudioFocusRequest(focusRequest) }
+        }
+
         MelodyPlaybackController.publish(state)
         if (foregroundStarted && state !is MelodyPlayer.State.Closed) updateNotification(state)
     }
@@ -221,6 +350,7 @@ class MelodyPlaybackService : Service() {
         is MelodyPlayer.State.Downloading -> "מתחבר לניגון: ${state.name}"
         is MelodyPlayer.State.Playing -> "${state.name} · ${state.folder}"
         MelodyPlayer.State.Paused -> "מושהה"
+        MelodyPlayer.State.TrialFinished -> TRIAL_USED_MESSAGE
         is MelodyPlayer.State.Error -> "מנסה שוב: ${state.message}"
         MelodyPlayer.State.Closed -> "הופסק"
     }
@@ -244,6 +374,12 @@ class MelodyPlaybackService : Service() {
         const val ACTION_PREPARE = "ani.lehava.jclock.music.PREPARE"
         const val EXTRA_VOLUME = "volume"
         const val EXTRA_LOCAL_NAME = "localName"
+        private const val TRIAL_USED_MESSAGE =
+            "מנגינת הניסיון כבר הושמעה. ניתן להמתין לחצות שאחרי כ״ט בחודש העברי הבא או ליצור איתי קשר."
+        private const val AUTOMATIC_TIME_MESSAGE =
+            "כדי לקבל מנגינת ניסיון חודשית יש להפעיל תאריך ושעה אוטומטיים במכשיר."
+        private const val MID_REQUIRED_MESSAGE =
+            "ניגון קובץ מקומי זמין לאחר הזנת UMID מורשה."
         private const val CHANNEL_ID = "jclock-melodies"
         private const val NOTIFICATION_ID = 42_317
 

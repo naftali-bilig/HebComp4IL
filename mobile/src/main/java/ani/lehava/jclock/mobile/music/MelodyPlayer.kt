@@ -27,6 +27,7 @@ class MelodyPlayer(
         data class Downloading(val name: String) : State()
         data class Playing(val name: String, val folder: String) : State()
         data object Paused : State()
+        data object TrialFinished : State()
         data class Error(val message: String) : State()
         data object Closed : State()
     }
@@ -37,12 +38,14 @@ class MelodyPlayer(
     private var catalogExpiry: Instant? = null
     private var lastTrackName: String? = null
     private var playRequested = false
+    private var singleTrackOnly = false
     private var closed = false
     private var volume = 0.28f
 
-    fun start() {
+    fun start(singleTrackOnly: Boolean = false) {
         runOnMain {
             if (closed) return@runOnMain
+            this.singleTrackOnly = singleTrackOnly
             playRequested = true
             val current = mediaPlayer
             if (current != null) {
@@ -75,7 +78,7 @@ class MelodyPlayer(
 
     fun skip() {
         runOnMain {
-            if (closed || !playRequested) return@runOnMain
+            if (closed || !playRequested || singleTrackOnly) return@runOnMain
             releasePlayer()
             prepareNext(0L)
         }
@@ -95,6 +98,7 @@ class MelodyPlayer(
             if (closed) return@runOnMain
             closed = true
             playRequested = false
+            singleTrackOnly = false
             generation.incrementAndGet()
             mainHandler.removeCallbacksAndMessages(this)
             releasePlayer()
@@ -186,7 +190,13 @@ class MelodyPlayer(
             player.setOnCompletionListener {
                 if (mediaPlayer === it) mediaPlayer = null
                 it.release()
-                if (playRequested && !closed) prepareNext(trackGapMillis)
+                if (singleTrackOnly) {
+                    playRequested = false
+                    singleTrackOnly = false
+                    publish(State.TrialFinished)
+                } else if (playRequested && !closed) {
+                    prepareNext(trackGapMillis)
+                }
             }
             player.setOnErrorListener { failed, what, extra ->
                 if (mediaPlayer === failed) mediaPlayer = null

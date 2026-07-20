@@ -1,4 +1,13 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <queries>
+        <package android:name="com.suno.android" />
+        <package android:name="com.whatsapp" />
+        <package android:name="com.whatsapp.w4b" />
+        <package android:name="kling.ai.video.chat" />
+        <package android:name="com.google.android.apps.labs.language.tailwind" />
+        <package android:name="com.google.android.keep" />
+    </queries>
+
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.INTERNET" />
@@ -31,6 +40,12 @@
             android:name=".JClockWebActivity"
             android:exported="false"
             android:launchMode="singleTop" />
+        <activity
+            android:name=".CustomYouTubeActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:exported="false"
+            android:label="JClock · CustomYouTube"
+            android:screenOrientation="sensor" />
 
         <service
             android:name=".PhoneLocationService"

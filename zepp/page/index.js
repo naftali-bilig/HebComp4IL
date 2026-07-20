@@ -1,29 +1,23 @@
-import { jclockSnapshot } from '../utils/jclock'
-import { requestPhoneLocation, sendSnapshot, SUN_TITLE, MOON_TITLE } from '../utils/bridge'
+import { jclockSnapshot, israelUtcOffsetHours } from '../utils/jclock'
+import { requestPhoneLocation, sendSnapshot, sendMusicToggle, testPhoneConnection, SUN_TITLE, MOON_TITLE } from '../utils/bridge'
 import { createWidget, widget, align, prop, event } from '@zos/ui'
 import { getDeviceInfo } from '@zos/device'
 import { setPageBrightTime, resetPageBrightTime } from '@zos/display'
 
-const LATITUDE = 31.7768514
-const LONGITUDE = 35.2331664
+const LATITUDE = 31.776852
+const LONGITUDE = 35.233166
 const LOCATION_POLL_MS = 6000
-// A relaxed interval makes the gesture reliable on a small round touchscreen.
-const LOCAL_DOUBLE_TAP_MS = 650
 
 const BLACK = 0x000000
-const BORDER = 0x37444e
-const ORBIT_BORDER = 0x4b5963
-const TEXT = 0xffffff
-const MUTED = 0xd3d3d3
-const TITLE = 0x74cdff
-const LIVE_TEXT = 0xc5e1f2
-const PAUSED_TEXT = 0xffc441
-const SUN = 0xffd246
-const TRACK = 0x303940
-const KNOB = 0x45b7ff
-const NOW_BACKGROUND = 0x223a48
-const NOW_TEXT = 0x87d2ff
-const ERROR = 0xe05858
+const PANEL = 0x121416
+const BORDER = 0x3a4148
+const ORBIT_BORDER = 0x59636d
+const TEXT = 0xd4d8dc
+const MUTED = 0xaaaaaa
+const GOLD = 0xf2ca45
+const GOLD_DARK = 0x5a4812
+const SUN = 0xffd342
+const GARMIN_MIDA_COLORS = [0x0000ff, 0xff0000, 0x800080, 0x00ff00, 0xffff00, 0xffa500, 0xaaaaaa]
 
 const WEEKDAYS = ['', 'ראשון', 'שני', 'שלישי', 'רביעי', 'חמישי', 'שישי', 'שבת']
 
@@ -38,6 +32,10 @@ function colorNumber(value, fallback) {
   const normalized = String(value || '').replace('#', '')
   const parsed = parseInt(normalized, 16)
   return Number.isFinite(parsed) ? parsed : fallback
+}
+
+function garminMidaColor(number) {
+  return GARMIN_MIDA_COLORS[Math.max(1, Math.min(7, Number(number) || 7)) - 1]
 }
 
 function clamp(value, low, high) {
@@ -55,6 +53,19 @@ function zonedParts(epoch, utcOffsetMinutes) {
     minute: shifted.getUTCMinutes(),
     second: shifted.getUTCSeconds(),
     millisecond: shifted.getUTCMilliseconds()
+  }
+}
+
+function deviceLocalParts(epoch) {
+  const date = new Date(Number(epoch))
+  return {
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds(),
+    millisecond: date.getMilliseconds()
   }
 }
 
@@ -76,8 +87,8 @@ function normalizedLocation(value) {
     accuracy: Number(value && value.accuracy),
     timeZone: String((value && value.timeZone) || ''),
     mobileLocationEnabled: Boolean(value && value.mobileLocationEnabled),
-    updated: !value || value.updated !== false,
-    keepScreenOn: Boolean(value && value.keepScreenOn)
+    updated: !value || value.updated !== false
+    ,keepScreenOn: Boolean(value && value.keepScreenOn)
   }
 }
 
@@ -90,324 +101,106 @@ function moonAsset(snapshot) {
 function sourcePosition(source, center, radius) {
   const orbit = source && source.orbit ? source.orbit : { x: 0, y: -1 }
   return {
-    x: Math.round(center.x + orbit.x * radius),
-    y: Math.round(center.y + orbit.y * radius)
+    x: Math.round(center + orbit.x * radius),
+    y: Math.round(center + orbit.y * radius)
   }
 }
 
 Page({
   build() {
     const { width, height } = getDeviceInfo()
-    const diameter = Math.min(width, height)
-    const scale = diameter / 454
+    const scale = Math.min(width, height) / 454
     const px = value => Math.round(value * scale)
-    const centerX = Math.round(width / 2)
-    const centerY = Math.round(height / 2)
-    const radius = diameter / 2 - px(5)
 
     this.width = width
     this.height = height
     this.px = px
-    this.centerX = centerX
-    this.centerY = centerY
-    this.radius = radius
     this.snapshot = null
     this.pausedEpoch = 0
-    this.offsetSeconds = 0
     this.statusTimer = null
-    this.localTapTimer = null
-    this.firstLocalTapAt = 0
     this.locationPollTimer = null
     this.displayPreferenceTimer = null
     this.locationRequestInFlight = false
     this.locationGeneration = 0
     this.desiredLocationMode = 'jerusalem'
     this.locationMode = 'jerusalem'
-    this.localTrackingMode = 'jerusalem'
     this.latitude = LATITUDE
     this.longitude = LONGITUDE
     this.timeZone = 'Asia/Jerusalem'
-    this.utcOffsetMinutes = -new Date().getTimezoneOffset()
-    this.jerusalemUtcOffsetMinutes = this.utcOffsetMinutes
+    this.utcOffsetMinutes = israelUtcOffsetHours(Date.now()) * 60
     this.mobileLocationEnabled = false
+    this.sourceSwitchStartedAt = Date.now()
 
-    const make = (owner, type, params) => owner
-      ? owner.createWidget(type, params)
-      : createWidget(type, params)
-
-    const fill = (owner, x, y, w, h, color, cornerRadius = 0) => make(owner, widget.FILL_RECT, {
-      x, y, w, h, color, radius: cornerRadius
-    })
-
-    const text = (owner, x, y, w, h, size, value, color = TEXT) => make(owner, widget.TEXT, {
+    const text = (x, y, w, h, size, value, color = MUTED) => createWidget(widget.TEXT, {
       x, y, w, h, text: value, text_size: size, color,
       align_h: align.CENTER_H, align_v: align.CENTER_V
     })
 
-    const centeredText = (center, y, w, h, size, value, color = TEXT) => text(
-      null,
-      Math.round(center - w / 2),
-      Math.round(y - h / 2),
-      Math.round(w),
-      Math.round(h),
-      px(size),
-      value,
-      color
-    )
+    this.background = createWidget(widget.FILL_RECT, { x: 0, y: 0, w: width, h: height, color: BLACK })
 
-    const outlinedText = (geometry, size, value) => {
-      const outline = Math.max(1, px(1))
-      ;[[-outline, 0], [outline, 0], [0, -outline], [0, outline]].forEach(([dx, dy]) => {
-        const shadow = text(
-          null,
-          geometry.x + dx,
-          geometry.y + dy,
-          geometry.w,
-          geometry.h,
-          px(size),
-          value,
-          BLACK
-        )
-        shadow.setEnable(false)
-      })
-      return text(null, geometry.x, geometry.y, geometry.w, geometry.h, px(size), value)
-    }
-
-    fill(null, 0, 0, width, height, BLACK)
-    make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: centerY,
-      radius: Math.round(radius),
-      color: BORDER
+    // Large round-screen layout: each row nearly fills the safe circular width.
+    const rowHeight = px(74)
+    const rowY = percent => Math.round(height * percent - rowHeight / 2)
+    const dateCellW = Math.round(width * 0.24)
+    const dateCell = center => Math.round(width * center - dateCellW / 2)
+    this.gregorianDay = text(dateCell(0.35), rowY(0.12), dateCellW, rowHeight, px(50), '--')
+    this.gregorianSeparator = text(dateCell(0.50), rowY(0.12), dateCellW, rowHeight, px(50), '/')
+    this.gregorianMonth = text(dateCell(0.65), rowY(0.12), dateCellW, rowHeight, px(50), '--')
+    this.civil = text(px(24), rowY(0.29), width - px(48), rowHeight, px(58), '--:--:--')
+    this.centerDivider = createWidget(widget.FILL_RECT, {
+      x: 0, y: Math.round(height / 2), w: width, h: Math.max(2, px(2)), color: 0xffffff
     })
-    make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: centerY,
-      radius: Math.max(1, Math.round(radius - px(3))),
-      color: BLACK
-    })
+    this.mazalLabel = text(px(18), rowY(0.60), width - px(36), rowHeight, px(48), '--')
 
-    centeredText(centerX, centerY - radius * 0.73, radius * 1.05, px(29), 20, 'קידוש החודש', TITLE)
-    this.sunTime = centeredText(centerX, centerY - radius * 0.55, radius * 1.25, px(34), 26, '--:----:--')
+    const clockY = rowY(0.78)
+    const clockSize = px(52)
+    this.sunHour = text(Math.round(width * 0.15), clockY, Math.round(width * 0.22), rowHeight, clockSize, '--')
+    this.sunSeparator1 = text(Math.round(width * 0.32), clockY, Math.round(width * 0.08), rowHeight, clockSize, ':')
+    this.sunMinute = text(Math.round(width * 0.36), clockY, Math.round(width * 0.28), rowHeight, clockSize, '----')
+    this.sunSeparator2 = text(Math.round(width * 0.62), clockY, Math.round(width * 0.08), rowHeight, clockSize, ':')
+    this.sunSecond = text(Math.round(width * 0.67), clockY, Math.round(width * 0.18), rowHeight, clockSize, '--')
 
-    const sideY = Math.round(centerY - radius * 0.44)
-    const sideW = Math.round(radius * 0.36)
-    const sideH = Math.round(radius * 0.69)
-    this.leftButtonGeometry = {
-      x: Math.round(centerX - radius * 0.79), y: sideY, w: sideW, h: sideH
-    }
-    this.rightButtonGeometry = {
-      x: Math.round(centerX + radius * 0.43), y: sideY, w: sideW, h: sideH
-    }
-    this.leftButtonOuter = fill(null, this.leftButtonGeometry.x, sideY, sideW, sideH, BORDER, px(9))
-    this.leftButtonInner = fill(
-      null,
-      this.leftButtonGeometry.x + px(3),
-      sideY + px(3),
-      sideW - px(6),
-      sideH - px(6),
-      BLACK,
-      px(7)
-    )
-    this.leftButtonText = outlinedText(this.leftButtonGeometry, 19, 'מקומי')
-    this.rightButtonOuter = fill(null, this.rightButtonGeometry.x, sideY, sideW, sideH, BORDER, px(9))
-    this.rightButtonInner = fill(
-      null,
-      this.rightButtonGeometry.x + px(3),
-      sideY + px(3),
-      sideW - px(6),
-      sideH - px(6),
-      BLACK,
-      px(7)
-    )
-    this.rightButtonText = outlinedText(this.rightButtonGeometry, 14, 'ירושלים')
-    this.leftButtonText.addEventListener(event.CLICK_UP, () => this.onLocalButtonTap())
-    this.rightButtonText.addEventListener(event.CLICK_UP, () => this.selectJerusalem())
-
-    const centerInfoY = centerY - radius * 0.07
-    const centerInfoGap = radius * 0.125
-    this.orbitCenter = { x: centerX, y: centerInfoY }
-    this.orbitRadius = Math.min(radius * 0.26, radius * 0.46 - px(13))
-    make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: Math.round(centerInfoY),
-      radius: Math.round(this.orbitRadius + px(1.5)),
-      color: ORBIT_BORDER
-    })
-    make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: Math.round(centerInfoY),
-      radius: Math.max(1, Math.round(this.orbitRadius)),
-      color: BLACK
-    })
-    this.weekday = centeredText(
-      centerX,
-      centerInfoY - centerInfoGap,
-      radius * 0.5,
-      px(22),
-      13,
-      '--',
-      LIVE_TEXT
-    )
-    this.date = centeredText(centerX, centerInfoY, radius * 0.72, px(25), 15, '--', LIVE_TEXT)
-    this.civil = centeredText(
-      centerX,
-      centerInfoY + centerInfoGap,
-      radius * 0.58,
-      px(22),
-      15,
-      '--:--:--',
-      LIVE_TEXT
-    )
-
-    this.sunDot = make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: Math.round(centerInfoY - this.orbitRadius),
-      radius: px(6),
-      color: SUN
-    })
-    this.moonImage = make(null, widget.IMG, {
-      x: centerX - px(12),
-      y: Math.round(centerInfoY - this.orbitRadius - px(12)),
-      w: px(24),
-      h: px(24),
-      src: 'moon/moon_30_01.png',
-      auto_scale: true,
-      auto_scale_obj_fit: true
-    })
-
-    const centerTap = text(
-      null,
-      Math.round(centerX - radius * 0.24),
-      sideY,
-      Math.round(radius * 0.48),
-      Math.round(radius * 0.71),
-      1,
-      '',
-      BLACK
-    )
-    centerTap.addEventListener(event.CLICK_UP, () => this.onClockTap())
-
-    this.moonTime = centeredText(
-      centerX,
-      centerY + radius * 0.36,
-      radius * 1.25,
-      px(34),
-      25,
-      '--:----:--'
-    )
-
-    const trackHalf = radius * 0.65
-    this.sliderGeometry = {
-      left: centerX - trackHalf,
-      right: centerX + trackHalf,
-      half: trackHalf,
-      y: centerY + radius * 0.505
-    }
-    fill(
-      null,
-      Math.round(this.sliderGeometry.left),
-      Math.round(centerY + radius * 0.48),
-      Math.round(trackHalf * 2),
-      Math.max(px(5), Math.round(radius * 0.05)),
-      TRACK,
-      px(5)
-    )
-    this.sliderKnob = make(null, widget.CIRCLE, {
-      center_x: centerX,
-      center_y: Math.round(this.sliderGeometry.y),
-      radius: px(9),
-      color: KNOB
-    })
-    const sliderTouch = text(
-      null,
-      0,
-      Math.round(centerY + radius * 0.39),
-      width,
-      Math.round(radius * 0.18),
-      1,
-      '',
-      BLACK
-    )
-    sliderTouch.addEventListener(event.CLICK_DOWN, info => this.updateTimeOffset(info))
-    sliderTouch.addEventListener(event.MOVE, info => this.updateTimeOffset(info))
-    sliderTouch.addEventListener(event.CLICK_UP, info => this.updateTimeOffset(info))
-
-    const nowGeometry = {
-      x: Math.round(centerX - radius * 0.19),
-      y: Math.round(centerY + radius * 0.59),
-      w: Math.round(radius * 0.38),
-      h: Math.round(radius * 0.14)
-    }
-    fill(null, nowGeometry.x, nowGeometry.y, nowGeometry.w, nowGeometry.h, NOW_BACKGROUND, px(9))
-    this.nowButton = text(
-      null,
-      nowGeometry.x,
-      nowGeometry.y,
-      nowGeometry.w,
-      nowGeometry.h,
-      px(15),
-      'Now',
-      NOW_TEXT
-    )
-    this.nowButton.addEventListener(event.CLICK_UP, () => this.resetToNow())
-
-    this.status = centeredText(
-      centerX,
-      centerY + radius * 0.82,
-      radius * 1.15,
-      px(24),
-      13,
-      'ירושלים',
-      MUTED
-    )
+    // A single tap stops and sends once; the next tap resumes immediately.
+    const tapTargets = [
+      this.background,
+      this.gregorianDay,
+      this.gregorianSeparator,
+      this.gregorianMonth,
+      this.civil,
+      this.centerDivider,
+      this.mazalLabel,
+      this.sunHour,
+      this.sunSeparator1,
+      this.sunMinute,
+      this.sunSeparator2,
+      this.sunSecond
+    ]
+    tapTargets.forEach(target => target.addEventListener(event.CLICK_UP, () => this.onClockTap()))
 
     this.safeRefresh()
     this.timer = setInterval(() => this.safeRefresh(), 1000)
     this.refreshJerusalemContext()
-    this.displayPreferenceTimer = setInterval(
-      () => this.refreshJerusalemContext(),
-      LOCATION_POLL_MS
-    )
-  },
-
-  baseStatus() {
-    if (this.locationMode !== 'local') return 'ירושלים'
-    return this.localTrackingMode === 'mobile' ? 'מקומי נייד · 6 שניות' : 'מקומי קבוע'
-  },
-
-  cancelLocalTap() {
-    if (this.localTapTimer) clearTimeout(this.localTapTimer)
-    this.localTapTimer = null
-    this.firstLocalTapAt = 0
-  },
-
-  onLocalButtonTap() {
-    const now = Date.now()
-    if (this.localTapTimer && now - this.firstLocalTapAt <= LOCAL_DOUBLE_TAP_MS) {
-      this.cancelLocalTap()
-      this.selectMobileLocalLocation()
-      return
-    }
-
-    this.firstLocalTapAt = now
-    this.setStatus('לחיצה נוספת: מיקום נייד', PAUSED_TEXT)
-    this.localTapTimer = setTimeout(() => {
-      this.localTapTimer = null
-      this.firstLocalTapAt = 0
-      this.selectFixedLocalLocation()
-    }, LOCAL_DOUBLE_TAP_MS)
+    this.displayPreferenceTimer = setInterval(() => this.refreshJerusalemContext(), LOCATION_POLL_MS)
   },
 
   setStatus(value, color = MUTED, clearAfter = 0) {
+    if (!this.status && this.mazalLabel) {
+      this.mazalLabel.setProperty(prop.MORE, { text: value, color })
+      if (this.statusTimer) clearTimeout(this.statusTimer)
+      if (clearAfter) {
+        this.statusTimer = setTimeout(() => {
+          this.statusTimer = null
+          this.safeRefresh()
+        }, clearAfter)
+      }
+      return
+    }
     if (!this.status) return
-    const w = Math.round(this.radius * 1.15)
-    const h = this.px(24)
     this.status.setProperty(prop.MORE, {
-      x: Math.round(this.centerX - w / 2),
-      y: Math.round(this.centerY + this.radius * 0.82 - h / 2),
-      w,
-      h,
+      x: this.px(25),
+      y: this.px(146),
+      w: this.px(168),
+      h: this.px(25),
       text: value,
       text_size: this.px(13),
       color,
@@ -415,47 +208,54 @@ Page({
       align_v: align.CENTER_V
     })
     if (this.statusTimer) clearTimeout(this.statusTimer)
-    this.statusTimer = null
     if (clearAfter) {
       this.statusTimer = setTimeout(() => {
         this.statusTimer = null
-        this.setStatus(this.baseStatus())
+        this.setStatus('נגיעה: עצור / המשך')
       }, clearAfter)
     }
   },
 
   onClockTap() {
-    if (!this.pausedEpoch) {
-      this.pausedEpoch = Date.now()
-      this.setStatus('חישוב המולד נעצר', PAUSED_TEXT)
+    if (this.pausedEpoch) {
+      this.pausedEpoch = 0
+      this.setStatus('המשך', MUTED, 1600)
       this.safeRefresh()
       return
     }
 
-    const selectedEpoch = this.pausedEpoch + this.offsetSeconds * 1000
-    this.pausedEpoch = 0
-    this.sendStoppedTime(selectedEpoch)
+    this.pausedEpoch = Date.now()
+    this.sendStoppedTime(this.pausedEpoch)
     this.safeRefresh()
   },
 
-  updateTimeOffset(info) {
-    const rawX = Number(info && info.x)
-    if (!Number.isFinite(rawX)) return
-    const x = clamp(rawX, this.sliderGeometry.left, this.sliderGeometry.right)
-    const normalized = (x - this.centerX) / this.sliderGeometry.half
-    this.offsetSeconds = -Math.round((normalized * 10800) / 300) * 300
-    this.safeRefresh()
+  togglePhoneMusic() {
+    this.setStatus('♫ שולח לנגן…', GOLD)
+    sendMusicToggle(({ state }) => {
+      if (state === 'sent') this.setStatus('♫ הנגן קיבל', GOLD, 2200)
+      else if (state === 'queued') this.setStatus('♫ ממתין לטלפון', GOLD, 3000)
+      else if (state === 'error') this.setStatus('אין חיבור לטלפון', 0xe05858, 3000)
+    }).catch(() => {})
   },
 
-  resetToNow() {
-    this.offsetSeconds = 0
-    this.safeRefresh()
+  checkConnection() {
+    this.setStatus('בודק חיבור…', GOLD)
+    testPhoneConnection()
+      .then(() => this.setStatus('✓ הטלפון והשעון מחוברים', 0x84c45e, 4000))
+      .catch(() => this.setStatus('אין חיבור לטלפון', 0xe05858, 4000))
   },
 
   calculationContext(epoch) {
+    if (this.locationMode === 'local') {
+      const localDate = new Date(epoch)
+      return {
+        parts: deviceLocalParts(epoch),
+        offsetMinutes: -localDate.getTimezoneOffset()
+      }
+    }
     return {
-      parts: zonedParts(epoch, this.utcOffsetMinutes),
-      offsetMinutes: this.utcOffsetMinutes
+      parts: zonedParts(epoch, israelUtcOffsetHours(epoch) * 60),
+      offsetMinutes: israelUtcOffsetHours(epoch) * 60
     }
   },
 
@@ -467,112 +267,87 @@ Page({
       this.longitude,
       context.offsetMinutes / 60
     )
-    this.setStatus('שולח לטלפון…', PAUSED_TEXT)
+    this.setStatus('השעון נעצר · שולח לטלפון…', GOLD)
     sendSnapshot({
       epoch,
       timeZone: this.timeZone,
       sun: { title: SUN_TITLE, time: selected.sun.value },
       moon: { title: MOON_TITLE, time: selected.moon ? selected.moon.value : '--:----:--' }
     }, ({ state }) => {
-      if (state === 'sent') this.setStatus('נשלח לטלפון', PAUSED_TEXT, 2600)
-      else if (state === 'queued') this.setStatus('ממתין לטלפון', PAUSED_TEXT, 3200)
-      else if (state === 'error') this.setStatus('אין חיבור לטלפון', ERROR, 3200)
+      if (state === 'sent') this.setStatus('נקודת העצירה נשלחה', GOLD, 2600)
+      else if (state === 'queued') this.setStatus('נקודת העצירה ממתינה', GOLD, 3200)
+      else if (state === 'error') this.setStatus('אין חיבור · השעון עצור', 0xe05858, 3200)
     }).catch(() => {})
   },
 
   refreshJerusalemContext() {
+    const generation = this.locationGeneration
     requestPhoneLocation('jerusalem')
       .then((value) => {
+        if (generation !== this.locationGeneration || this.locationMode !== 'jerusalem') return
         const location = normalizedLocation(value)
         if (!location) return
         this.applyDisplayPreference(location.keepScreenOn)
-        this.jerusalemUtcOffsetMinutes = location.utcOffsetMinutes
-        if (this.locationMode === 'jerusalem') {
-          this.utcOffsetMinutes = location.utcOffsetMinutes
-          this.timeZone = location.timeZone || 'Asia/Jerusalem'
-        }
+        this.utcOffsetMinutes = israelUtcOffsetHours(Date.now()) * 60
+        this.timeZone = location.timeZone || 'Asia/Jerusalem'
         this.safeRefresh()
       })
       .catch(() => {})
   },
 
   selectJerusalem() {
-    this.cancelLocalTap()
     this.locationGeneration += 1
     this.desiredLocationMode = 'jerusalem'
     this.locationMode = 'jerusalem'
-    this.localTrackingMode = 'jerusalem'
     this.latitude = LATITUDE
     this.longitude = LONGITUDE
-    this.utcOffsetMinutes = this.jerusalemUtcOffsetMinutes
     this.timeZone = 'Asia/Jerusalem'
     this.mobileLocationEnabled = false
     this.locationRequestInFlight = false
     this.stopLocationPolling()
+    this.updateLocationLabel()
     this.safeRefresh()
-    this.setStatus('ירושלים')
+    this.setStatus('ירושלים · מיקום קבוע', GOLD, 2200)
     this.refreshJerusalemContext()
   },
 
-  selectFixedLocalLocation() {
+  selectLocalLocation() {
     const generation = ++this.locationGeneration
     this.desiredLocationMode = 'local'
-    this.localTrackingMode = 'fixed'
     this.locationRequestInFlight = true
-    this.stopLocationPolling()
-    this.setStatus('מחפש מיקום קבוע…', PAUSED_TEXT)
+    this.setStatus('מקבל GPS מהטלפון…', GOLD)
     requestPhoneLocation('fixed')
       .then((value) => {
         this.locationRequestInFlight = false
         if (generation !== this.locationGeneration || this.desiredLocationMode !== 'local') return
         const location = normalizedLocation(value)
         if (!location) throw new Error('invalid phone location')
-        this.applyLocalLocation(location, 'fixed')
-        this.setStatus(this.baseStatus())
+        this.applyLocalLocation(location)
+        this.startLocationPolling()
+        this.setStatus(
+          location.mobileLocationEnabled ? 'מקומי · מיקום נייד' : 'מקומי · מיקום קבוע',
+          GOLD,
+          2600
+        )
       })
       .catch(() => {
         this.locationRequestInFlight = false
         if (generation !== this.locationGeneration || this.desiredLocationMode !== 'local') return
         this.desiredLocationMode = this.locationMode
-        this.setStatus('המיקום לא זמין', ERROR, 3200)
+        this.setStatus('GPS בטלפון אינו זמין', 0xe05858, 3200)
       })
   },
 
-  selectMobileLocalLocation() {
-    const generation = ++this.locationGeneration
-    this.desiredLocationMode = 'local'
-    this.localTrackingMode = 'mobile'
-    this.locationRequestInFlight = true
-    this.stopLocationPolling()
-    this.setStatus('מבקש GPS נייד…', PAUSED_TEXT)
-    requestPhoneLocation('mobile')
-      .then((value) => {
-        this.locationRequestInFlight = false
-        if (generation !== this.locationGeneration || this.localTrackingMode !== 'mobile') return
-        const location = normalizedLocation(value)
-        if (!location) throw new Error('invalid phone location')
-        this.applyLocalLocation(location, 'mobile')
-        this.startLocationPolling()
-        this.setStatus(this.baseStatus())
-      })
-      .catch(() => {
-        this.locationRequestInFlight = false
-        if (generation !== this.locationGeneration || this.localTrackingMode !== 'mobile') return
-        this.desiredLocationMode = this.locationMode
-        this.setStatus('GPS נייד אינו זמין', ERROR, 3200)
-      })
-  },
-
-  applyLocalLocation(location, trackingMode = this.localTrackingMode) {
+  applyLocalLocation(location) {
     this.locationMode = 'local'
     this.desiredLocationMode = 'local'
-    this.localTrackingMode = trackingMode
     this.latitude = location.latitude
     this.longitude = location.longitude
     this.utcOffsetMinutes = location.utcOffsetMinutes
     this.timeZone = location.timeZone || this.timeZone
-    this.mobileLocationEnabled = trackingMode === 'mobile'
+    this.mobileLocationEnabled = location.mobileLocationEnabled
     this.applyDisplayPreference(location.keepScreenOn)
+    this.updateLocationLabel()
     this.safeRefresh()
   },
 
@@ -587,34 +362,43 @@ Page({
   },
 
   pollMobileLocation() {
-    if (
-      this.locationMode !== 'local' ||
-      this.localTrackingMode !== 'mobile' ||
-      this.locationRequestInFlight
-    ) return
+    if (this.locationMode !== 'local' || this.locationRequestInFlight) return
     const generation = this.locationGeneration
     this.locationRequestInFlight = true
     requestPhoneLocation('mobile')
       .then((value) => {
         this.locationRequestInFlight = false
-        if (
-          generation !== this.locationGeneration ||
-          this.locationMode !== 'local' ||
-          this.localTrackingMode !== 'mobile'
-        ) return
-        if (value && value.updated !== false) {
+        if (generation !== this.locationGeneration || this.locationMode !== 'local') return
+        this.mobileLocationEnabled = Boolean(value && value.mobileLocationEnabled)
+        if (this.mobileLocationEnabled && value && value.updated !== false) {
           const location = normalizedLocation(value)
-          if (location) this.applyLocalLocation(location, 'mobile')
+          if (location) this.applyLocalLocation(location)
         }
+        this.updateLocationLabel()
       })
       .catch(() => {
         this.locationRequestInFlight = false
       })
   },
 
+  updateLocationLabel() {
+    if (this.locationLabel) {
+      const value = this.locationMode === 'local'
+        ? (this.mobileLocationEnabled ? 'מקומי · מיקום נייד' : 'מקומי · מיקום קבוע')
+        : 'ירושלים · מיקום קבוע'
+      this.locationLabel.setProperty(prop.TEXT, value)
+    }
+    if (this.leftButtonText) {
+      this.leftButtonText.setProperty(prop.TEXT, this.locationMode === 'local' ? '• מקומי' : 'מקומי')
+    }
+    if (this.rightButtonText) {
+      this.rightButtonText.setProperty(prop.TEXT, this.locationMode === 'jerusalem' ? '• ירושלים' : 'ירושלים')
+    }
+  },
+
   applyMoladButton(outer, inner, label, geometry, colors) {
     const foreground = colorNumber(colors && colors.foreground, BORDER)
-    const background = colorNumber(colors && colors.background, BLACK)
+    const background = colorNumber(colors && colors.background, PANEL)
     outer.setProperty(prop.MORE, {
       x: geometry.x,
       y: geometry.y,
@@ -637,7 +421,7 @@ Page({
       w: geometry.w,
       h: geometry.h,
       color: foreground,
-      text_size: geometry === this.leftButtonGeometry ? this.px(19) : this.px(14),
+      text_size: geometry === this.leftButtonGeometry ? this.px(16) : this.px(14),
       align_h: align.CENTER_H,
       align_v: align.CENTER_V
     })
@@ -653,14 +437,14 @@ Page({
       this.refresh()
       return true
     } catch (error) {
-      this.setStatus('שגיאת תצוגה · פתח מחדש', ERROR)
+      if (this.mazalLabel) this.mazalLabel.setProperty(prop.TEXT, 'שגיאת חישוב')
       return false
     }
   },
 
   refresh() {
-    if (!this.sunTime) return
-    const epoch = (this.pausedEpoch || Date.now()) + this.offsetSeconds * 1000
+    if (!this.sunHour) return
+    const epoch = this.pausedEpoch || Date.now()
     const context = this.calculationContext(epoch)
     const snapshot = jclockSnapshot(
       context.parts,
@@ -668,80 +452,54 @@ Page({
       this.longitude,
       context.offsetMinutes / 60
     )
-    const jerusalemContext = {
-      parts: zonedParts(epoch, this.jerusalemUtcOffsetMinutes),
-      offsetMinutes: this.jerusalemUtcOffsetMinutes
-    }
-    const jerusalemSnapshot = jclockSnapshot(
-      jerusalemContext.parts,
-      LATITUDE,
-      LONGITUDE,
-      jerusalemContext.offsetMinutes / 60
-    )
     this.snapshot = snapshot
 
-    this.sunTime.setProperty(prop.TEXT, snapshot.sun.value)
-    this.moonTime.setProperty(prop.TEXT, snapshot.moon ? snapshot.moon.value : '--:----:--')
-    const centerColor = this.pausedEpoch ? PAUSED_TEXT : LIVE_TEXT
-    this.date.setProperty(prop.MORE, {
-      text: snapshot.hebrew.formatted,
-      color: centerColor
+    const showMoon = Boolean(snapshot.moon) && Math.floor((Date.now() - this.sourceSwitchStartedAt) / 6000) % 2 === 1
+    const source = showMoon ? snapshot.moon : snapshot.sun
+    const molad = showMoon ? snapshot.molad.moon : snapshot.molad.sun
+
+    this.gregorianDay.setProperty(prop.MORE, {
+      text: pad(context.parts.day, 2),
+      color: garminMidaColor(molad.foregroundMida)
     })
-    this.weekday.setProperty(prop.MORE, {
-      text: `יום ${WEEKDAYS[snapshot.hebrew.weekday] || ''}`,
-      color: centerColor
+    this.gregorianSeparator.setProperty(prop.COLOR, MUTED)
+    this.gregorianMonth.setProperty(prop.MORE, {
+      text: pad(context.parts.month, 2),
+      color: garminMidaColor(molad.backgroundMida)
     })
-    this.civil.setProperty(prop.MORE, {
-      text: civilTimeFromParts(context.parts),
-      color: centerColor
+    this.civil.setProperty(prop.TEXT, civilTimeFromParts(context.parts))
+    this.mazalLabel.setProperty(prop.MORE, {
+      text: showMoon ? snapshot.hebrew.hebrewText : (source.mazalName || snapshot.hebrew.hebrewText),
+      color: showMoon
+        ? (source.risingPeriod ? 0xffffff : MUTED)
+        : MUTED
     })
 
-    const sun = sourcePosition(snapshot.sun, this.orbitCenter, this.orbitRadius)
-    const moon = sourcePosition(snapshot.moon, this.orbitCenter, this.orbitRadius)
-    this.sunDot.setProperty(prop.MORE, {
-      center_x: sun.x,
-      center_y: sun.y,
-      radius: this.px(6),
-      color: SUN
-    })
-    this.moonImage.setProperty(prop.MORE, {
-      x: moon.x - this.px(12),
-      y: moon.y - this.px(12),
-      w: this.px(24),
-      h: this.px(24),
-      src: moonAsset(snapshot),
-      auto_scale: true,
-      auto_scale_obj_fit: true
-    })
-    this.sliderKnob.setProperty(prop.MORE, {
-      center_x: Math.round(
-        this.centerX - this.sliderGeometry.half * (this.offsetSeconds / 10800)
-      ),
-      center_y: Math.round(this.sliderGeometry.y),
-      radius: this.px(9),
-      color: KNOB
-    })
+    const parts = String(source.value || '--:----:--').split(':')
+    this.sunHour.setProperty(prop.TEXT, parts[0] || '--')
+    this.sunMinute.setProperty(prop.TEXT, parts[1] || '----')
+    this.sunSecond.setProperty(prop.TEXT, parts[2] || '--')
 
-    this.applyMoladButton(
-      this.leftButtonOuter,
-      this.leftButtonInner,
-      this.leftButtonText,
-      this.leftButtonGeometry,
-      jerusalemSnapshot.molad.sun
-    )
-    this.applyMoladButton(
-      this.rightButtonOuter,
-      this.rightButtonInner,
-      this.rightButtonText,
-      this.rightButtonGeometry,
-      jerusalemSnapshot.molad.moon
-    )
+    if (showMoon) {
+      const moonColor = garminMidaColor(source.mazal && source.mazal.midaNumber)
+      this.sunHour.setProperty(prop.COLOR, moonColor)
+      this.sunMinute.setProperty(prop.COLOR, moonColor)
+      this.sunSecond.setProperty(prop.COLOR, moonColor)
+      this.sunSeparator1.setProperty(prop.COLOR, moonColor)
+      this.sunSeparator2.setProperty(prop.COLOR, moonColor)
+    } else {
+      const colors = source.garminColors
+      this.sunHour.setProperty(prop.COLOR, colors.hour)
+      this.sunMinute.setProperty(prop.COLOR, colors.minute)
+      this.sunSecond.setProperty(prop.COLOR, colors.second)
+      this.sunSeparator1.setProperty(prop.COLOR, colors.separator)
+      this.sunSeparator2.setProperty(prop.COLOR, colors.separator)
+    }
   },
 
   onDestroy() {
     if (this.timer) clearInterval(this.timer)
     if (this.statusTimer) clearTimeout(this.statusTimer)
-    if (this.localTapTimer) clearTimeout(this.localTapTimer)
     if (this.displayPreferenceTimer) clearInterval(this.displayPreferenceTimer)
     resetPageBrightTime()
     this.stopLocationPolling()

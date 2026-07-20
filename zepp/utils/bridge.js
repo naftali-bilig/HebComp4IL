@@ -73,7 +73,11 @@ export function sendSnapshot(payload, onStatus) {
       params: snapshot
     })
     .then((result) => {
-      const state = result && result.delivered ? 'sent' : 'queued'
+      const state = result && result.delivered
+        ? 'sent'
+        : result && result.queued
+          ? 'queued'
+          : 'error'
       report(onStatus, { state, result, snapshot })
       return result
     })

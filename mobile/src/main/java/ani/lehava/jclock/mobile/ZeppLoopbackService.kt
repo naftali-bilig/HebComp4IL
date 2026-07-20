@@ -3,6 +3,7 @@ package ani.lehava.jclock.mobile
 import android.app.Notification
 import android.app.NotificationChannel
 import android.app.NotificationManager
+import android.app.PendingIntent
 import android.app.Service
 import android.content.Context
 import android.content.Intent
@@ -46,6 +47,7 @@ class ZeppLoopbackService : Service() {
         super.onCreate()
         startForeground(NOTIFICATION_ID, createNotification())
         startLoopbackServer()
+        GarminConnectManager.start(applicationContext)
     }
 
     override fun onStartCommand(intent: Intent?, flags: Int, startId: Int): Int = START_STICKY
@@ -53,6 +55,7 @@ class ZeppLoopbackService : Service() {
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onDestroy() {
+        GarminConnectManager.stop(applicationContext)
         runCatching { serverSocket?.close() }
         acceptThread?.interrupt()
         clientPool.shutdownNow()
@@ -153,6 +156,7 @@ class ZeppLoopbackService : Service() {
 
     private fun receiveSnapshot(body: JSONObject): JSONObject {
         requireProtocol(body, SNAPSHOT_PROTOCOL)
+        WatchConnectionRepository.markCheetahSeen(applicationContext)
         val eventId = requireEventId(body)
         val normalized = normalizeSnapshot(body)
         val isNew = EventDeduper.accept(applicationContext, "$SNAPSHOT_PROTOCOL:$eventId")
@@ -162,12 +166,15 @@ class ZeppLoopbackService : Service() {
         mainHandler.post {
             runCatching { LearningLinkDispatcher.forward(applicationContext, normalized) }
                 .onFailure { Log.e(TAG, "Could not forward learning links", it) }
+            runCatching { showSnapshotNotification(normalized) }
+                .onFailure { Log.e(TAG, "Could not show watch update notification", it) }
         }
         return accepted(eventId, duplicate = false)
     }
 
     private fun receiveMusicToggle(body: JSONObject): JSONObject {
         requireProtocol(body, MUSIC_PROTOCOL)
+        WatchConnectionRepository.markCheetahSeen(applicationContext)
         val eventId = requireEventId(body)
         if (!ZeppMusicControlBridge.isAvailable()) {
             throw HttpFailure(503, "music controller is not ready")
@@ -184,6 +191,7 @@ class ZeppLoopbackService : Service() {
 
     private fun receiveLocation(body: JSONObject): JSONObject {
         requireProtocol(body, LOCATION_PROTOCOL)
+        WatchConnectionRepository.markCheetahSeen(applicationContext)
         val mode = PhoneLocationRepository.Mode.fromWireValue(body.optString("mode").trim())
             ?: throw HttpFailure(422, "invalid location mode")
         val snapshot = try {
@@ -211,6 +219,7 @@ class ZeppLoopbackService : Service() {
 
     private fun receivePing(body: JSONObject): JSONObject {
         if (body.optString("protocol") != PING_PROTOCOL) throw HttpFailure(422, "invalid ping protocol")
+        WatchConnectionRepository.markCheetahSeen(applicationContext)
         val manager = getSystemService(NotificationManager::class.java)
         manager.createNotificationChannel(
             NotificationChannel(PING_NOTIFICATION_CHANNEL, "ThirdTempale connection tests", NotificationManager.IMPORTANCE_HIGH),
@@ -225,6 +234,36 @@ class ZeppLoopbackService : Service() {
                 .build(),
         )
         return JSONObject().put("ok", true).put("connected", true).put("receivedAt", System.currentTimeMillis())
+    }
+
+    private fun showSnapshotNotification(body: JSONObject) {
+        val manager = getSystemService(NotificationManager::class.java)
+        manager.createNotificationChannel(
+            NotificationChannel(
+                SNAPSHOT_NOTIFICATION_CHANNEL,
+                "JClock watch updates",
+                NotificationManager.IMPORTANCE_DEFAULT,
+            ),
+        )
+        val pendingIntent = PendingIntent.getActivity(
+            this,
+            SNAPSHOT_NOTIFICATION_ID,
+            Intent(this, MainActivity::class.java).addFlags(
+                Intent.FLAG_ACTIVITY_CLEAR_TOP or Intent.FLAG_ACTIVITY_SINGLE_TOP,
+            ),
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE,
+        )
+        val time = body.optString("time").ifBlank { "--:--" }
+        manager.notify(
+            SNAPSHOT_NOTIFICATION_ID,
+            Notification.Builder(this, SNAPSHOT_NOTIFICATION_CHANNEL)
+                .setSmallIcon(android.R.drawable.ic_lock_idle_alarm)
+                .setContentTitle("התקבלה נקודת עצירה מ־CHEETAH")
+                .setContentText("שעת העצירה: $time")
+                .setContentIntent(pendingIntent)
+                .setAutoCancel(true)
+                .build(),
+        )
     }
 
     private fun normalizeSnapshot(source: JSONObject): JSONObject {
@@ -413,6 +452,8 @@ class ZeppLoopbackService : Service() {
         private const val PING_PROTOCOL = "jclock.ping.v1"
         private const val PING_NOTIFICATION_CHANNEL = "jclock_connection_tests"
         private const val PING_NOTIFICATION_ID = 43778
+        private const val SNAPSHOT_NOTIFICATION_CHANNEL = "jclock_watch_updates"
+        private const val SNAPSHOT_NOTIFICATION_ID = 43779
         private const val NOTIFICATION_CHANNEL = "jclock_zepp_connection"
         private const val NOTIFICATION_ID = 4_377
         private const val MAX_REQUEST_LINE_BYTES = 2_048

@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>CustomYouTube</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: #0b1020; color: #f8fafc; font-family: Arial, sans-serif; }
+    body { padding: clamp(12px, 2.4vw, 28px); }
+    main { width: min(1100px, 100%); margin: 0 auto; }
+    header { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 18px; direction: ltr; }
+    header h1 { order: 2; direction: ltr; text-align: right; }
+    header .badge { order: 1; direction: rtl; text-align: left; }
+    h1 { margin: 0; font-size: clamp(1.8rem, 5vw, 3.4rem); letter-spacing: -.04em; }
+    h1 span { color: #ef4444; }
+    .badge { border: 1px solid #334155; border-radius: 999px; padding: 8px 13px; color: #cbd5e1; background: #111827; white-space: nowrap; }
+    .player-shell { overflow: hidden; width: 100%; aspect-ratio: 16 / 9; min-height: 270px; border: 1px solid #334155; border-radius: 18px; background: #000; box-shadow: 0 22px 70px rgba(0,0,0,.4); }
+    #player, #player iframe { width: 100% !important; height: 100% !important; display: block; }
+    .status { min-height: 1.5em; margin: 14px 2px; color: #cbd5e1; }
+    .search-wrap { position: sticky; top: 0; z-index: 5; padding: 8px 0 14px; background: linear-gradient(#0b1020 75%, transparent); }
+    .search { width: 100%; min-height: 52px; border: 1px solid #475569; border-radius: 999px; padding: 0 22px; color: #f8fafc; background: #111827; font: inherit; font-size: 1.05rem; }
+    .search:focus { outline: 3px solid #60a5fa; outline-offset: 2px; border-color: transparent; }
+    .library-title { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; margin: 8px 2px 12px; }
+    .library-title h2 { margin: 0; font-size: 1.25rem; }
+    .result-count { color: #94a3b8; font-size: .9rem; }
+    .videos { display: grid; grid-template-columns: repeat(auto-fill, minmax(235px, 1fr)); gap: 18px 14px; max-height: min(48vh, 560px); overflow-y: auto; padding: 2px 3px 16px; scrollbar-color: #475569 #111827; }
+    .video-card { min-height: 0; border: 0; border-radius: 14px; padding: 0; overflow: hidden; color: #f8fafc; background: #111827; text-align: right; font-weight: 400; box-shadow: 0 8px 24px rgba(0,0,0,.2); transition: transform .16s ease, background .16s ease; }
+    .video-card:hover { transform: translateY(-2px); background: #172033; }
+    .video-card[aria-pressed="true"] { outline: 3px solid #ef4444; outline-offset: 2px; background: #23151a; }
+    .thumbnail { position: relative; width: 100%; aspect-ratio: 16 / 9; overflow: hidden; background: #020617; }
+    .thumbnail img { width: 100%; height: 100%; display: block; object-fit: cover; }
+    .play-mark { position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); width: 46px; height: 34px; display: grid; place-items: center; border-radius: 10px; background: rgba(239,68,68,.92); color: white; font-size: 1.1rem; }
+    .card-copy { padding: 12px 13px 14px; }
+    .card-title { display: block; font-weight: 800; line-height: 1.35; }
+    .card-description { display: -webkit-box; margin-top: 6px; overflow: hidden; color: #94a3b8; font-size: .9rem; line-height: 1.45; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+    .empty { grid-column: 1 / -1; padding: 38px 16px; border: 1px dashed #475569; border-radius: 14px; color: #94a3b8; text-align: center; }
+    button { min-height: 52px; border: 1px solid #334155; border-radius: 14px; padding: 11px 15px; color: #f8fafc; background: #172033; font: inherit; font-weight: 700; cursor: pointer; }
+    button:focus-visible { outline: 3px solid #60a5fa; outline-offset: 2px; }
+    button[aria-pressed="true"] { border-color: #ef4444; background: #3a1820; }
+    .tablet-lock { margin-top: 18px; width: 100%; border-color: #475569; background: #263449; }
+    .import-links { margin: 18px 0 8px; width: 100%; border-color: #60a5fa; background: #1e3a5f; }
+    .note { margin: 12px 2px 0; color: #94a3b8; font-size: .92rem; line-height: 1.55; }
+    @media (max-width: 600px) {
+      header { align-items: flex-start; flex-direction: column; }
+      header h1, header .badge { order: initial; }
+      .player-shell { min-height: 210px; border-radius: 12px; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <h1>Custom<span>YouTube</span></h1>
+      <div class="badge">רק סרטונים שאושרו</div>
+    </header>
+
+    <section class="player-shell" aria-label="נגן YouTube רשמי">
+      <div id="player"></div>
+    </section>
+
+    <p class="status" id="status" role="status">&#1489;&#1495;&#1512;&#1493; &#1505;&#1512;&#1496;&#1493;&#1503; &#1499;&#1491;&#1497; &#1500;&#1492;&#1514;&#1495;&#1497;&#1500; &#1500;&#1500;&#1502;&#1493;&#1491; / Choose a video to start learning</p>
+    <div class="search-wrap">
+      <input class="search" id="search" type="search" inputmode="search" autocomplete="off" lang="he" dir="auto" aria-label="&#1495;&#1497;&#1508;&#1493;&#1513; &#1500;&#1508;&#1497; &#1513;&#1501; &#1488;&#1493; &#1514;&#1497;&#1488;&#1493;&#1512;" placeholder="&#1495;&#1497;&#1508;&#1493;&#1513; &#1500;&#1508;&#1497; &#1513;&#1501; &#1488;&#1493; &#1514;&#1497;&#1488;&#1493;&#1512; / Search title or description">
+    </div>
+    <div class="library-title">
+      <h2>חדשות הלו״ז</h2>
+      <span class="result-count" id="result-count"></span>
+    </div>
+    <div class="videos" id="scheduled-videos" aria-label="סרטוני חדשות הלו״ז"></div>
+    <button class="import-links" type="button" id="import-links">הוספת קובץ קישורי YouTube</button>
+    <p class="note">בקובץ הקישורים יש לכתוב כל קישור YouTube בשורה חדשה. זה הכול. קישורים מתיקיית G ב־R2 נטענים לכאן אוטומטית.</p>
+    <div class="library-title">
+      <h2>כללי</h2>
+    </div>
+    <div class="videos" id="general-videos" aria-label="סרטונים כלליים"></div>
+    <button class="tablet-lock" type="button" id="lock">נעילת האפליקציה על המסך</button>
+    <p class="note">מצב הנעילה מונע מעבר מקרי לאפליקציות אחרות. נעילת קיוסק מלאה דורשת הגדרת הטאבלט כמכשיר מנוהל.</p>
+  </main>
+
+  <script>
+    const rawScheduled = __SCHEDULED_VIDEOS__;
+    const rawGeneral = __GENERAL_VIDEOS__;
+    const VIDEO_ID = /^[A-Za-z0-9_-]{11}$/;
+
+    function videoIdFrom(entry) {
+      const direct = String(entry.id || "").trim();
+      if (VIDEO_ID.test(direct)) return direct;
+      const value = String(entry.url || entry.link || "").trim();
+      try {
+        const url = new URL(value);
+        let candidate = "";
+        if (url.hostname === "youtu.be") candidate = url.pathname.split("/").filter(Boolean)[0] || "";
+        else if (url.pathname === "/watch") candidate = url.searchParams.get("v") || "";
+        else {
+          const parts = url.pathname.split("/").filter(Boolean);
+          if (["shorts", "embed", "v"].includes(parts[0])) candidate = parts[1] || "";
+        }
+        return VIDEO_ID.test(candidate) ? candidate : "";
+      } catch (_) {
+        return "";
+      }
+    }
+
+    function normalizeEntries(entries, fallbackTitle) {
+      return entries.map((entry, index) => ({
+        ...entry,
+        id: videoIdFrom(entry),
+        title: String(entry.title || `${fallbackTitle} ${index + 1}`),
+        description: String(entry.description || "")
+      })).filter(entry => entry.id);
+    }
+
+    const scheduled = normalizeEntries(rawScheduled, "חדשות הלו״ז");
+    const general = normalizeEntries(rawGeneral, "סרטון כללי");
+    const allowed = [...scheduled, ...general];
+    const allowedIds = new Set(allowed.map(item => item.id));
+    const status = document.querySelector("#status");
+    const scheduledVideos = document.querySelector("#scheduled-videos");
+    const generalVideos = document.querySelector("#general-videos");
+    const search = document.querySelector("#search");
+    const resultCount = document.querySelector("#result-count");
+    const playerShell = document.querySelector(".player-shell");
+    let player;
+    let selectedId = "";
+    let restoring = false;
+
+    function normalized(value) {
+      return String(value || "").normalize("NFKC").toLocaleLowerCase("he-IL").trim();
+    }
+
+    function notifyBlocked() {
+      status.textContent = "\u05d4\u05e1\u05e8\u05d8\u05d5\u05df \u05e0\u05d7\u05e1\u05dd \u05de\u05e4\u05e0\u05d9 \u05e9\u05d0\u05d9\u05e0\u05d5 \u05d1\u05e8\u05e9\u05d9\u05de\u05d4 \u05d4\u05de\u05d0\u05d5\u05e9\u05e8\u05ea.";
+      if (window.TabletControl?.showBlocked) window.TabletControl.showBlocked();
+    }
+
+    function enforceAllowlist() {
+      if (!player?.getVideoData || restoring) return;
+      const currentId = String(player.getVideoData()?.video_id || "");
+      if (!currentId || allowedIds.has(currentId)) return;
+      restoring = true;
+      player.stopVideo();
+      if (selectedId) player.cueVideoById(selectedId);
+      notifyBlocked();
+      window.setTimeout(() => { restoring = false; }, 500);
+    }
+
+    function selectVideo(entry, button) {
+      selectedId = entry.id;
+      document.querySelectorAll(".videos button").forEach(item => {
+        item.setAttribute("aria-pressed", String(item === button));
+      });
+      status.textContent = entry.description ? `${entry.title} — ${entry.description}` : entry.title;
+      if (player?.cueVideoById) player.cueVideoById(entry.id);
+      playerShell.scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    function makeCard(entry) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "video-card";
+      button.setAttribute("aria-pressed", String(entry.id === selectedId));
+      button.setAttribute("aria-label", entry.description ? `${entry.title}. ${entry.description}` : entry.title);
+
+      const thumb = document.createElement("span");
+      thumb.className = "thumbnail";
+      const image = document.createElement("img");
+      image.src = `https://i.ytimg.com/vi/${entry.id}/hqdefault.jpg`;
+      image.alt = "";
+      image.loading = "lazy";
+      image.referrerPolicy = "no-referrer";
+      const play = document.createElement("span");
+      play.className = "play-mark";
+      play.setAttribute("aria-hidden", "true");
+      play.textContent = "\u25b6";
+      thumb.append(image, play);
+
+      const copy = document.createElement("span");
+      copy.className = "card-copy";
+      const title = document.createElement("span");
+      title.className = "card-title";
+      title.textContent = entry.title;
+      copy.appendChild(title);
+      if (entry.description) {
+        const description = document.createElement("span");
+        description.className = "card-description";
+        description.textContent = entry.description;
+        copy.appendChild(description);
+      }
+      button.append(thumb, copy);
+      button.addEventListener("click", () => selectVideo(entry, button));
+      return button;
+    }
+
+    function renderSection(entries, container, query) {
+      const matches = entries.filter(entry => !query || normalized(`${entry.title} ${entry.description}`).includes(query));
+      container.replaceChildren();
+      if (!matches.length) {
+        const empty = document.createElement("p");
+        empty.className = "empty";
+        empty.textContent = "\u05dc\u05d0 \u05e0\u05de\u05e6\u05d0\u05d5 \u05e1\u05e8\u05d8\u05d5\u05e0\u05d9\u05dd / No videos found";
+        container.appendChild(empty);
+      } else {
+        matches.forEach(entry => container.appendChild(makeCard(entry)));
+      }
+      return matches.length;
+    }
+
+    function renderLibrary() {
+      const query = normalized(search.value);
+      const scheduledCount = renderSection(scheduled, scheduledVideos, query);
+      const generalCount = renderSection(general, generalVideos, query);
+      resultCount.textContent = `${scheduledCount + generalCount} / ${allowed.length}`;
+    }
+
+    search.addEventListener("input", renderLibrary);
+    renderLibrary();
+
+    document.querySelector("#lock").addEventListener("click", () => {
+      if (window.TabletControl?.startPinning) window.TabletControl.startPinning();
+    });
+
+    document.querySelector("#import-links").addEventListener("click", () => {
+      if (window.TabletControl?.importLinks) window.TabletControl.importLinks();
+    });
+
+    function onYouTubeIframeAPIReady() {
+      player = new YT.Player("player", {
+        width: "100%",
+        height: "100%",
+        playerVars: {
+          autoplay: 0,
+          controls: 1,
+          fs: 1,
+          hl: "he",
+          playsinline: 1,
+          rel: 0,
+          origin: window.location.origin
+        },
+        events: {
+          onReady: () => { status.textContent = "\u05d1\u05d7\u05e8\u05d5 \u05e1\u05e8\u05d8\u05d5\u05df \u05db\u05d3\u05d9 \u05dc\u05d4\u05ea\u05d7\u05d9\u05dc \u05dc\u05dc\u05de\u05d5\u05d3 / Choose a video to start learning"; },
+          onStateChange: enforceAllowlist,
+          onError: () => { status.textContent = "\u05d4\u05e1\u05e8\u05d8\u05d5\u05df \u05d0\u05d9\u05e0\u05d5 \u05d6\u05de\u05d9\u05df \u05db\u05e8\u05d2\u05e2 \u05d1\u05e0\u05d2\u05df \u05d4\u05de\u05d5\u05d8\u05de\u05e2 / Video unavailable"; }
+        }
+      });
+    }
+
+    const api = document.createElement("script");
+    api.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(api);
+  </script>
+</body>
+</html>
