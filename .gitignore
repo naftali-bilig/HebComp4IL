@@ -23,6 +23,7 @@ output/
 *.keystore
 
 # Temporary files
+tmp/
 *.tmp.*
 *.wayback.tmp.*
 *.log

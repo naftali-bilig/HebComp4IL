@@ -3,7 +3,7 @@ plugins { id("com.android.application"); id("org.jetbrains.kotlin.android") }
 android {
     namespace = "ani.lehava.jclock.mobile"
     compileSdk = 35
-    defaultConfig { applicationId = "simchanaftali669.jclock"; minSdk = 26; targetSdk = 35; versionCode = 16; versionName = "0.4.3" }
+    defaultConfig { applicationId = "simchanaftali669.jclock"; minSdk = 26; targetSdk = 35; versionCode = 17; versionName = "0.4.4" }
     compileOptions { sourceCompatibility = JavaVersion.VERSION_17; targetCompatibility = JavaVersion.VERSION_17 }
     sourceSets.getByName("main").assets.srcDir("../site/public/apps/birth-calculator/shared")
 }
@@ -15,4 +15,5 @@ dependencies {
     implementation("com.google.android.gms:play-services-location:21.3.0")
     implementation("com.google.android.gms:play-services-wearable:19.0.0")
     testImplementation("junit:junit:4.13.2")
+    testImplementation("org.json:json:20250517")
 }

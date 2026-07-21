@@ -74,10 +74,6 @@ class MelodyPlaybackService : Service() {
         when (intent?.action) {
             ACTION_PAUSE -> stopPlayback()
             ACTION_SKIP -> {
-                if (trialPlaybackActive) {
-                    onPlayerState(MelodyPlayer.State.Error(TRIAL_USED_MESSAGE))
-                    return
-                }
                 val wasPlayingLocalFile = localPlayer != null
                 stopLocalPlayer()
                 if (MelodyPlaybackController.isPlaybackRequested && !wasPlayingLocalFile) {
@@ -118,7 +114,7 @@ class MelodyPlaybackService : Service() {
     private fun startCatalogPlayback() {
         stopLocalPlayer()
         if (trialPlaybackActive) {
-            beginCatalogPlayback(singleTrackOnly = true)
+            beginCatalogPlayback(MelodyPlayer.MonthlyAccess.SINGLE)
             return
         }
 
@@ -126,13 +122,17 @@ class MelodyPlaybackService : Service() {
             allowTrial = true,
             onFullAccess = {
                 clearTrialSession()
-                beginCatalogPlayback(singleTrackOnly = false)
+                beginCatalogPlayback(MelodyPlayer.MonthlyAccess.FULL)
             },
             onMonthlyTrial = { periodKey ->
                 trialPlaybackActive = true
                 trialStarted = false
                 activeTrialPeriod = periodKey
-                beginCatalogPlayback(singleTrackOnly = true)
+                beginCatalogPlayback(MelodyPlayer.MonthlyAccess.SINGLE)
+            },
+            onRestrictedAccess = {
+                clearTrialSession()
+                beginCatalogPlayback(MelodyPlayer.MonthlyAccess.NONE)
             },
         )
     }
@@ -146,13 +146,13 @@ class MelodyPlaybackService : Service() {
         if (foregroundStarted) updateNotification(MelodyPlayer.State.Paused)
     }
 
-    private fun beginCatalogPlayback(singleTrackOnly: Boolean) {
+    private fun beginCatalogPlayback(monthlyAccess: MelodyPlayer.MonthlyAccess) {
         if (!requestAudioFocus()) {
             if (!trialStarted) clearTrialSession()
             return
         }
         MelodyPlaybackController.isPlaybackRequested = true
-        player.start(singleTrackOnly = singleTrackOnly)
+        player.start(monthlyAccess = monthlyAccess)
     }
 
     private fun authorizeLocalPlayback(uri: Uri?, displayName: String?) {
@@ -171,6 +171,7 @@ class MelodyPlaybackService : Service() {
         allowTrial: Boolean,
         onFullAccess: () -> Unit,
         onMonthlyTrial: (String) -> Unit,
+        onRestrictedAccess: () -> Unit = {},
     ) {
         if (accessCheckInFlight) return
         accessCheckInFlight = true
@@ -190,14 +191,12 @@ class MelodyPlaybackService : Service() {
                                 if (allowTrial) onMonthlyTrial(decision.periodKey)
                                 else denyAccess(MID_REQUIRED_MESSAGE)
                             }
-                            MelodyAccessGate.Decision.TrialAlreadyUsed ->
-                                denyAccess(TRIAL_USED_MESSAGE)
-                            MelodyAccessGate.Decision.AutomaticTimeRequired ->
-                                denyAccess(AUTOMATIC_TIME_MESSAGE)
+                            MelodyAccessGate.Decision.TrialAlreadyUsed -> onRestrictedAccess()
+                            MelodyAccessGate.Decision.AutomaticTimeRequired -> onRestrictedAccess()
                         }
                     },
                     onFailure = {
-                        denyAccess("לא ניתן לאמת את ה־UMID ואת זמן ראש החודש. יש לבדוק חיבור לאינטרנט.")
+                        onRestrictedAccess()
                     },
                 )
             }
@@ -291,7 +290,10 @@ class MelodyPlaybackService : Service() {
     }
 
     private fun onPlayerState(state: MelodyPlayer.State) {
-        if (state is MelodyPlayer.State.Playing && trialPlaybackActive && !trialStarted) {
+        if (state is MelodyPlayer.State.Playing &&
+            state.folder != MelodyPlayer.GENERAL_FOLDER &&
+            trialPlaybackActive && !trialStarted
+        ) {
             activeTrialPeriod?.let(accessGate::markTrialUsed)
             trialStarted = true
         }

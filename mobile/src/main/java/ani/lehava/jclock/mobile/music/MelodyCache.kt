@@ -48,7 +48,12 @@ class MelodyCache(
         if (validExistingEntry(audioFile, metadataFile, entry, expiresAt, sourceUrl, now)) {
             return CachedMelody(audioFile, entry, expiresAt, sourceUrl)
         }
-        deletePair(audioFile, metadataFile)
+        // A G melody is append-only on the device. Even if its metadata or byte
+        // signature later changes, never replace the bytes that were downloaded.
+        if (folder == PROTECTED_GENERAL_FOLDER && audioFile.isFile) {
+            return CachedMelody(audioFile, entry, expiresAt, sourceUrl)
+        }
+        deletePair(audioFile, metadataFile, folder)
 
         val temporaryAudio = File(directory, "$key.download")
         val temporaryMetadata = File(directory, "$key.properties.tmp")
@@ -61,6 +66,8 @@ class MelodyCache(
                 temporaryMetadata,
                 mapOf(
                     "name" to entry.name,
+                    "folder" to folder,
+                    "retainForever" to (folder == PROTECTED_GENERAL_FOLDER).toString(),
                     "bytes" to actualBytes.toString(),
                     "expectedBytes" to (entry.bytes?.toString() ?: ""),
                     "expiresAt" to expiresAt.toEpochMilli().toString(),
@@ -72,7 +79,7 @@ class MelodyCache(
         } catch (error: Throwable) {
             temporaryAudio.delete()
             temporaryMetadata.delete()
-            deletePair(audioFile, metadataFile)
+            deletePair(audioFile, metadataFile, folder)
             throw error
         }
     }
@@ -109,11 +116,12 @@ class MelodyCache(
             val key = metadataFile.name.removeSuffix(".properties")
             liveKeys += key
             val properties = readMetadata(metadataFile)
+            val protected = isProtectedGeneralEntry(properties)
             val expiresAt = properties?.getProperty("expiresAt")?.toLongOrNull()
             val audio = directory.listFiles { file ->
                 file.isFile && file.name.startsWith("$key.") && !file.name.endsWith(".properties")
             }?.firstOrNull()
-            if (expiresAt == null || now.toEpochMilli() >= expiresAt || audio == null || !audio.exists()) {
+            if (!protected && (expiresAt == null || now.toEpochMilli() >= expiresAt || audio == null || !audio.exists())) {
                 if (audio?.delete() == true) removed += 1
                 if (metadataFile.delete()) removed += 1
             }
@@ -211,14 +219,29 @@ class MelodyCache(
         return digest.joinToString("") { byte -> "%02x".format(byte.toInt() and 0xff) }
     }
 
-    private fun deletePair(audio: File, metadata: File) {
+    private fun deletePair(audio: File, metadata: File, folder: String) {
+        if (folder == PROTECTED_GENERAL_FOLDER) return
         audio.delete()
         metadata.delete()
+    }
+
+    private fun isProtectedGeneralEntry(properties: Properties?): Boolean {
+        if (properties == null) return false
+        if (properties.getProperty("retainForever").toBoolean()) return true
+        if (properties.getProperty("folder") == PROTECTED_GENERAL_FOLDER) return true
+        // Backward compatibility for G entries downloaded before the folder marker existed.
+        return runCatching { URL(properties.getProperty("sourceUrl")).path }
+            .getOrNull()
+            ?.startsWith("/$PROTECTED_GENERAL_FOLDER/") == true
     }
 
     private fun ensureDirectory() {
         if ((!directory.exists() && !directory.mkdirs()) || !directory.isDirectory) {
             throw IOException("Could not create melody cache directory: $directory")
         }
+    }
+
+    private companion object {
+        const val PROTECTED_GENERAL_FOLDER = "G"
     }
 }

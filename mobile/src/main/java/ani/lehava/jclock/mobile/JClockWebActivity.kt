@@ -1048,6 +1048,9 @@ class JClockWebActivity : ComponentActivity() {
         )
         private val APPS = listOf(
             NEED_ME_APP,
+            AppDestination("Tuning-MG.com - משחק", "https://tuning-mg.com/", "tuning-mg.com"),
+            AppDestination("Tuning-MG.com/jclock - נפתלי", "https://tuning-mg.com/jclock", "tuning-mg.com"),
+            AppDestination("Tuning-MG.com/007 - דוויד", "https://tuning-mg.com/007", "tuning-mg.com"),
             AppDestination("התבודדות", "https://chatgpt.com/", "chatgpt.com"),
             AppDestination("נקדן", "https://nakdan.dicta.org.il/", "nakdan.dicta.org.il"),
             AppDestination(

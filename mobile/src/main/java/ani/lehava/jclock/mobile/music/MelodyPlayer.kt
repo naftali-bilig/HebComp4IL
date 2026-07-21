@@ -21,6 +21,8 @@ class MelodyPlayer(
     private val mainHandler: Handler = Handler(Looper.getMainLooper()),
     private val onStateChanged: (State) -> Unit = {},
 ) : Closeable {
+    enum class MonthlyAccess { NONE, SINGLE, FULL }
+
     sealed class State {
         data object Idle : State()
         data object LoadingCatalog : State()
@@ -34,23 +36,29 @@ class MelodyPlayer(
 
     private val generation = AtomicLong(0L)
     private var mediaPlayer: MediaPlayer? = null
-    private var catalog: MelodyCatalogClient.Catalog? = null
-    private var catalogExpiry: Instant? = null
+    private var monthlyCatalog: MelodyCatalogClient.Catalog? = null
+    private var monthlyCatalogExpiry: Instant? = null
+    private var generalCatalog: MelodyCatalogClient.Catalog? = null
     private var lastTrackName: String? = null
     private var playRequested = false
-    private var singleTrackOnly = false
+    private var monthlyAccess = MonthlyAccess.NONE
+    private var singleMonthlyTrackPlayed = false
+    private var activeFolder: String? = null
     private var closed = false
     private var volume = 0.28f
 
-    fun start(singleTrackOnly: Boolean = false) {
+    fun start(monthlyAccess: MonthlyAccess = MonthlyAccess.NONE) {
         runOnMain {
             if (closed) return@runOnMain
-            this.singleTrackOnly = singleTrackOnly
+            if (this.monthlyAccess != monthlyAccess) {
+                this.monthlyAccess = monthlyAccess
+                singleMonthlyTrackPlayed = false
+            }
             playRequested = true
             val current = mediaPlayer
             if (current != null) {
                 runCatching { current.start() }
-                    .onSuccess { publish(State.Playing(lastTrackName.orEmpty(), catalog?.folder.orEmpty())) }
+                    .onSuccess { publish(State.Playing(lastTrackName.orEmpty(), activeFolder.orEmpty())) }
                     .onFailure { prepareNext(0L) }
             } else {
                 prepareNext(0L)
@@ -78,7 +86,7 @@ class MelodyPlayer(
 
     fun skip() {
         runOnMain {
-            if (closed || !playRequested || singleTrackOnly) return@runOnMain
+            if (closed || !playRequested) return@runOnMain
             releasePlayer()
             prepareNext(0L)
         }
@@ -87,8 +95,9 @@ class MelodyPlayer(
     /** Forces a fresh no-store manifest read on the next track. */
     fun refreshCatalog() {
         runOnMain {
-            catalog = null
-            catalogExpiry = null
+            monthlyCatalog = null
+            monthlyCatalogExpiry = null
+            generalCatalog = null
             if (playRequested && mediaPlayer == null) prepareNext(0L)
         }
     }
@@ -98,7 +107,8 @@ class MelodyPlayer(
             if (closed) return@runOnMain
             closed = true
             playRequested = false
-            singleTrackOnly = false
+            monthlyAccess = MonthlyAccess.NONE
+            singleMonthlyTrackPlayed = false
             generation.incrementAndGet()
             mainHandler.removeCallbacksAndMessages(this)
             releasePlayer()
@@ -122,26 +132,35 @@ class MelodyPlayer(
                 val now = Instant.now()
                 val window = schedule.window(now)
                 cache.cleanExpired(now)
-                var activeCatalog = catalog
-                if (
-                    activeCatalog == null ||
-                    activeCatalog.folder != window.folder ||
-                    catalogExpiry != window.expiresAt
+                val tracks = ArrayList<Track>()
+                val general = generalCatalog ?: catalogClient.fetchMonth(GENERAL_FOLDER).also { generalCatalog = it }
+                general.entries.forEach { tracks += Track(GENERAL_FOLDER, it, GENERAL_CACHE_EXPIRY) }
+
+                if (monthlyAccess == MonthlyAccess.FULL ||
+                    (monthlyAccess == MonthlyAccess.SINGLE && !singleMonthlyTrackPlayed)
                 ) {
-                    activeCatalog = catalogClient.fetchForWindow(window)
-                    if (activeCatalog.entries.isEmpty()) error("No melodies for folder ${window.folder}")
-                    catalog = activeCatalog
-                    catalogExpiry = window.expiresAt
+                    var monthly = monthlyCatalog
+                    if (monthly == null || monthly.folder != window.folder || monthlyCatalogExpiry != window.expiresAt) {
+                        monthly = catalogClient.fetchForWindow(window)
+                        monthlyCatalog = monthly
+                        monthlyCatalogExpiry = window.expiresAt
+                    }
+                    monthly.entries.forEach { tracks += Track(window.folder, it, window.expiresAt) }
                 }
-                val entry = selectEntry(activeCatalog.entries)
-                postIfCurrent(token) { publish(State.Downloading(entry.name)) }
-                val cached = cache.find(window.folder, entry, window.expiresAt, now)
-                if (cached != null) {
-                    postIfCurrent(token) { playFile(token, cached) }
+                if (tracks.isEmpty()) error("No melodies are available")
+                val track = selectTrack(tracks)
+                postIfCurrent(token) { publish(State.Downloading(track.entry.name)) }
+                val cached = if (track.folder == GENERAL_FOLDER) {
+                    cache.getOrDownload(track.folder, track.entry, track.expiresAt, now)
                 } else {
-                    val source = catalogClient.trackUrl(window.folder, entry, window.expiresAt)
+                    cache.find(track.folder, track.entry, track.expiresAt, now)
+                }
+                if (cached != null) {
+                    postIfCurrent(token) { playFile(token, track.folder, cached) }
+                } else {
+                    val source = catalogClient.trackUrl(track.folder, track.entry, track.expiresAt)
                     postIfCurrent(token) {
-                        playSource(token, entry.name, window.folder, source.toString())
+                        playSource(token, track.entry.name, track.folder, source.toString())
                     }
                 }
             } catch (error: Throwable) {
@@ -153,14 +172,19 @@ class MelodyPlayer(
         }
     }
 
-    private fun selectEntry(entries: List<MelodyCatalogClient.Entry>): MelodyCatalogClient.Entry {
-        if (entries.size == 1) return entries.first()
-        val candidates = entries.filterNot { it.name == lastTrackName }.ifEmpty { entries }
+    private fun selectTrack(entries: List<Track>): Track {
+        val eligible = if (monthlyAccess == MonthlyAccess.SINGLE && !singleMonthlyTrackPlayed) {
+            entries.filterNot { it.folder == GENERAL_FOLDER }.ifEmpty { entries }
+        } else {
+            entries
+        }
+        if (eligible.size == 1) return eligible.first()
+        val candidates = eligible.filterNot { it.entry.name == lastTrackName }.ifEmpty { eligible }
         return candidates[Random.Default.nextInt(candidates.size)]
     }
 
-    private fun playFile(token: Long, melody: MelodyCache.CachedMelody) {
-        playSource(token, melody.entry.name, catalog?.folder.orEmpty(), melody.file.absolutePath)
+    private fun playFile(token: Long, folder: String, melody: MelodyCache.CachedMelody) {
+        playSource(token, melody.entry.name, folder, melody.file.absolutePath)
     }
 
     /**
@@ -184,17 +208,17 @@ class MelodyPlayer(
             player.setOnPreparedListener { prepared ->
                 if (!isCurrent(token) || !playRequested) return@setOnPreparedListener
                 lastTrackName = name
+                activeFolder = folder
                 prepared.start()
                 publish(State.Playing(name, folder))
             }
             player.setOnCompletionListener {
                 if (mediaPlayer === it) mediaPlayer = null
                 it.release()
-                if (singleTrackOnly) {
-                    playRequested = false
-                    singleTrackOnly = false
-                    publish(State.TrialFinished)
-                } else if (playRequested && !closed) {
+                if (folder != GENERAL_FOLDER && monthlyAccess == MonthlyAccess.SINGLE) {
+                    singleMonthlyTrackPlayed = true
+                }
+                if (playRequested && !closed) {
                     prepareNext(trackGapMillis)
                 }
             }
@@ -239,5 +263,13 @@ class MelodyPlayer(
 
     companion object {
         private const val RETRY_DELAY_MILLIS = 1_500L
+        const val GENERAL_FOLDER = "G"
+        private val GENERAL_CACHE_EXPIRY = Instant.ofEpochMilli(Long.MAX_VALUE)
     }
+
+    private data class Track(
+        val folder: String,
+        val entry: MelodyCatalogClient.Entry,
+        val expiresAt: Instant,
+    )
 }

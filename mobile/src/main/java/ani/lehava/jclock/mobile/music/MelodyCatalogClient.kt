@@ -53,6 +53,7 @@ class MelodyCatalogClient(
     internal fun entriesFromManifest(manifest: JSONObject, folder: String): List<Entry> {
         val files = manifest.optJSONArray("files")
             ?: manifest.optJSONObject("months")?.optJSONArray(folder)
+            ?: manifest.optJSONObject("folders")?.optJSONArray(folder)
             ?: JSONArray()
         val sizesRoot = manifest.optJSONObject("fileSizes")
         val sizes = sizesRoot?.optJSONObject(folder) ?: sizesRoot
@@ -126,14 +127,18 @@ class MelodyCatalogClient(
         return number?.takeIf { it in 0L..MAX_SAFE_INTEGER }
     }
 
-    private fun validAudioName(name: String): Boolean =
-        name.isNotBlank() && !name.contains('/') && !name.contains('\\') && AUDIO_PATTERN.matches(name)
+    private fun validAudioName(name: String): Boolean {
+        val segments = name.replace('\\', '/').split('/')
+        return segments.isNotEmpty() &&
+            segments.none { it.isBlank() || it == "." || it == ".." } &&
+            AUDIO_PATTERN.matches(segments.last())
+    }
 
     companion object {
         const val DEFAULT_ROOT_URL = "https://pub-71e18ce829fd428ea6d4aa9498a7e642.r2.dev/"
         private const val MAX_MANIFEST_BYTES = 2 * 1024 * 1024
         private const val MAX_SAFE_INTEGER = 9_007_199_254_740_991L
-        private val FOLDER_PATTERN = Regex("\\d{2}")
+        private val FOLDER_PATTERN = Regex("[A-Za-z0-9_-]+")
         private val AUDIO_PATTERN = Regex("[^/\\\\]+\\.(wav|mp3|ogg)", RegexOption.IGNORE_CASE)
     }
 }
